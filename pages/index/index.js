@@ -38,6 +38,10 @@ Page({
     daySchedule: [],
     showInviteModal: false,  // 邀请护士长弹窗
     
+    // 错误提示条
+    showErrorBar: false,
+    errorMessage: '',
+    
     // 防抖标志
     loadingPendingCount: false  // 是否正在加载待审批数量
   },
@@ -56,6 +60,56 @@ Page({
       // 未初始化时，执行初始化
       this.checkDepartment();
     }
+  },
+
+  // 下拉刷新
+  async onPullDownRefresh() {
+    try {
+      // 等待数据加载完成
+      await this.refreshData();
+      // 成功后收起下拉样式
+      wx.stopPullDownRefresh();
+    } catch (error) {
+      console.error('刷新失败:', error);
+      // 失败时显示错误横幅
+      this.setData({
+        showErrorBar: true,
+        errorMessage: '加载失败'
+      });
+      
+      // 2秒后关闭横幅并收起下拉样式
+      setTimeout(() => {
+        this.setData({ showErrorBar: false });
+        wx.stopPullDownRefresh();
+      }, 2000);
+    }
+  },
+
+  // 异步刷新数据
+  async refreshData() {
+    // 并行请求：获取用户信息和科室信息
+    const promises = [api.getUserInfo()];
+    
+    // 如果有科室，也获取科室信息
+    if (this.data.hasDepartment) {
+      promises.push(api.getDepartmentInfo());
+    }
+    
+    const results = await Promise.all(promises);
+    
+    // 更新用户信息缓存
+    const userInfo = results[0].data;
+    wx.setStorageSync('userInfo', userInfo);
+    
+    // 如果有科室信息，更新科室缓存
+    if (results[1]) {
+      const department = results[1].data;
+      wx.setStorageSync('department', department);
+      this.setData({ department });
+    }
+    
+    // 重新检查科室状态（异步执行）
+    this.checkDepartment();
   },
 
   // 检查科室状态
@@ -825,5 +879,132 @@ Page({
       title: '护士排班系统 - 高效便捷的排班管理工具',
       path: '/pages/login/login'
     };
+  },
+
+  // 显示科室操作菜单（护士长专属）
+  showDepartmentActions() {
+    if (!this.data.isCreator) return;
+    
+    wx.showActionSheet({
+      itemList: ['解散科室', '转让科室', '踢出成员'],
+      success: (res) => {
+        switch (res.tapIndex) {
+          case 0:
+            this.dismissDepartment();
+            break;
+          case 1:
+            this.transferDepartment();
+            break;
+          case 2:
+            this.kickMember();
+            break;
+        }
+      }
+    });
+  },
+
+  // 解散科室
+  async dismissDepartment() {
+    const confirm = await util.showConfirm('确认解散', '解散后将删除所有数据且无法恢复，确定要解散吗？');
+    if (!confirm) return;
+
+    try {
+      util.showLoading('解散中...');
+      await api.dismissDepartment(this.data.department.id);
+      util.hideLoading();
+      
+      // 清除本地数据
+      app.clearUserInfo();
+      wx.removeStorageSync('department');
+      
+      util.showSuccess('已解散');
+      
+      // 跳转到登录页
+      setTimeout(() => {
+        wx.reLaunch({ url: '/pages/login/login' });
+      }, 1500);
+    } catch (error) {
+      util.hideLoading();
+      util.showError(error.message || error.msg || '解散失败');
+    }
+  },
+
+  // 转让科室
+  async transferDepartment() {
+    // 筛选出非创建者的成员
+    const transferableMembers = this.data.members.filter(m => !m.isCreator);
+    
+    if (transferableMembers.length === 0) {
+      util.showError('暂无其他成员可转让');
+      return;
+    }
+
+    // 显示成员列表供选择
+    const memberNames = transferableMembers.map(m => m.nickName);
+    const { tapIndex } = await wx.showActionSheet({
+      itemList: memberNames
+    });
+
+    if (tapIndex === undefined) return;
+
+    const selectedMember = transferableMembers[tapIndex];
+    const confirm = await util.showConfirm('确认转让', `确定将科室转让给 ${selectedMember.nickName} 吗？`);
+    if (!confirm) return;
+
+    try {
+      util.showLoading('转让中...');
+      await api.transferDepartment(this.data.department.id, { newCreatorId: selectedMember.id });
+      util.hideLoading();
+      
+      // 更新本地数据
+      const userInfo = wx.getStorageSync('userInfo');
+      const department = this.data.department;
+      department.creatorId = selectedMember.id;
+      wx.setStorageSync('department', department);
+      
+      util.showSuccess('已转让');
+      
+      // 刷新页面
+      this.checkDepartment();
+    } catch (error) {
+      util.hideLoading();
+      util.showError(error.message || error.msg || '转让失败');
+    }
+  },
+
+  // 踢出成员
+  async kickMember() {
+    // 筛选出非创建者的成员
+    const kickableMembers = this.data.members.filter(m => !m.isCreator);
+    
+    if (kickableMembers.length === 0) {
+      util.showError('暂无其他成员可踢出');
+      return;
+    }
+
+    // 显示成员列表供选择
+    const memberNames = kickableMembers.map(m => m.nickName);
+    const { tapIndex } = await wx.showActionSheet({
+      itemList: memberNames
+    });
+
+    if (tapIndex === undefined) return;
+
+    const selectedMember = kickableMembers[tapIndex];
+    const confirm = await util.showConfirm('确认踢出', `确定要将 ${selectedMember.nickName} 移出科室吗？`);
+    if (!confirm) return;
+
+    try {
+      util.showLoading('处理中...');
+      await api.kickMember(this.data.department.id, { memberId: selectedMember.id });
+      util.hideLoading();
+      util.showSuccess('已移出');
+      
+      // 刷新成员列表
+      this.loadMembers(this.data.department);
+    } catch (error) {
+      util.hideLoading();
+      util.showError(error.message || error.msg || '操作失败');
+    }
   }
 });

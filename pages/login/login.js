@@ -5,10 +5,17 @@ const util = require('../../utils/util');
 
 Page({
   data: {
-    loading: false
+    loading: false,
+    inviteCode: null  // 邀请码
   },
 
   onLoad(options) {
+    // 获取邀请码参数
+    if (options.inviteCode) {
+      this.setData({ inviteCode: options.inviteCode });
+      console.log('获取到邀请码:', options.inviteCode);
+    }
+    
     // 检查是否已登录
     this.checkLoginStatus();
   },
@@ -43,10 +50,16 @@ Page({
 
       // 3. 调用后端登录接口
       const loginData = {
-        code: code,
-        nickName: userInfo?.nickName || '微信用户',
-        avatarUrl: userInfo?.avatarUrl || ''
+        code: code
       };
+      
+      // 只有用户主动授权获取到了信息，才传递给后端
+      if (userInfo?.nickName) {
+        loginData.nickName = userInfo.nickName;
+      }
+      if (userInfo?.avatarUrl) {
+        loginData.avatarUrl = userInfo.avatarUrl;
+      }
 
       const res = await api.wxLogin(loginData);
 
@@ -109,13 +122,19 @@ Page({
   // 跳转到下一页
   redirectToNext() {
     const department = wx.getStorageSync('department');
+    const { inviteCode } = this.data;
 
     if (department) {
       // 有科室，直接进入首页
       wx.redirectTo({ url: '/pages/index/index' });
     } else {
       // 无科室，进入身份选择页
-      wx.redirectTo({ url: '/pages/role-select/role-select' });
+      let url = '/pages/role-select/role-select';
+      if (inviteCode) {
+        // 如果有邀请码，传递给身份选择页
+        url += `?inviteCode=${inviteCode}`;
+      }
+      wx.redirectTo({ url });
     }
   }
 });

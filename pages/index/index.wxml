@@ -1,5 +1,10 @@
 <!--pages/index/index.wxml-->
 <view class="index-container">
+  <!-- 顶部错误提示条 -->
+  <view class="error-bar" wx:if="{{showErrorBar}}">
+    <text class="error-text">{{errorMessage}}</text>
+  </view>
+
   <!-- 核心日历区 -->
   <view class="calendar-section card">
     <!-- 月份切换 -->
@@ -103,7 +108,7 @@
 
   <!-- 科室信息与邀请（护士长可见） -->
   <view class="invite-section card" wx:if="{{isCreator}}">
-    <text class="invite-text">{{department.name}}（{{members.length}}人）</text>
+    <text class="invite-text" bindtap="showDepartmentActions" hover-class="invite-text-hover">{{department.name}}（{{members.length}}人）</text>
     <button class="invite-btn" size="mini" open-type="share">邀请成员</button>
   </view>
 

@@ -371,12 +371,16 @@ const dismissDepartment = (departmentId) => {
   if (!deptId) {
     return Promise.reject({ message: '科室ID不存在' });
   }
-  return request({ url: '/department/dismiss', method: 'DELETE', data: { departmentId: deptId } });
+  return request({ url: '/department/dismiss', method: 'DELETE', params: { departmentId: deptId } });
 };
 
-const transferDepartment = (data) => {
+const transferDepartment = (departmentId, data) => {
   if (USE_MOCK) return mockRequest('transferDepartment', data);
-  return request({ url: '/department/transfer', method: 'POST', data });
+  const deptId = departmentId || getCurrentDepartmentId();
+  if (!deptId) {
+    return Promise.reject({ message: '科室ID不存在' });
+  }
+  return request({ url: '/department/transfer', method: 'POST', data, params: { departmentId: deptId } });
 };
 
 const getMemberList = (departmentId) => {
@@ -388,9 +392,13 @@ const getMemberList = (departmentId) => {
   return request({ url: '/department/members', data: { departmentId: deptId } });
 };
 
-const kickMember = (data) => {
+const kickMember = (departmentId, data) => {
   if (USE_MOCK) return mockRequest('kickMember', data);
-  return request({ url: '/department/kick', method: 'POST', data });
+  const deptId = departmentId || getCurrentDepartmentId();
+  if (!deptId) {
+    return Promise.reject({ message: '科室ID不存在' });
+  }
+  return request({ url: '/department/kick', method: 'POST', data, params: { departmentId: deptId } });
 };
 
 const getInviteLink = (departmentId) => {

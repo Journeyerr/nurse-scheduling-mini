@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "护士排班",
-  "enableShareAppMessage": true
+  "enableShareAppMessage": true,
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
 }

@@ -107,7 +107,7 @@ Page({
 
     try {
       util.showLoading('转让中...');
-      await api.transferDepartment({ newCreatorId: this.data.selectedMember });
+      await api.transferDepartment(null, { newCreatorId: this.data.selectedMember });
       util.hideLoading();
       
       // 更新本地状态

@@ -70,7 +70,7 @@ Page({
 
     try {
       util.showLoading('处理中...');
-      await api.kickMember({ memberId: id });
+      await api.kickMember(null, { memberId: id });
       util.hideLoading();
       util.showSuccess('已移出');
       this.loadMembers();

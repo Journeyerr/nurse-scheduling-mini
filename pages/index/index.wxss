@@ -6,6 +6,36 @@
   padding-bottom: 30rpx;
 }
 
+/* 顶部错误提示条 */
+.error-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #f85b5b;
+  color: #fff;
+  padding: 15rpx 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.error-text {
+  font-size: 26rpx;
+  text-align: center;
+}
+
 /* 顶部科室信息区 */
 .header {
   background: linear-gradient(135deg, #4A90D9 0%, #357ABD 100%);
@@ -210,14 +240,18 @@
   padding: 24rpx 20rpx 24rpx 24rpx;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: #fff;
   border-radius: 16rpx;
 }
 
 .invite-text {
   font-size: 30rpx;
-  color: #333;
-  flex: 1;
+  color: #4A90D9;
+}
+
+.invite-text-hover {
+  opacity: 0.7;
 }
 
 .invite-btn {
