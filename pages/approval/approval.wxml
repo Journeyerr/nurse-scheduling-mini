@@ -1,0 +1,83 @@
+<!--pages/approval/approval.wxml-->
+<view class="approval-container">
+  <!-- 标题 -->
+  <view class="page-header">
+    <text class="page-title">申请审批</text>
+    <view class="pending-badge" wx:if="{{expectPending > 0}}">{{expectPending}}条待审批</view>
+  </view>
+
+  <!-- 申请列表 -->
+  <view class="list-section">
+    <view class="approval-item card" wx:for="{{expectList}}" wx:key="id">
+      <view class="item-header">
+        <text class="item-title">{{item.userName}}</text>
+        <text class="item-time">{{item.createTime}}</text>
+      </view>
+      <view class="item-content">
+        <!-- 期望排班类型 -->
+        <block wx:if="{{item.type === 'schedule'}}">
+          <view class="info-row">
+            <text class="info-label">类型：</text>
+            <text class="type-badge schedule">{{item.typeName}}</text>
+          </view>
+          <view class="info-row schedule-row">
+            <text class="info-label">日期：</text>
+            <text class="swap-box left">{{item.startDate}}</text>
+          </view>
+          <view class="info-row schedule-row">
+            <text class="info-label">班次：</text>
+            <text class="swap-box left" style="color: {{item.shiftColor}}">{{item.shiftCode ? item.shiftCode + '-' : ''}}{{item.shiftName || '无'}}</text>
+          </view>
+        </block>
+        
+        <!-- 换班类型 -->
+        <block wx:if="{{item.type === 'swap'}}">
+          <view class="info-row">
+            <text class="info-label">类型：</text>
+            <text class="type-badge swap">{{item.typeName}}</text>
+          </view>
+          <view class="info-row swap-row">
+            <text class="info-label">日期：</text>
+            <view class="swap-content">
+              <text class="swap-box">{{item.startDate}}</text>
+              <text class="swap-arrow">⇄</text>
+              <text class="swap-box">{{item.targetDate}}</text>
+            </view>
+          </view>
+          <view class="info-row swap-row">
+            <text class="info-label">对象：</text>
+            <view class="swap-content">
+              <text class="swap-box">{{item.userName}}</text>
+              <text class="swap-arrow">⇄</text>
+              <text class="swap-box">{{item.targetUserName}}</text>
+            </view>
+          </view>
+          <view class="info-row swap-row">
+            <text class="info-label">班次：</text>
+            <view class="swap-content">
+              <text class="swap-box" style="color: {{item.myShiftColor}}">{{item.myShiftCode || '无'}}-{{item.myShiftName || '无'}}</text>
+              <text class="swap-arrow">⇄</text>
+              <text class="swap-box" style="color: {{item.targetShiftColor}}">{{item.myShiftCode || '无'}}-{{item.targetShiftName || '无'}}</text>
+            </view>
+          </view>
+        </block>
+        
+        <view class="info-row" wx:if="{{item.remark}}">
+          <text class="info-label">备注：</text>
+          <text class="info-value">{{item.remark}}</text>
+        </view>
+      </view>
+      <view class="item-actions" wx:if="{{item.status === 'pending'}}">
+        <button class="btn-reject" bindtap="handleReject" data-id="{{item.id}}">拒绝</button>
+        <button class="btn-approve" bindtap="handleApprove" data-id="{{item.id}}">通过</button>
+      </view>
+      <view class="item-status" wx:else>
+        <text class="status-text {{item.status}}">{{item.statusName}}</text>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{expectList.length === 0}}">
+      <text>暂无申请</text>
+    </view>
+  </view>
+</view>

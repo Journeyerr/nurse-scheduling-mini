@@ -1,0 +1,56 @@
+<!--pages/member-list/member-list.wxml-->
+<view class="member-container">
+  <!-- 搜索框 -->
+  <view class="search-section card">
+    <input 
+      class="search-input" 
+      placeholder="搜索成员" 
+      value="{{keyword}}"
+      bindinput="onSearch"
+    />
+  </view>
+
+  <!-- 成员列表 -->
+  <view class="member-list">
+    <view class="member-card card" wx:for="{{filteredMembers}}" wx:key="id">
+      <view class="member-avatar-section">
+        <view class="member-avatar-text" wx:if="{{!item.avatarUrl}}">
+          <text>{{item.nickName[0]}}</text>
+        </view>
+        <image class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill" wx:else></image>
+        <view class="tag tag-creator" wx:if="{{item.isCreator}}">创建者</view>
+      </view>
+      
+      <view class="member-info-section">
+        <text class="member-name">{{item.nickName}}</text>
+        <text class="member-join-time">加入时间：{{item.joinTime || '-'}}</text>
+        
+        <!-- 排班统计 -->
+        <view class="member-stats">
+          <view class="stat-item">
+            <text class="stat-value">{{item.scheduleCount || 0}}</text>
+            <text class="stat-label">排班次数</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-value">{{item.nightCount || 0}}</text>
+            <text class="stat-label">夜班次数</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-value">{{item.leaveCount || 0}}</text>
+            <text class="stat-label">请假次数</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="member-actions" wx:if="{{isCreator && !item.isCreator}}">
+        <button class="btn-kick" bindtap="kickMember" data-id="{{item.id}}" data-name="{{item.nickName}}">
+          移出
+        </button>
+      </view>
+    </view>
+    
+    <view class="empty-state" wx:if="{{filteredMembers.length === 0}}">
+      <text>暂无成员</text>
+    </view>
+  </view>
+</view>

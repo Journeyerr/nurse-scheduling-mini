@@ -1,0 +1,204 @@
+/* pages/create-department/create-department.wxss */
+
+.create-container {
+  padding: 30rpx;
+  padding-bottom: 140rpx;
+  min-height: 100vh;
+  background: #F5F7FA;
+  box-sizing: border-box;
+}
+
+.form-section {
+  padding: 40rpx 30rpx;
+  margin-bottom: 30rpx;
+}
+
+.form-item {
+  margin-bottom: 40rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.form-label-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.form-tip-inline {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 16rpx;
+}
+
+.input {
+  width: 100%;
+  height: 88rpx;
+  background: #F5F7FA;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+}
+
+/* 班种选择 - 一行两个 */
+.shift-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.shift-item {
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  box-sizing: border-box;
+  position: relative;
+  margin-bottom: 16rpx;
+}
+
+.shift-item.selected {
+  background: #E8F4FD;
+  border-color: #4A90D9;
+}
+
+.shift-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+  padding-right: 40rpx;
+}
+
+.shift-badge {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.badge-code {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.shift-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+  flex: 1;
+}
+
+.shift-duration {
+  font-size: 24rpx;
+  color: #4A90D9;
+  font-weight: 600;
+  margin-left: 8rpx;
+}
+
+.shift-times {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.time-slot {
+  display: inline-flex;
+}
+
+.time-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.shift-check {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  font-size: 28rpx;
+  color: #4A90D9;
+  font-weight: bold;
+}
+
+/* 新增班种按钮 */
+.add-shift-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  border: 2rpx dashed #D9D9D9;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.add-icon {
+  font-size: 36rpx;
+  color: #4A90D9;
+  margin-right: 12rpx;
+}
+
+.add-text {
+  font-size: 28rpx;
+  color: #4A90D9;
+}
+
+/* 提交按钮 */
+.submit-btn {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100% !important;
+  height: 110rpx;
+  line-height: 110rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #357ABD 100%);
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  border: none;
+  border-radius: 0;
+  padding: 0 !important;
+  margin: 0;
+  box-shadow: 0 -4rpx 20rpx rgba(74, 144, 217, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.submit-btn::before {
+  display: none;
+}
+
+.submit-btn::after {
+  display: none;
+  border: none;
+}
+
+.submit-btn[disabled] {
+  background: #B8B8B8;
+  color: #666;
+  box-shadow: none;
+  width: 100% !important;
+}
+
+.submit-btn:not([disabled]):active {
+  background: linear-gradient(135deg, #357ABD 0%, #2868A8 100%);
+}

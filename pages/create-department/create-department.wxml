@@ -1,0 +1,64 @@
+<!--pages/create-department/create-department.wxml-->
+<view class="create-container">
+  <view class="form-section card">
+    <view class="form-item">
+      <text class="form-label">科室名称</text>
+      <input 
+        class="input" 
+        placeholder="请输入科室名称" 
+        value="{{name}}"
+        bindinput="onNameInput"
+        maxlength="20"
+      />
+    </view>
+    
+    <view class="form-item">
+      <text class="form-label">您的姓名</text>
+      <input 
+        class="input" 
+        placeholder="请输入您的姓名" 
+        value="{{creatorName}}"
+        bindinput="onCreatorNameInput"
+        maxlength="10"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label-row">
+        <text class="form-label">班种选择</text>
+        <text class="form-tip-inline">可多选</text>
+      </view>
+      <view class="shift-list">
+        <view 
+          class="shift-item {{item.selected ? 'selected' : ''}}" 
+          wx:for="{{shiftList}}" 
+          wx:key="id"
+          bindtap="toggleShift"
+          data-index="{{index}}"
+        >
+          <view class="shift-header">
+            <view class="shift-badge" style="background-color: {{item.color}}20; border-color: {{item.color}}">
+              <text class="badge-code" style="color: {{item.color}}">{{item.code}}</text>
+            </view>
+            <text class="shift-name">{{item.name}}</text>
+            <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
+          </view>
+          <view class="shift-times">
+            <view class="time-slot" wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
+              <text class="time-text">{{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}</text>
+            </view>
+          </view>
+          <text class="shift-check" wx:if="{{item.selected}}">✓</text>
+        </view>
+      </view>
+      <view class="add-shift-btn" bindtap="addShift">
+        <text class="add-icon">+</text>
+        <text class="add-text">新增班种</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="submit-btn" bindtap="handleSubmit" disabled="{{!canSubmit}}">
+    创建科室
+  </button>
+</view>

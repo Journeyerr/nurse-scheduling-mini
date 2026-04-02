@@ -1,0 +1,119 @@
+/* pages/team-schedule/team-schedule.wxss */
+
+.team-schedule-container {
+  min-height: 100vh;
+  background: #F5F7FA;
+  padding: 20rpx;
+}
+
+/* 周选择器 */
+.week-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15rpx 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.selector-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow {
+  font-size: 40rpx;
+  color: #4A90D9;
+}
+
+.week-range {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 排班表 */
+.schedule-table {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* 表头 */
+.table-header {
+  display: flex;
+  background: #F5F7FA;
+  border-bottom: 1rpx solid #E8E8E8;
+}
+
+.header-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 10rpx;
+  border-right: 1rpx solid #E8E8E8;
+}
+
+.header-cell:last-child {
+  border-right: none;
+}
+
+.name-cell {
+  flex: 0 0 140rpx;
+  min-width: 140rpx;
+}
+
+.week-text {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.date-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 数据行 */
+.table-body {
+  max-height: calc(100vh - 280rpx);
+  overflow-y: auto;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: 1rpx solid #E8E8E8;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.body-cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15rpx 9rpx;
+  min-height: 60rpx;
+  border-right: 1rpx solid #E8E8E8;
+}
+
+.body-cell:last-child {
+  border-right: none;
+}
+
+.member-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.shift-code {
+  font-size: 26rpx;
+  font-weight: bold;
+}

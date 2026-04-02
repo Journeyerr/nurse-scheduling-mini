@@ -1,0 +1,69 @@
+<!--pages/department-manage/department-manage.wxml-->
+<view class="manage-container">
+  <!-- 科室信息 -->
+  <view class="info-section card">
+    <view class="info-row">
+      <text class="info-label">科室名称</text>
+      <text class="info-value">{{department.name}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">成员数量</text>
+      <text class="info-value">{{members.length}}人</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">创建时间</text>
+      <text class="info-value">{{department.createTime}}</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section card">
+    <!-- 邀请成员 -->
+    <view class="menu-item" bindtap="handleInvite">
+      <text class="menu-text">邀请成员</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    
+    <!-- 转让科室 -->
+    <view class="menu-item" bindtap="handleTransfer">
+      <text class="menu-text">转让科室</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    
+    <!-- 解散科室 -->
+    <view class="menu-item danger" bindtap="handleDismiss">
+      <text class="menu-text danger-text">解散科室</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 成员列表 -->
+  <view class="member-section card">
+    <view class="section-title">成员列表</view>
+    <view class="member-list">
+      <view class="member-item" wx:for="{{members}}" wx:key="id" bindtap="selectMember" data-id="{{item.id}}" data-name="{{item.nickName}}">
+        <view class="member-avatar-text" wx:if="{{!item.avatarUrl}}">
+          <text>{{item.nickName[0]}}</text>
+        </view>
+        <image class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill" wx:else></image>
+        <view class="member-info">
+          <text class="member-name">{{item.nickName}}</text>
+          <view class="tag tag-creator" wx:if="{{item.isCreator}}">创建者</view>
+        </view>
+        <view class="member-check" wx:if="{{selectMode && selectedMember === item.id}}">
+          <text class="check-icon">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 转让确认按钮 -->
+  <view class="bottom-btn" wx:if="{{selectMode}}">
+    <button class="btn-primary" bindtap="confirmTransfer" disabled="{{!selectedMember}}">
+      确认转让
+    </button>
+    <button class="btn-secondary cancel-btn" bindtap="cancelSelect">
+      取消
+    </button>
+  </view>
+</view>

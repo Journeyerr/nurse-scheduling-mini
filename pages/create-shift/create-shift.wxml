@@ -1,0 +1,145 @@
+<!--pages/create-shift/create-shift.wxml-->
+<view class="create-shift-container">
+  <view class="form-section card">
+    <view class="form-item">
+      <text class="form-label">班种编号（代号）</text>
+      <input
+        class="input"
+        placeholder="如：A、B、N"
+        placeholder-class="input-placeholder"
+        value="{{code}}"
+        bindinput="onCodeInput"
+        maxlength="2"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">班种名称</text>
+      <input
+        class="input"
+        placeholder="如：白班、夜班"
+        placeholder-class="input-placeholder"
+        value="{{name}}"
+        bindinput="onNameInput"
+        maxlength="10"
+      />
+    </view>
+    
+    <view class="form-item">
+      <text class="form-label">工作时间段</text>
+
+      <view class="time-slots">
+        <view class="time-slot-item" wx:for="{{timeSlots}}" wx:key="index">
+          <view class="time-row">
+            <view class="time-col">
+              <text class="time-col-label">开始</text>
+              <view class="time-picker" bindtap="showStartTimePicker" data-index="{{index}}">
+                <text class="time-text">{{item.startTime || '00:00'}}</text>
+                <text class="next-day-tag" wx:if="{{item.startIsNextDay}}">次日</text>
+              </view>
+            </view>
+            <view class="time-col">
+              <text class="time-col-label">结束</text>
+              <view class="time-picker" bindtap="showEndTimePicker" data-index="{{index}}">
+                <text class="time-text">{{item.endTime || '00:00'}}</text>
+                <text class="next-day-tag" wx:if="{{item.endIsNextDay}}">次日</text>
+              </view>
+            </view>
+            <!-- 操作按钮区域（固定宽度，防止布局抖动） -->
+            <view class="time-action {{index === 0 && timeSlots.length < 2 ? 'add-action' : ''}}" 
+                  wx:if="{{(index === 0 && timeSlots.length < 2) || index === 1}}"
+                  bindtap="{{index === 0 ? 'addTimeSlot' : 'removeTimeSlot'}}"
+                  data-index="{{index}}">
+              <text class="{{index === 0 ? 'add-btn' : 'remove-btn'}}">{{index === 0 ? '+' : '−'}}</text>
+            </view>
+            <!-- 占位符，保持第一行有按钮时的宽度一致 -->
+            <view class="time-action-placeholder" wx:if="{{index === 0 && timeSlots.length >= 2}}"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">时长（小时）</text>
+      <input
+        class="input"
+        type="digit"
+        placeholder="自动计算或手动输入"
+        placeholder-class="input-placeholder"
+        value="{{duration}}"
+        bindinput="onDurationInput"
+      />
+    </view>
+    
+    <view class="form-item">
+      <text class="form-label">编号字体颜色</text>
+      <view class="color-picker">
+        <view 
+          class="color-item {{currentColor === item ? 'active' : ''}}" 
+          wx:for="{{colorList}}" 
+          wx:key="*this"
+          style="background-color: {{item}}"
+          bindtap="selectColor"
+          data-color="{{item}}"
+        >
+          <text class="check-icon" wx:if="{{currentColor === item}}">✓</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 预览 -->
+    <view class="preview-section">
+      <text class="form-label">预览效果</text>
+      <view class="preview-box">
+        <view class="preview-tag">
+          <text class="preview-code" style="color: {{currentColor}}">{{code || 'A'}}</text>
+        </view>
+        <view class="preview-info">
+          <text class="preview-name">{{name || '班种名称'}}</text>
+          <view class="preview-times">
+            <text class="preview-time" wx:for="{{timeSlots}}" wx:key="index">
+              {{item.startTime || '00:00'}}-{{item.endTime || '00:00'}}{{item.endIsNextDay ? '次日' : ''}}
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <button class="submit-btn" bindtap="handleSubmit" disabled="{{!canSubmit}}">
+    {{isEdit ? '保存修改' : '创建班种'}}
+  </button>
+
+  <!-- 时间选择弹窗 -->
+  <view class="time-modal-mask" wx:if="{{showTimePickerModal}}" bindtap="hideTimePicker">
+    <view class="time-modal" catchtap="stopPropagation">
+      <view class="time-modal-header">
+        <view class="time-modal-btn cancel" bindtap="hideTimePicker">取消</view>
+        <text class="time-modal-title">选择时间</text>
+        <view class="time-modal-btn" bindtap="confirmTime">确定</view>
+      </view>
+
+      <!-- 今日/次日切换 -->
+      <view class="day-toggle">
+        <view class="day-option {{!tempIsNextDay ? 'active' : ''}}" bindtap="toggleDay" data-day="today">
+          <text>今日</text>
+        </view>
+        <view class="day-option {{tempIsNextDay ? 'active' : ''}}" bindtap="toggleDay" data-day="next">
+          <text>次日</text>
+        </view>
+      </view>
+
+      <!-- 时间选择器 -->
+      <view class="time-selector">
+        <picker-view indicator-style="height: 44px;" value="{{pickerValue}}" bindchange="onTimeChange">
+          <picker-view-column>
+            <view class="picker-item" wx:for="{{hours}}" wx:key="*this">{{item}}时</view>
+          </picker-view-column>
+          <picker-view-column>
+            <view class="picker-item" wx:for="{{minutes}}" wx:key="*this">{{item}}分</view>
+          </picker-view-column>
+        </picker-view>
+      </view>
+    </view>
+  </view>
+</view>

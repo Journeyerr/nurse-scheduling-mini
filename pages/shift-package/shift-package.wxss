@@ -1,0 +1,394 @@
+/* pages/shift-package/shift-package.wxss */
+.package-container {
+  min-height: 100vh;
+  background: #F5F7FA;
+  padding-bottom: 120rpx;
+}
+
+.package-list {
+  padding: 20rpx;
+}
+
+.package-item {
+  margin-bottom: 20rpx;
+  padding: 24rpx;
+}
+
+.package-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.package-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.package-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  font-size: 26rpx;
+  padding: 8rpx 16rpx;
+}
+
+.action-btn.edit {
+  color: #4A90D9;
+}
+
+.action-btn.delete {
+  color: #E74C3C;
+}
+
+.package-shifts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.shift-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.day-label-small {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.shift-code-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 60rpx;
+  background: #F0F0F0;
+  border: 2rpx solid #D9D9D9;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #999;
+  box-sizing: border-box;
+}
+
+.shift-code-badge text {
+  line-height: 1;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200rpx);
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.add-btn {
+  position: fixed;
+  bottom: 40rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #4A90D9;
+  color: #fff;
+  padding: 20rpx 60rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 4rpx 12rpx rgba(74, 144, 217, 0.3);
+}
+
+.add-icon {
+  font-size: 40rpx;
+  margin-right: 12rpx;
+}
+
+.add-text {
+  font-size: 30rpx;
+}
+
+/* 底部滑入弹窗 */
+.bottom-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.bottom-modal-mask.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.bottom-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.bottom-modal-mask.show .bottom-modal {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30rpx;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 20rpx;
+  background: #F8F9FA;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+
+/* 周选择器 */
+.week-selector {
+  margin-top: 20rpx;
+}
+
+.week-header {
+  display: flex;
+  margin-bottom: 12rpx;
+}
+
+.week-day {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.week-cells {
+  display: flex;
+  gap: 8rpx;
+}
+
+.week-cell {
+  flex: 1;
+}
+
+.cell-content {
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F9FA;
+  border-radius: 8rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.cell-content.selected {
+  background: #E8F4FD;
+  border-color: #4A90D9;
+}
+
+.cell-content.has-shift {
+  /* 背景色由内联样式设置 */
+}
+
+.cell-text {
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.cell-placeholder {
+  font-size: 40rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+/* 班种列表区域 */
+.shift-section {
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.section-header {
+  margin-bottom: 16rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.shift-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8rpx;
+}
+
+.shift-item {
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  padding: 16rpx 20rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.shift-item.active {
+  background: #E8F4FD;
+  border-color: #4A90D9;
+}
+
+.shift-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4rpx;
+  padding-right: 40rpx;
+}
+
+.shift-badge {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.badge-code {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.shift-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+  flex: 1;
+}
+
+.shift-duration {
+  font-size: 24rpx;
+  color: #4A90D9;
+  font-weight: 600;
+  margin-left: 8rpx;
+}
+
+.shift-check {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  font-size: 28rpx;
+  color: #4A90D9;
+  font-weight: bold;
+}
+
+.shift-times {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.time-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.4;
+}
+
+.modal-footer {
+  padding: 0;
+}
+
+.btn-primary {
+  width: 100% !important;
+  height: 110rpx;
+  line-height: 110rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #357ABD 100%);
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  border: none;
+  border-radius: 0;
+  padding: 0 !important;
+  margin: 0;
+  box-shadow: 0 -4rpx 20rpx rgba(74, 144, 217, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.btn-primary::before {
+  display: none;
+}
+
+.btn-primary::after {
+  display: none;
+  border: none;
+}

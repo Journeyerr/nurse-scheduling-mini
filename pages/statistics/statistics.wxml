@@ -1,0 +1,99 @@
+<!--pages/statistics/statistics.wxml-->
+<view class="stats-container">
+  <!-- 月份选择 -->
+  <view class="month-selector card">
+    <view class="selector-btn" bindtap="prevMonth">
+      <text class="arrow">‹</text>
+    </view>
+    <text class="current-month">{{currentYear}}年{{currentMonth}}月</text>
+    <view class="selector-btn" bindtap="nextMonth">
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 个人统计（护士） -->
+  <view class="stats-section card" wx:if="{{!isCreator}}">
+    <view class="section-title">我的排班统计</view>
+    <view class="stats-grid">
+      <view class="stats-item">
+        <text class="stats-value">{{myStats.totalDays}}</text>
+        <text class="stats-label">排班天数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{myStats.restDays}}</text>
+        <text class="stats-label">休息天数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{myStats.leaveDays}}</text>
+        <text class="stats-label">请假天数</text>
+      </view>
+    </view>
+    
+    <view class="stats-detail">
+      <view class="detail-title">班次详情</view>
+      <view class="detail-list">
+        <view class="detail-item" wx:for="{{myStats.shiftDetails}}" wx:key="name">
+          <view class="detail-color" style="background-color: {{item.color}}"></view>
+          <text class="detail-name">{{item.name}}</text>
+          <text class="detail-count">{{item.count}}次</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 全员统计（护士长） -->
+  <view class="stats-section card" wx:if="{{isCreator}}">
+    <view class="section-title">科室排班统计</view>
+    
+    <!-- 成员筛选 -->
+    <view class="filter-section">
+      <picker mode="selector" range="{{memberOptions}}" range-key="name" bindchange="onMemberChange">
+        <view class="picker-btn">
+          <text>{{selectedMemberName}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    
+    <view class="stats-grid" wx:if="{{selectedMemberId === 'all'}}">
+      <view class="stats-item">
+        <text class="stats-value">{{deptStats.totalSchedules}}</text>
+        <text class="stats-label">排班总数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{deptStats.totalMembers}}</text>
+        <text class="stats-label">参与人数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{deptStats.avgDays}}</text>
+        <text class="stats-label">人均天数</text>
+      </view>
+    </view>
+    
+    <view class="stats-grid" wx:else>
+      <view class="stats-item">
+        <text class="stats-value">{{memberStats.totalDays}}</text>
+        <text class="stats-label">排班天数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{memberStats.restDays}}</text>
+        <text class="stats-label">休息天数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{memberStats.leaveDays}}</text>
+        <text class="stats-label">请假天数</text>
+      </view>
+    </view>
+    
+    <!-- 成员排班排行 -->
+    <view class="rank-section" wx:if="{{selectedMemberId === 'all'}}">
+      <view class="detail-title">成员排行</view>
+      <view class="rank-list">
+        <view class="rank-item" wx:for="{{deptStats.memberRank}}" wx:key="id">
+          <text class="rank-name-text">{{item.name}}</text>
+          <text class="rank-count">{{item.days}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

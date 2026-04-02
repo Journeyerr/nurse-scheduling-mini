@@ -1,0 +1,103 @@
+<!--pages/shift-package/shift-package.wxml-->
+<view class="package-container">
+  <!-- 套餐列表 -->
+  <view class="package-list">
+    <view class="package-item card" wx:for="{{packageList}}" wx:key="id">
+      <view class="package-header">
+        <text class="package-name">{{item.name}}</text>
+        <view class="package-actions">
+          <text class="action-btn edit" bindtap="editPackage" data-id="{{item.id}}">编辑</text>
+          <text class="action-btn delete" bindtap="deletePackage" data-id="{{item.id}}">删除</text>
+        </view>
+      </view>
+      <view class="package-shifts-row">
+        <view class="shift-cell" wx:for="{{item.shifts}}" wx:for-item="shift" wx:for-index="dayIndex" wx:key="dayIndex">
+          <text class="day-label-small">{{weekDays[dayIndex]}}</text>
+          <view class="shift-code-badge" 
+                style="{{shift.shiftId ? 'background-color: ' + shift.color + '20; border-color: ' + shift.color + '; color: ' + shift.color : ''}}">
+            <text>{{shift.code || '休'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{packageList.length === 0}}">
+      <text>暂无班种套餐，请点击下方按钮添加</text>
+    </view>
+  </view>
+
+  <!-- 添加按钮 -->
+  <view class="add-btn" bindtap="addPackage">
+    <text class="add-icon">+</text>
+    <text class="add-text">添加班种套餐</text>
+  </view>
+</view>
+
+<!-- 底部滑入弹窗 -->
+<view class="bottom-modal-mask {{showEditModal ? 'show' : ''}}" bindtap="closeEditModal">
+  <view class="bottom-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{editingPackage.id ? '编辑套餐' : '添加套餐'}}</text>
+      <view class="modal-close" bindtap="closeEditModal">×</view>
+    </view>
+
+    <view class="modal-body">
+      <!-- 套餐名称 -->
+      <view class="form-item">
+        <input class="form-input" placeholder="请输入套餐名称" value="{{editingPackage.name}}" bindinput="onNameInput" />
+      </view>
+
+      <!-- 一周班种选择 -->
+      <view class="week-selector">
+        <view class="week-header">
+          <text class="week-day" wx:for="{{weekDays}}" wx:key="index">{{item}}</text>
+        </view>
+      <view class="week-cells">
+        <view class="week-cell" wx:for="{{editingPackage.shifts}}" wx:for-item="shift" wx:for-index="dayIndex" wx:key="dayIndex">
+          <view class="cell-content {{selectedDayIndex === dayIndex ? 'selected' : ''}} {{shift.shiftId ? 'has-shift' : ''}}" 
+                style="{{shift.shiftId ? 'background-color: ' + shift.color + '20; border-color: ' + shift.color : ''}}"
+                bindtap="selectDay" data-day-index="{{dayIndex}}">
+            <text class="cell-text" wx:if="{{shift.code}}" style="color: {{shift.color}}">{{shift.code}}</text>
+            <text class="cell-placeholder" wx:else>+</text>
+          </view>
+        </view>
+      </view>
+      </view>
+
+      <!-- 班种列表 -->
+      <view class="shift-section">
+        <view class="section-header">
+          <text class="section-title">班种</text>
+        </view>
+        <view class="shift-list">
+          <view 
+            class="shift-item {{selectedDayIndex >= 0 && editingPackage.shifts[selectedDayIndex].shiftId === item.id ? 'active' : ''}}" 
+            wx:for="{{shiftOptions}}" 
+            wx:key="id"
+            bindtap="selectShift"
+            data-shift="{{item}}"
+          >
+            <view class="shift-header">
+              <view class="shift-badge" style="background-color: {{item.color}}20; border-color: {{item.color}}">
+                <text class="badge-code" style="color: {{item.color}}">{{item.code}}</text>
+              </view>
+              <text class="shift-name">{{item.name}}</text>
+              <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
+              <text class="shift-check" wx:if="{{selectedDayIndex >= 0 && editingPackage.shifts[selectedDayIndex].shiftId === item.id}}">✓</text>
+            </view>
+            <view class="shift-times">
+              <text class="time-text" wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
+                {{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}{{index < (item.timeSlots.length - 1) ? ' / ' : ''}}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-primary" bindtap="savePackage">保存</button>
+    </view>
+  </view>
+</view>

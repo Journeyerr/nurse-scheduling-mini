@@ -1,0 +1,37 @@
+<!--pages/team-schedule/team-schedule.wxml-->
+<view class="team-schedule-container">
+  <!-- 周选择器 -->
+  <view class="week-selector card">
+    <view class="selector-btn" bindtap="prevWeek">
+      <text class="arrow">‹</text>
+    </view>
+    <text class="week-range">{{weekRange}}</text>
+    <view class="selector-btn" bindtap="nextWeek">
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 排班表 -->
+  <view class="schedule-table card">
+    <!-- 表头 - 星期 -->
+    <view class="table-header">
+      <view class="header-cell name-cell">姓名</view>
+      <view class="header-cell" wx:for="{{weekDays}}" wx:key="index">
+        <text class="week-text">{{item.week}}</text>
+        <text class="date-text">{{item.date}}</text>
+      </view>
+    </view>
+
+    <!-- 数据行 -->
+    <view class="table-body">
+      <view class="table-row" wx:for="{{scheduleData}}" wx:key="memberId">
+        <view class="body-cell name-cell">
+          <text class="member-name">{{item.memberName}}</text>
+        </view>
+        <view class="body-cell" wx:for="{{item.schedules}}" wx:key="date">
+          <text class="shift-code" style="color: {{item.color}}" wx:if="{{item.shiftCode}}">{{item.shiftCode}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

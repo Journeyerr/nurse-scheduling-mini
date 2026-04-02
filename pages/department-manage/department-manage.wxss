@@ -1,0 +1,166 @@
+/* pages/department-manage/department-manage.wxss */
+
+.manage-container {
+  padding: 30rpx;
+  padding-bottom: 200rpx;
+  min-height: 100vh;
+  background: #F5F7FA;
+}
+
+/* 科室信息 */
+.info-section {
+  padding: 20rpx 30rpx;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #F5F5F5;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 功能菜单 */
+.menu-section {
+  padding: 0;
+  margin-top: 20rpx;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #F5F5F5;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item.danger {
+  background: #FFF5F5;
+}
+
+.menu-text {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.danger-text {
+  color: #E74C3C;
+}
+
+.menu-arrow {
+  font-size: 36rpx;
+  color: #CCC;
+}
+
+/* 成员列表 */
+.member-section {
+  margin-top: 20rpx;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #F5F5F5;
+}
+
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.member-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  background: #f0f0f0;
+}
+
+.member-avatar-text {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #357ABD 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-avatar-text text {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.member-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.member-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.member-check {
+  width: 40rpx;
+  height: 40rpx;
+  background: #4A90D9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.check-icon {
+  color: #fff;
+  font-size: 24rpx;
+}
+
+/* 底部按钮 */
+.bottom-btn {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 30rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 20rpx;
+}
+
+.bottom-btn button {
+  flex: 1;
+}
+
+.cancel-btn {
+  margin-top: 0;
+}

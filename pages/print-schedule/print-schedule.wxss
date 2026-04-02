@@ -1,0 +1,153 @@
+/* pages/print-schedule/print-schedule.wxss */
+
+.print-container {
+  min-height: 100vh;
+  background: #F5F7FA;
+  padding: 20rpx;
+  padding-bottom: 200rpx;
+}
+
+/* 月份选择 */
+.month-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.selector-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow {
+  font-size: 40rpx;
+  color: #4A90D9;
+}
+
+.current-month {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 排班表预览 */
+.schedule-preview {
+  padding: 30rpx;
+  background: #fff;
+}
+
+.preview-table {
+  width: 100%;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: 1rpx solid #E8E8E8;
+}
+
+.header-row {
+  background: #F5F7FA;
+  font-weight: bold;
+}
+
+.table-cell {
+  flex: 1;
+  min-width: 120rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  color: #333;
+  border-right: 1rpx solid #E8E8E8;
+}
+
+.table-cell:last-child {
+  border-right: none;
+}
+
+.name-cell {
+  flex: 0 0 140rpx;
+  min-width: 140rpx;
+  justify-content: flex-start;
+  padding-left: 20rpx;
+}
+
+.shift-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shift-badge-small {
+  padding: 10rpx 20rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  border: 2rpx solid;
+  white-space: nowrap;
+}
+
+.count-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 图例 */
+.legend-section {
+  margin-top: 40rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #E8E8E8;
+}
+
+.legend-title {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.legend-color {
+  width: 40rpx;
+  height: 24rpx;
+  border-radius: 4rpx;
+  margin-right: 10rpx;
+}
+
+.legend-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 30rpx;
+  display: flex;
+  gap: 20rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.action-buttons button {
+  flex: 1;
+}

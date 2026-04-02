@@ -1,0 +1,233 @@
+<!--pages/schedule/schedule.wxml-->
+<view class="schedule-container">
+  <!-- 周导航 -->
+  <view class="week-nav card">
+    <view class="year-picker" bindtap="showCalendarModal">
+      <text class="current-year">{{currentYear}}</text>
+      <text class="picker-arrow">▼</text>
+    </view>
+    <view class="week-nav-center">
+      <view class="nav-btn" bindtap="prevWeek">
+        <text class="nav-arrow">‹</text>
+      </view>
+      <text class="current-week">{{weekRangeText}}</text>
+      <view class="nav-btn" bindtap="nextWeek">
+        <text class="nav-arrow">›</text>
+      </view>
+    </view>
+    <text class="publish-btn" bindtap="publishSchedule">发布</text>
+  </view>
+
+  <!-- 日历选择弹窗 -->
+  <view class="calendar-modal-mask {{showCalendarModal ? 'show' : ''}}" bindtap="hideCalendarModal">
+    <view class="calendar-modal" catchtap="stopPropagation">
+      <view class="calendar-modal-header">
+        <view class="cal-nav-btn" bindtap="calPrevMonth">
+          <text class="cal-nav-arrow">‹</text>
+        </view>
+        <text class="cal-current-date">{{calYear}}年{{calMonth}}月</text>
+        <view class="cal-nav-btn" bindtap="calNextMonth">
+          <text class="cal-nav-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="cal-week-header">
+        <text class="cal-week-item" wx:for="{{['日', '一', '二', '三', '四', '五', '六']}}" wx:key="*this">{{item}}</text>
+      </view>
+
+      <view class="cal-grid">
+        <view 
+          class="cal-day-item {{item.isCurrentMonth ? '' : 'other-month'}} {{item.isToday ? 'today' : ''}}"
+          wx:for="{{calDays}}" 
+          wx:key="date"
+          bindtap="selectCalDay"
+          data-date="{{item.date}}"
+        >
+          <text class="cal-day-text">{{item.day}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 排班表格 -->
+  <view class="schedule-table card">
+    <!-- 表头 -->
+    <view class="table-header">
+      <view class="header-status">
+        <text class="status-text">未发布</text>
+      </view>
+      <view class="header-dates">
+        <view class="header-cell" wx:for="{{weekDates}}" wx:key="fullDate">
+          <text class="header-day">{{item.day}}</text>
+          <text class="header-date">{{item.date}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 成员排班行 -->
+    <view class="table-body">
+      <view class="table-row" wx:for="{{members}}" wx:for-index="memberIndex" wx:key="id">
+        <view class="member-cell">
+          <text class="member-name">{{item.nickName}}</text>
+        </view>
+        <view class="date-cells">
+          <view 
+            class="date-cell {{focusCell.memberId === item.id && focusCell.dateIndex === index ? 'focused' : ''}}" 
+            wx:for="{{weekDates}}" 
+            wx:for-item="dateItem" 
+            wx:key="fullDate"
+            bindtap="onCellTap"
+            data-member-id="{{item.id}}"
+            data-date="{{dateItem.fullDate}}"
+            data-date-index="{{index}}"
+          >
+            <view 
+              class="shift-tag {{item.schedules[dateItem.fullDate].isExpect ? 'expect-shift' : ''}}" 
+              wx:if="{{item.schedules[dateItem.fullDate]}}"
+              style="background-color: {{item.schedules[dateItem.fullDate].color}}20; border-color: {{item.schedules[dateItem.fullDate].color}}"
+            >
+              <text class="shift-code" style="color: {{item.schedules[dateItem.fullDate].color}}">{{item.schedules[dateItem.fullDate].code}}</text>
+              <text class="expect-icon" wx:if="{{item.schedules[dateItem.fullDate].isExpect}}">♥</text>
+            </view>
+            <view class="empty-cell" wx:else>
+              <text class="empty-text">+</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加成员 -->
+  <view class="add-member-section card" bindtap="addMember">
+    <text class="add-member-text">添加成员</text>
+    <text class="add-icon">+</text>
+  </view>
+
+  <!-- 班种区域 -->
+  <view class="shift-section card">
+    <view class="section-header">
+      <text class="section-title">班种</text>
+    </view>
+    <view class="shift-list">
+      <view 
+        class="shift-item {{currentShift === item.id ? 'active' : ''}}" 
+        wx:for="{{shiftList}}" 
+        wx:key="id"
+        bindtap="selectShift"
+        data-id="{{item.id}}"
+      >
+        <view class="shift-header">
+          <view class="shift-badge" style="background-color: {{item.color}}20; border-color: {{item.color}}">
+            <text class="badge-code" style="color: {{item.color}}">{{item.code}}</text>
+          </view>
+          <text class="shift-name">{{item.name}}</text>
+          <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
+          <text class="shift-check" wx:if="{{currentShift === item.id}}">✓</text>
+        </view>
+        <view class="shift-times">
+          <text class="time-text" wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
+            {{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}{{index < (item.timeSlots.length - 1) ? ' / ' : ''}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 班种套餐区域 -->
+  <view class="package-section card">
+    <view class="section-header">
+      <text class="section-title">班种套餐</text>
+    </view>
+    
+    <!-- 有套餐时显示列表 -->
+    <view class="package-list" wx:if="{{packageList.length > 0}}">
+      <view class="package-item" wx:for="{{packageList}}" wx:key="id" bindtap="applyPackage" data-id="{{item.id}}">
+        <view class="package-name-row">
+          <text class="package-name">{{item.name}}</text>
+        </view>
+        <view class="package-shifts-row">
+          <view class="shift-cell" wx:for="{{item.shifts}}" wx:for-item="shift" wx:for-index="dayIndex" wx:key="dayIndex">
+            <text class="day-label-small">{{weekDays[dayIndex]}}</text>
+            <view class="shift-code-badge" 
+                  style="{{shift.shiftId ? 'background-color: ' + shift.color + '20; border-color: ' + shift.color + '; color: ' + shift.color : ''}}">
+              <text>{{shift.code || '休'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 无套餐时显示添加按钮 -->
+    <view class="add-package-btn" wx:else bindtap="goCreatePackage">
+      <text class="add-package-icon">+</text>
+      <text class="add-package-text">添加班种套餐</text>
+    </view>
+  </view>
+
+  <!-- 添加成员弹窗 -->
+  <view class="member-modal-mask {{showMemberModal ? 'show' : ''}}" bindtap="closeMemberModal">
+    <view class="member-modal" catchtap="stopPropagation">
+      <view class="member-modal-body">
+        <view 
+          class="member-option {{item.selected ? 'selected' : ''}}" 
+          wx:for="{{allMembers}}" 
+          wx:key="id"
+          bindtap="toggleMember"
+          data-id="{{item.id}}"
+        >
+          <text class="member-name-text">{{item.nickName}}</text>
+          <checkbox checked="{{item.selected}}" />
+        </view>
+      </view>
+      <view class="member-modal-footer">
+        <button class="btn-primary" bindtap="confirmMembers">确定</button>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 发布确认弹窗 -->
+  <view class="publish-modal-mask {{showPublishModal ? 'show' : ''}}" bindtap="cancelPublish">
+    <view class="publish-modal" catchtap="stopPropagation">
+      <view class="publish-modal-header">
+        <text class="publish-modal-title">确认发布排班</text>
+        <text class="publish-modal-subtitle">{{weekRangeText}}</text>
+      </view>
+      
+      <view class="publish-modal-body">
+        <view class="stats-table" wx:if="{{publishStats}}">
+          <!-- 表头：日期 -->
+          <view class="stats-header">
+            <view class="stats-cell stats-corner">班种</view>
+            <view class="stats-cell stats-date" wx:for="{{publishStats.dates}}" wx:key="index">
+              <text class="stats-day">{{item.day}}</text>
+              <text class="stats-date-num">{{item.date}}</text>
+            </view>
+          </view>
+          
+          <!-- 班种行 -->
+          <view class="stats-row" wx:for="{{publishStats.shifts}}" wx:key="code">
+            <view class="stats-cell stats-shift">
+              <view class="shift-dot" style="background-color: {{item.color}}"></view>
+              <text class="shift-label">{{item.name}}</text>
+            </view>
+            <view class="stats-cell stats-count" wx:for="{{item.counts}}" wx:for-item="count" wx:key="index">
+              <text class="{{count > 0 ? 'count-active' : 'count-zero'}}">{{count || '-'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="publish-modal-footer">
+        <view class="footer-info">
+          <text class="info-text">新增: {{localChanges.adds.length}} 条</text>
+          <text class="info-text">删除: {{localChanges.deletes.length}} 条</text>
+        </view>
+        <view class="footer-btns">
+          <button class="btn-cancel" bindtap="cancelPublish">取消</button>
+          <button class="btn-confirm" bindtap="confirmPublish">确认发布</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

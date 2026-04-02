@@ -1,0 +1,228 @@
+<!--pages/index/index.wxml-->
+<view class="index-container">
+  <!-- 核心日历区 -->
+  <view class="calendar-section card">
+    <!-- 月份切换 -->
+    <view class="calendar-header">
+      <view class="month-nav" bindtap="prevMonth">
+        <text class="nav-arrow">‹</text>
+      </view>
+      <text class="current-month">{{currentYear}}年{{currentMonth}}月</text>
+      <view class="month-nav" bindtap="nextMonth">
+        <text class="nav-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 星期标题 -->
+    <view class="week-header">
+      <text class="week-item" wx:for="{{weekDays}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <!-- 日历网格 -->
+    <swiper class="calendar-swiper" style="height: {{calendarHeight}}rpx" current="{{swiperIndex}}" bindchange="onSwiperChange">
+      <swiper-item wx:for="{{calendarList}}" wx:key="index">
+        <view class="calendar-grid">
+          <view class="week-row" wx:for="{{item}}" wx:for-item="week" wx:key="index">
+            <view
+              class="day-cell {{day.isToday ? 'today' : ''}} {{!day.isCurrentMonth ? 'other-month' : ''}}"
+              wx:for="{{week}}"
+              wx:for-item="day"
+              wx:key="date"
+              bindtap="onDayTap"
+              data-date="{{day.date}}"
+              data-day="{{day.day}}"
+            >
+              <view class="day-number-wrapper">
+                <text class="day-number" wx:if="{{day.day}}">{{day.day}}</text>
+              </view>
+              <!-- 显示排班编码 -->
+              <text class="schedule-code" style="color: {{day.scheduleColor}}" wx:if="{{day.scheduleCode}}">{{day.scheduleCode}}</text>
+            </view>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 功能按钮区 -->
+  <view class="action-section card">
+    <view class="action-grid">
+      <!-- 护士长可见 -->
+      <view class="action-item" wx:if="{{isLeader}}" bindtap="goSchedule">
+        <view class="item-icon schedule-icon">
+          <text class="icon-text">排</text>
+        </view>
+        <text class="item-name">排班设置</text>
+      </view>
+      <view class="action-item" wx:if="{{isLeader}}" bindtap="goShiftManage">
+        <view class="item-icon shift-icon">
+          <text class="icon-text">班</text>
+        </view>
+        <text class="item-name">班种管理</text>
+      </view>
+      <view class="action-item" wx:if="{{isLeader}}" bindtap="goPrint">
+        <view class="item-icon print-icon">
+          <text class="icon-text">印</text>
+        </view>
+        <text class="item-name">打印排班</text>
+      </view>
+      <view class="action-item" wx:if="{{isLeader}}" bindtap="goApproval">
+        <view class="item-icon approval-icon">
+          <text class="icon-text">审</text>
+        </view>
+        <text class="item-name">审批</text>
+        <view class="badge" wx:if="{{pendingCount > 0}}">{{pendingCount}}</view>
+      </view>
+      <!-- 全员可见 -->
+      <view class="action-item" bindtap="goStatistics">
+        <view class="item-icon stats-icon">
+          <text class="icon-text">统</text>
+        </view>
+        <text class="item-name">统计</text>
+      </view>
+      <view class="action-item" bindtap="goExpectSchedule">
+        <view class="item-icon expect-icon">
+          <text class="icon-text">申</text>
+        </view>
+        <text class="item-name">申请班次</text>
+      </view>
+      <view class="action-item" bindtap="goTeamSchedule">
+        <view class="item-icon team-icon">
+          <text class="icon-text">全</text>
+        </view>
+        <text class="item-name">全科排班</text>
+      </view>
+      <!-- <view class="action-item" bindtap="goLeaveApply">
+        <view class="item-icon leave-icon">
+          <text class="icon-text">假</text>
+        </view>
+        <text class="item-name">假勤申请</text>
+      </view> -->
+    </view>
+  </view>
+
+  <!-- 科室信息与邀请（护士长可见） -->
+  <view class="invite-section card" wx:if="{{isCreator}}">
+    <text class="invite-text">{{department.name}}（{{members.length}}人）</text>
+    <button class="invite-btn" size="mini" open-type="share">邀请成员</button>
+  </view>
+
+  <!-- 成员列表区 -->
+  <view class="member-section card" wx:if="{{hasDepartment && members.length > 0}}">
+    <view class="member-list">
+      <view 
+        class="member-item" 
+        wx:for="{{members}}" 
+        wx:key="id"
+        bindtap="goMemberInfo"
+        data-id="{{item.id}}"
+      >
+        <view class="member-left">
+          <view 
+            class="member-avatar-text" 
+            wx:if="{{!item.avatarUrl}}"
+            catchtap="onAvatarTap"
+            data-id="{{item.id}}"
+            data-phone="{{item.phone}}"
+            data-isself="{{item.isSelf}}"
+          >
+            <text>{{item.nickName[0]}}</text>
+          </view>
+          <image 
+            class="member-avatar" 
+            src="{{item.avatarUrl}}" 
+            mode="aspectFill" 
+            wx:else
+            catchtap="onAvatarTap"
+            data-id="{{item.id}}"
+            data-phone="{{item.phone}}"
+            data-isself="{{item.isSelf}}"
+          ></image>
+          <view class="member-info">
+            <view class="member-name-row">
+              <text class="member-name">{{item.nickName}}</text>
+              <view class="tag tag-self" wx:if="{{item.isSelf}}">我</view>
+              <view class="tag tag-creator" wx:if="{{item.isCreator}}">创建者</view>
+            </view>
+          </view>
+        </view>
+        <text class="member-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 无科室时的底部操作区 -->
+  <view class="no-department-footer" wx:if="{{!hasDepartment}}">
+    <!-- 护士长角色：创建科室 + 切换为护士 -->
+    <block wx:if="{{role === 'leader'}}">
+      <view class="footer-action" bindtap="goCreateDepartment" hover-class="footer-action-hover">
+        <view class="action-left">
+          <text class="action-icon">+</text>
+          <text class="action-text">创建我的科室</text>
+        </view>
+        <text class="action-arrow">去创建 ›</text>
+      </view>
+      <view class="switch-role" bindtap="switchToNurse">
+        <text class="switch-role-text">切换为护士</text>
+        <text class="switch-arrow">⇄</text>
+      </view>
+    </block>
+    <!-- 护士角色：分享给护士长 + 切换为护士长 -->
+    <block wx:else>
+      <button class="footer-action-btn" open-type="share" hover-class="footer-action-hover">
+        <view class="action-left">
+          <text class="action-icon">♥</text>
+          <text class="action-text">分享给护士长</text>
+        </view>
+        <text class="action-arrow">去分享 ›</text>
+      </button>
+      <view class="switch-role" bindtap="switchToLeader">
+        <text class="switch-role-text">切换为护士长</text>
+        <text class="switch-arrow">⇄</text>
+      </view>
+    </block>
+  </view>
+</view>
+
+<!-- 日期详情弹窗 -->
+<view class="modal-mask" wx:if="{{showDayModal}}" bindtap="closeDayModal">
+  <view class="modal-content day-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{selectedDate}}</text>
+      <view class="modal-close" bindtap="closeDayModal">×</view>
+    </view>
+    <view class="modal-body">
+      <view wx:if="{{daySchedule.length === 0}}" class="empty-state">
+        <text>暂无排班</text>
+      </view>
+      <view wx:else class="schedule-list">
+        <view class="schedule-item" wx:for="{{daySchedule}}" wx:key="id">
+          <view class="schedule-color" style="background-color: {{item.color}}"></view>
+          <view class="schedule-detail">
+            <text class="schedule-name">{{item.name}}</text>
+            <view class="schedule-time-row">
+              <block wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
+                <text class="schedule-time-text" wx:if="{{index > 0}}"> / </text>
+                <text class="schedule-time-text">
+                  {{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}
+                </text>
+              </block>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 邀请护士长弹窗 -->
+<view class="modal-mask" wx:if="{{showInviteModal}}" bindtap="closeInviteModal">
+  <view class="invite-modal" catchtap="stopPropagation">
+    <view class="invite-modal-title">邀请护士长</view>
+    <view class="invite-modal-content">邀请护士长创建科室，加入后即可使用排班功能</view>
+    <view class="invite-modal-actions">
+      <button class="invite-cancel" bindtap="closeInviteModal">取消</button>
+      <button class="invite-confirm" open-type="share">邀请</button>
+    </view>
+  </view>
+</view>

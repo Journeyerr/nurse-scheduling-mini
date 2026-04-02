@@ -1,0 +1,107 @@
+<!--pages/member-info/member-info.wxml-->
+<view class="member-info-container">
+  <!-- 头像区域 -->
+  <view class="avatar-section">
+    <view class="avatar-wrapper">
+      <view class="avatar-text" wx:if="{{!memberInfo.avatarUrl}}">
+        <text>{{memberInfo.nickName ? memberInfo.nickName[0] : '未'}}</text>
+      </view>
+      <image class="avatar-img" src="{{memberInfo.avatarUrl}}" mode="aspectFill" wx:else></image>
+    </view>
+    <text class="member-name">{{memberInfo.nickName || '未设置'}}</text>
+  </view>
+
+  <!-- 信息表单 -->
+  <view class="info-section card">
+    <view class="info-item">
+      <text class="info-label">姓名</text>
+      <input 
+        class="info-value" 
+        value="{{memberInfo.nickName}}" 
+        disabled="{{!isSelf}}"
+        bindinput="onInputChange"
+        data-field="nickName"
+        placeholder="请输入姓名"
+      />
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">电话</text>
+      <input 
+        class="info-value" 
+        value="{{memberInfo.phone}}" 
+        disabled="{{!isSelf}}"
+        bindinput="onInputChange"
+        data-field="phone"
+        placeholder="请输入电话"
+        type="number"
+      />
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">科室</text>
+      <input 
+        class="info-value" 
+        value="{{memberInfo.department}}" 
+        disabled="{{true}}"
+        placeholder="暂无科室"
+      />
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">工号</text>
+      <input 
+        class="info-value" 
+        value="{{memberInfo.workNo}}" 
+        disabled="{{!isSelf}}"
+        bindinput="onInputChange"
+        data-field="workNo"
+        placeholder="请输入工号"
+      />
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">职称</text>
+      <input 
+        class="info-value" 
+        value="{{memberInfo.title}}" 
+        disabled="{{!isSelf}}"
+        bindinput="onInputChange"
+        data-field="title"
+        placeholder="请输入职称"
+      />
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">年资</text>
+      <input 
+        class="info-value" 
+        value="{{memberInfo.seniority}}" 
+        disabled="{{!isSelf}}"
+        bindinput="onInputChange"
+        data-field="seniority"
+        placeholder="请输入年资（年）"
+        type="number"
+      />
+    </view>
+
+    <view class="info-item textarea-item">
+      <text class="info-label">备注</text>
+      <textarea 
+        class="info-textarea" 
+        value="{{memberInfo.remark}}" 
+        disabled="{{!isSelf}}"
+        bindinput="onInputChange"
+        data-field="remark"
+        placeholder="请输入备注"
+        maxlength="200"
+        auto-height
+      />
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="btn-section" wx:if="{{isSelf}}">
+    <button class="submit-btn" bindtap="saveInfo" disabled="{{!hasChanges}}">保存修改</button>
+  </view>
+</view>

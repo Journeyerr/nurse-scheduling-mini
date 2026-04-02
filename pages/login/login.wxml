@@ -1,0 +1,24 @@
+<!--pages/login/login.wxml-->
+<view class="login-container">
+  <!-- Logo区域 -->
+  <view class="logo-section">
+    <view class="logo-icon">
+      <text class="logo-text">护</text>
+    </view>
+    <text class="app-name">护士排班系统</text>
+    <text class="app-desc">专业的科室排班管理工具</text>
+  </view>
+
+  <!-- 登录按钮区域 -->
+  <view class="login-section">
+    <button class="btn-login" bindtap="handleLogin">
+      <text class="btn-text">微信一键登录</text>
+    </button>
+    <text class="login-tip">登录即表示同意《用户协议》和《隐私政策》</text>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text>版本 1.0.0</text>
+  </view>
+</view>

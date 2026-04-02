@@ -1,0 +1,270 @@
+<!--pages/expect-schedule/expect-schedule.wxml-->
+<!-- 申请类型选择弹窗 -->
+<view class="bottom-modal-mask {{showTypeModal ? 'show' : ''}}" bindtap="closeTypeModal">
+  <view class="bottom-modal type-select-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">选择申请类型</text>
+      <view class="modal-close" bindtap="closeTypeModal">×</view>
+    </view>
+    <view class="modal-body">
+      <view class="type-option" bindtap="selectScheduleType">
+        <view class="type-icon schedule-icon">📅</view>
+        <view class="type-content">
+          <text class="type-name">排班</text>
+          <text class="type-desc">申请期望的班次排班</text>
+        </view>
+      </view>
+      <view class="type-option" bindtap="selectSwapType">
+        <view class="type-icon swap-icon">🔄</view>
+        <view class="type-content">
+          <text class="type-name">换班</text>
+          <text class="type-desc">申请与其他护士换班</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+<view class="package-container">
+  <!-- 期望列表 -->
+  <view class="package-list">
+    <view class="package-item card" wx:for="{{myExpects}}" wx:key="id">
+      <!-- 期望排班类型 -->
+      <block wx:if="{{item.type === 'schedule'}}">
+        <view class="package-row">
+          <view class="row-left">
+            <text class="row-label">类型：</text>
+            <text class="type-badge schedule">{{item.typeName}}</text>
+          </view>
+          <view class="status-tag {{item.status}}">{{item.statusName}}</view>
+        </view>
+        <view class="package-row schedule-row">
+          <text class="row-label">日期：</text>
+          <text class="swap-box left">{{item.startDate}}</text>
+        </view>
+
+        <view class="package-row schedule-row">
+          <text class="row-label">班次：</text>
+          <text class="swap-box left" style="color: {{item.shiftColor || '#333'}}">{{item.shiftCode ? item.shiftCode + '-' : ''}}{{item.shiftName || '无'}}</text>
+        </view>
+      </block>
+
+      <!-- 换班类型 -->
+      <block wx:if="{{item.type === 'swap'}}">
+        <view class="package-row">
+          <view class="row-left">
+            <text class="row-label">类型：</text>
+            <text class="type-badge swap">{{item.typeName}}</text>
+          </view>
+          <view class="status-tag {{item.status}}">{{item.statusName}}</view>
+        </view>
+
+        <view class="package-row swap-row">
+          <text class="row-label">日期：</text>
+          <view class="swap-content">
+            <text class="swap-box">{{item.myDate}}</text>
+            <text class="swap-arrow">⇄</text>
+            <text class="swap-box">{{item.targetDate}}</text>
+          </view>
+        </view>
+
+        <view class="package-row swap-row">
+          <text class="row-label">对象：</text>
+          <view class="swap-content">
+            <text class="swap-box">{{item.userName}}</text>
+            <text class="swap-arrow">⇄</text>
+            <text class="swap-box">{{item.targetUserName}}</text>
+          </view>
+        </view>
+
+        <view class="package-row swap-row">
+          <text class="row-label">班次：</text>
+          <view class="swap-content">
+            <text class="swap-box" style="color: {{item.myShiftColor}}">{{item.myShiftName || '无'}}</text>
+            <text class="swap-arrow">⇄</text>
+            <text class="swap-box" style="color: {{item.targetShiftColor}}">{{item.targetShiftName || '无'}}</text>
+          </view>
+        </view>
+      </block>
+
+      <view class="package-row footer-row">
+        <view class="row-left remark-content" wx:if="{{item.remark}}">
+          <text class="row-label">备注：</text>
+          <text class="row-value">{{item.remark}}</text>
+        </view>
+        <view class="row-left" wx:else>
+          <text class="row-label">备注：</text>
+          <text class="row-value empty">-</text>
+        </view>
+        <text class="submit-time" wx:if="{{item.createTime}}">{{item.createTime}}</text>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{myExpects.length === 0}}">
+      <text>暂无期望排班申请，请点击下方按钮添加</text>
+    </view>
+  </view>
+
+  <!-- 添加按钮 -->
+  <view class="add-btn" bindtap="addExpect">
+    <text class="add-icon">+</text>
+    <text class="add-text">新增申请</text>
+  </view>
+</view>
+
+<!-- 换班申请弹窗 -->
+<view class="bottom-modal-mask {{showSwapModal ? 'show' : ''}}" bindtap="closeSwapModal">
+  <view class="bottom-modal swap-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">换班申请</text>
+      <view class="modal-close" bindtap="closeSwapModal">×</view>
+    </view>
+
+    <view class="modal-body">
+      <!-- 日期选择 -->
+      <view class="swap-section">
+        <text class="section-title">日期</text>
+        <view class="swap-row">
+          <picker mode="date" value="{{swapRequest.myDate}}" start="{{todayDate}}" bindchange="onMyDateChange">
+            <view class="date-picker">
+              <text class="{{swapRequest.myDate ? 'date-value' : 'date-placeholder'}}">{{swapRequest.myDate || '选择日期'}}</text>
+            </view>
+          </picker>
+          <text class="swap-arrow">⇄</text>
+          <picker mode="date" value="{{swapRequest.targetDate}}" start="{{todayDate}}" bindchange="onTargetDateChange">
+            <view class="date-picker">
+              <text class="{{swapRequest.targetDate ? 'date-value' : 'date-placeholder'}}">{{swapRequest.targetDate || '选择日期'}}</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- 换班对象 -->
+      <view class="swap-section">
+        <text class="section-title">对象</text>
+        <view class="swap-row">
+          <view class="info-box">
+            <text class="info-value">{{mySwapInfo.nickName || '无人员'}}</text>
+          </view>
+          <text class="swap-arrow">⇄</text>
+          <picker
+            mode="selector"
+            range="{{swapUsers}}"
+            range-key="nickName"
+            value="{{swapRequest.selectedUserIndex}}"
+            bindchange="onSwapUserChange"
+          >
+            <view class="info-box {{swapUsers.length > 0 ? '' : 'disabled'}}">
+              <text class="{{swapRequest.targetUserId ? 'info-value' : 'info-placeholder'}}">{{swapRequest.targetUserId ? swapUsers[swapRequest.selectedUserIndex].nickName : (swapUsers.length > 0 ? '请选择' : '无人员')}}</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- 班次对比 -->
+      <view class="swap-section">
+        <text class="section-title">班次</text>
+        <view class="swap-row">
+          <view class="info-box">
+            <text class="info-value" style="color: {{mySwapInfo.shiftColor || '#999'}}">{{mySwapInfo.shiftName || '无排班'}}</text>
+          </view>
+          <text class="swap-arrow">⇄</text>
+          <view class="info-box">
+            <text class="info-value" style="color: {{targetSwapInfo.shiftColor || '#999'}}">{{targetSwapInfo.shiftName || '无排班'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 换班备注 -->
+      <view class="form-item">
+        <text class="form-label">备注（选填）</text>
+        <textarea
+          class="form-textarea swap-textarea"
+          placeholder="请输入换班原因说明"
+          placeholder-class="textarea-placeholder"
+          value="{{swapRequest.remark}}"
+          bindinput="onSwapRemarkInput"
+          maxlength="200"
+          auto-height
+        ></textarea>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-primary" bindtap="submitSwap">提交</button>
+    </view>
+  </view>
+</view>
+
+<!-- 底部滑入弹窗 -->
+<view class="bottom-modal-mask {{showEditModal ? 'show' : ''}}" bindtap="closeEditModal">
+  <view class="bottom-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">期望排班申请</text>
+      <view class="modal-close" bindtap="closeEditModal">×</view>
+    </view>
+
+    <view class="modal-body">
+      <!-- 选择日期 -->
+      <view class="form-item">
+        <text class="form-label">选择日期</text>
+        <picker mode="date" value="{{editingExpect.date}}" start="{{todayDate}}" bindchange="onDateChange">
+          <view class="form-input picker-input">
+            <text class="{{editingExpect.date ? 'picker-value' : 'picker-placeholder'}}">
+              {{editingExpect.date || '请选择日期'}}
+            </text>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 班种列表 -->
+      <view class="shift-section">
+        <view class="section-header">
+          <text class="section-title">选择班种</text>
+        </view>
+        <view class="shift-list">
+          <view
+            class="shift-item {{editingExpect.shiftId === item.id ? 'active' : ''}}"
+            wx:for="{{shiftOptions}}"
+            wx:key="id"
+            bindtap="selectShift"
+            data-shift="{{item}}"
+          >
+            <view class="shift-header">
+              <view class="shift-badge" style="background-color: {{item.color}}20; border-color: {{item.color}}">
+                <text class="badge-code" style="color: {{item.color}}">{{item.code}}</text>
+              </view>
+              <text class="shift-name">{{item.name}}</text>
+              <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
+              <text class="shift-check" wx:if="{{editingExpect.shiftId === item.id}}">✓</text>
+            </view>
+            <view class="shift-times">
+              <text class="time-text" wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
+                {{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}{{index < (item.timeSlots.length - 1) ? ' / ' : ''}}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="form-item">
+        <text class="form-label">备注（选填）</text>
+        <textarea
+          class="form-textarea swap-textarea"
+          placeholder="请输入备注说明"
+          placeholder-class="textarea-placeholder"
+          value="{{editingExpect.remark}}"
+          bindinput="onRemarkInput"
+          maxlength="200"
+          auto-height
+        ></textarea>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-primary" bindtap="submitExpect">提交</button>
+    </view>
+  </view>
+</view>

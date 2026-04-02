@@ -1,0 +1,30 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/role-select/role-select",
+    "pages/index/index",
+    "pages/create-department/create-department",
+    "pages/department-manage/department-manage",
+    "pages/member-list/member-list",
+    "pages/member-info/member-info",
+    "pages/shift-manage/shift-manage",
+    "pages/create-shift/create-shift",
+    "pages/shift-package/shift-package",
+    "pages/schedule/schedule",
+    "pages/team-schedule/team-schedule",
+    "pages/approval/approval",
+    "pages/statistics/statistics",
+    "pages/expect-schedule/expect-schedule",
+    "pages/leave-apply/leave-apply",
+    "pages/print-schedule/print-schedule"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#4A90D9",
+    "navigationBarTitleText": "护士排班",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F7FA"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

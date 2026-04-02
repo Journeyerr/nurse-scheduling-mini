@@ -1,0 +1,44 @@
+<!--pages/role-select/role-select.wxml-->
+<view class="role-container">
+  <!-- 顶部说明 -->
+  <view class="header">
+    <text class="title">请选择您的身份</text>
+    <text class="subtitle">不同身份拥有不同的权限</text>
+  </view>
+
+  <!-- 身份选择卡片 -->
+  <view class="role-cards">
+    <!-- 护士长 -->
+    <view class="role-card" bindtap="selectLeader">
+      <view class="role-icon">
+        <text class="icon-text">护</text>
+      </view>
+      <view class="role-info">
+        <text class="role-name">我是护士长</text>
+        <text class="role-desc">创建科室、管理成员、排班等</text>
+      </view>
+      <view class="role-arrow">
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 护士 -->
+    <view class="role-card" bindtap="selectNurse">
+      <view class="role-icon nurse">
+        <text class="icon-text">士</text>
+      </view>
+      <view class="role-info">
+        <text class="role-name">我是护士</text>
+        <text class="role-desc">通过邀请加入科室</text>
+      </view>
+      <view class="role-arrow">
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="footer">
+    <text class="footer-text">护士只能通过邀请链接加入科室</text>
+  </view>
+</view>

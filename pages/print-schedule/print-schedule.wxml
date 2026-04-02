@@ -1,0 +1,53 @@
+<!--pages/print-schedule/print-schedule.wxml-->
+<view class="print-container">
+  <!-- 月份选择 -->
+  <view class="month-selector card">
+    <view class="selector-btn" bindtap="prevMonth">
+      <text class="arrow">‹</text>
+    </view>
+    <text class="current-month">{{department.name}} - {{currentYear}}年{{currentMonth}}月排班表</text>
+    <view class="selector-btn" bindtap="nextMonth">
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 排班表预览 -->
+  <view class="schedule-preview card" id="scheduleCanvas">
+    <view class="preview-table">
+      <!-- 表头 -->
+      <view class="table-row header-row">
+        <view class="table-cell name-cell">姓名</view>
+        <view class="table-cell shift-header" wx:for="{{shiftList}}" wx:key="id">
+          <view class="shift-badge-small" style="background-color: {{item.color}}20; border-color: {{item.color}}; color: {{item.color}}">
+            {{item.code}}-{{item.name}}
+          </view>
+        </view>
+      </view>
+      
+      <!-- 数据行 -->
+      <view class="table-row" wx:for="{{statisticsData}}" wx:key="memberId">
+        <view class="table-cell name-cell">{{item.memberName}}</view>
+        <view class="table-cell" wx:for="{{item.shiftCounts}}" wx:key="shiftId">
+          <text class="count-text">{{item.count || '-'}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 图例 -->
+    <view class="legend-section">
+      <text class="legend-title">图例：</text>
+      <view class="legend-list">
+        <view class="legend-item" wx:for="{{shiftList}}" wx:key="id">
+          <view class="legend-color" style="background-color: {{item.color}}"></view>
+          <text class="legend-text">{{item.code}}: {{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="btn-primary" bindtap="saveImage">保存图片</button>
+    <button class="btn-secondary" bindtap="shareSchedule">分享排班</button>
+  </view>
+</view>

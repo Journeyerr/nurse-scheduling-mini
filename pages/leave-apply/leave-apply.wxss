@@ -1,0 +1,162 @@
+/* pages/leave-apply/leave-apply.wxss */
+
+.leave-container {
+  min-height: 100vh;
+  background: #F5F7FA;
+  padding: 20rpx;
+}
+
+.section {
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.btn-add {
+  background: #4A90D9;
+  color: #fff;
+  font-size: 26rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 20rpx;
+  border: none;
+}
+
+.apply-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.apply-item {
+  padding: 24rpx;
+  background: #F8F9FA;
+  border-radius: 12rpx;
+}
+
+.apply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.apply-type {
+  font-size: 28rpx;
+  font-weight: bold;
+  padding: 6rpx 16rpx;
+  border-radius: 6rpx;
+}
+
+.apply-type.leave { background: #E8F4FD; color: #4A90D9; }
+.apply-type.transfer { background: #FFF3E0; color: #F57C00; }
+.apply-type.exchange { background: #E8F5E9; color: #43A047; }
+
+.apply-status {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 6rpx;
+}
+
+.apply-status.pending { background: #FFF8E1; color: #FFA000; }
+.apply-status.approved { background: #E8F5E9; color: #43A047; }
+.apply-status.rejected { background: #FFEBEE; color: #E74C3C; }
+
+.apply-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.apply-row {
+  display: flex;
+}
+
+.apply-label {
+  font-size: 26rpx;
+  color: #999;
+  width: 100rpx;
+}
+
+.apply-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+}
+
+/* 弹窗样式 */
+.modal-content {
+  width: 650rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.type-options {
+  display: flex;
+  gap: 20rpx;
+}
+
+.type-option {
+  flex: 1;
+  padding: 24rpx;
+  text-align: center;
+  background: #F5F7FA;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #666;
+  border: 2rpx solid transparent;
+}
+
+.type-option.active {
+  background: #E8F4FD;
+  color: #4A90D9;
+  border-color: #4A90D9;
+}
+
+.picker-value {
+  padding: 24rpx;
+  background: #F5F7FA;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.textarea {
+  width: 100%;
+  height: 200rpx;
+  padding: 20rpx;
+  background: #F5F7FA;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.modal-footer {
+  margin-top: 30rpx;
+}
+
+.modal-footer button {
+  width: 100%;
+}
