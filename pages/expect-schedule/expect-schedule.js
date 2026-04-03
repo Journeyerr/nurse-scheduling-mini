@@ -31,7 +31,11 @@ Page({
       targetUserId: '',
       selectedUserIndex: -1,
       remark: ''
-    }
+    },
+    
+    // 详情弹窗
+    showDetailModal: false,
+    currentItem: null
   },
 
   onLoad() {
@@ -235,6 +239,25 @@ Page({
   // 阻止冒泡
   stopPropagation() {},
 
+  // 显示详情
+  showDetail(e) {
+    const { index } = e.currentTarget.dataset;
+    const item = this.data.myExpects[index];
+    
+    this.setData({
+      showDetailModal: true,
+      currentItem: item
+    });
+  },
+
+  // 关闭详情弹窗
+  closeDetailModal() {
+    this.setData({
+      showDetailModal: false,
+      currentItem: null
+    });
+  },
+
   // 选择日期
   onDateChange(e) {
     this.setData({
@@ -383,7 +406,7 @@ Page({
     });
   },
   
-  // 提交换班申请
+  // 提交申请换班
   async submitSwap() {
     const { swapRequest, mySwapInfo, targetSwapInfo } = this.data;
 

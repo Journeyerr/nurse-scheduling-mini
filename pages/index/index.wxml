@@ -1,5 +1,14 @@
 <!--pages/index/index.wxml-->
-<view class="index-container">
+
+<!-- 启动加载提示 -->
+<view class="launch-loading" wx:if="{{isLaunching}}">
+  <view class="loading-content">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">正在加载...</text>
+  </view>
+</view>
+
+<view class="index-container" wx:else>
   <!-- 顶部错误提示条 -->
   <view class="error-bar" wx:if="{{showErrorBar}}">
     <text class="error-text">{{errorMessage}}</text>
@@ -108,16 +117,41 @@
 
   <!-- 科室信息与邀请（护士长可见） -->
   <view class="invite-section card" wx:if="{{isCreator}}">
-    <text class="invite-text" bindtap="showDepartmentActions" hover-class="invite-text-hover">{{department.name}}（{{members.length}}人）</text>
-    <button class="invite-btn" size="mini" open-type="share">邀请成员</button>
+    <view class="dept-info-left">
+      <text class="invite-text" bindtap="showDepartmentActions" hover-class="invite-text-hover">{{department.name}}（{{members.length}}人）</text>
+      <image class="search-icon" src="/assets/icons/search.png" bindtap="toggleSearch" mode="aspectFit"></image>
+    </view>
+    <button class="invite-btn" size="mini" open-type="share">
+      邀请成员
+    </button>
+  </view>
+
+  <!-- 科室信息（非护士长成员可见） -->
+  <view class="invite-section card" wx:if="{{hasDepartment && !isCreator}}">
+    <view class="dept-info-left">
+      <text class="invite-text" bindtap="showMemberActions" hover-class="invite-text-hover">{{department.name}}（{{members.length}}人）</text>
+      <image class="search-icon" src="/assets/icons/search.png" bindtap="toggleSearch" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 搜索框（所有有科室的用户可见） -->
+  <view class="search-section card" wx:if="{{showSearchInput}}">
+    <input 
+      class="search-input" 
+      placeholder="搜索成员姓名" 
+      value="{{searchKeyword}}"
+      bindinput="onSearchInput"
+      focus="{{showSearchInput}}"
+    />
+    <text class="search-close" bindtap="closeSearch">×</text>
   </view>
 
   <!-- 成员列表区 -->
-  <view class="member-section card" wx:if="{{hasDepartment && members.length > 0}}">
+  <view class="member-section card" wx:if="{{hasDepartment && filteredMembers.length > 0}}">
     <view class="member-list">
       <view 
         class="member-item" 
-        wx:for="{{members}}" 
+        wx:for="{{filteredMembers}}" 
         wx:key="id"
         bindtap="goMemberInfo"
         data-id="{{item.id}}"
@@ -154,6 +188,11 @@
         <text class="member-arrow">›</text>
       </view>
     </view>
+  </view>
+
+  <!-- 无搜索结果提示 -->
+  <view class="no-result card" wx:if="{{hasDepartment && searchKeyword && filteredMembers.length === 0}}">
+    <text class="no-result-text">未找到匹配的成员</text>
   </view>
 
   <!-- 无科室时的底部操作区 -->

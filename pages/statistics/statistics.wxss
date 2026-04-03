@@ -40,6 +40,44 @@
   margin-bottom: 20rpx;
 }
 
+/* 我的统计横幅 */
+.my-stats-banner {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.banner-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+  background: #fff;
+  border-radius: 12rpx;
+  margin: 0 10rpx;
+}
+
+.banner-item:first-child {
+  margin-left: 0;
+}
+
+.banner-item:last-child {
+  margin-right: 0;
+}
+
+.banner-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.banner-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #4A90D9;
+}
+
 .section-title {
   font-size: 32rpx;
   font-weight: bold;
@@ -58,7 +96,6 @@
   flex-direction: column;
   align-items: center;
   padding: 20rpx 0;
-  background: #F8F9FA;
   border-radius: 12rpx;
   margin: 0 10rpx;
 }
@@ -156,27 +193,194 @@
 .rank-list {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 16rpx;
 }
 
 .rank-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24rpx 20rpx;
-  background: #F8F9FA;
-  border-radius: 8rpx;
+  padding: 15rpx 20rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  border: 1rpx solid #F0F0F0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
-.rank-name-text {
-  flex: 1;
+.rank-left {
+  display: flex;
+  align-items: center;
+}
+
+.rank-medal {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.rank-medal-1 {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  box-shadow: 0 4rpx 12rpx rgba(255, 215, 0, 0.3);
+}
+
+.rank-medal-2 {
+  background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
+  box-shadow: 0 4rpx 12rpx rgba(192, 192, 192, 0.3);
+}
+
+.rank-medal-3 {
+  background: linear-gradient(135deg, #CD7F32 0%, #B8860B 100%);
+  box-shadow: 0 4rpx 12rpx rgba(205, 127, 50, 0.3);
+}
+
+.rank-medal-default {
+  background: #F5F5F5;
+}
+
+.rank-number {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.rank-medal-default .rank-number {
+  color: #999;
+}
+
+.rank-name {
   font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.rank-right {
+  display: flex;
+  align-items: center;
+}
+
+.rank-data-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24rpx;
+}
+
+.rank-data-label {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 6rpx;
+}
+
+.rank-data-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #4A90D9;
+}
+
+.rank-data-divider {
+  width: 1rpx;
+  height: 40rpx;
+  background: #E0E0E0;
+}
+
+/* 成员选择弹窗 */
+.picker-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.picker-popup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  max-height: 70vh;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.picker-title {
+  font-size: 32rpx;
+  font-weight: bold;
   color: #333;
 }
 
-.rank-count {
+.picker-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+  padding: 0 10rpx;
+}
+
+.picker-list {
+  max-height: 60vh;
+}
+
+.picker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #F5F5F5;
+}
+
+.picker-item:active {
+  background: #F8F9FA;
+}
+
+.picker-item.active {
+  background: #F0F7FF;
+}
+
+.picker-item-text {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.picker-item.active .picker-item-text {
+  color: #4A90D9;
+  font-weight: 500;
+}
+
+.picker-check {
   font-size: 32rpx;
   color: #4A90D9;
   font-weight: bold;
-  margin-left: 40rpx;
 }

@@ -1,8 +1,8 @@
 {
   "pages": [
+    "pages/index/index",
     "pages/login/login",
     "pages/role-select/role-select",
-    "pages/index/index",
     "pages/create-department/create-department",
     "pages/department-manage/department-manage",
     "pages/member-list/member-list",

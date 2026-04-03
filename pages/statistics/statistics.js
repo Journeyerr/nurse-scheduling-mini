@@ -13,7 +13,7 @@ Page({
     myStats: {
       totalDays: 0,
       restDays: 0,
-      leaveDays: 0,
+      totalHours: 0,
       shiftDetails: []
     },
     
@@ -21,18 +21,26 @@ Page({
     deptStats: {
       totalSchedules: 0,
       totalMembers: 0,
-      avgDays: 0,
+      totalHours: 0,
       memberRank: []
     },
-    
+
+    // 当前用户统计（护士长自己的统计）
+    currentUserStats: {
+      totalDays: 0,
+      restDays: 0,
+      totalHours: 0
+    },
+
     // 成员筛选
     memberOptions: [{ id: 'all', name: '全部成员' }],
     selectedMemberId: 'all',
     selectedMemberName: '全部成员',
+    showMemberPicker: false,
     memberStats: {
       totalDays: 0,
       restDays: 0,
-      leaveDays: 0
+      totalHours: 0
     }
   },
 
@@ -51,6 +59,7 @@ Page({
     if (this.data.isCreator) {
       await this.loadMemberOptions();
       this.loadDeptStats();
+      this.loadCurrentUserStats();
     } else {
       this.loadMyStats();
     }
@@ -118,17 +127,41 @@ Page({
     }
   },
 
+  // 加载当前用户统计
+  async loadCurrentUserStats() {
+    try {
+      const res = await api.getMyStatistics(this.data.currentYear, this.data.currentMonth);
+      this.setData({ currentUserStats: res.data || {} });
+    } catch (error) {
+      // 加载当前用户统计失败
+    }
+  },
+
+  // 显示成员选择器
+  showPicker() {
+    this.setData({ showMemberPicker: true });
+  },
+
+  // 隐藏成员选择器
+  hidePicker() {
+    this.setData({ showMemberPicker: false });
+  },
+
   // 切换成员
   onMemberChange(e) {
-    const index = e.detail.value;
-    const member = this.data.memberOptions[index];
-    this.setData({
-      selectedMemberId: member.id,
-      selectedMemberName: member.name
-    });
+    const memberId = e.currentTarget.dataset.id;
+    const member = this.data.memberOptions.find(m => m.id === memberId);
     
-    if (member.id !== 'all') {
-      this.loadMemberStats(member.id);
+    if (member) {
+      this.setData({
+        selectedMemberId: member.id,
+        selectedMemberName: member.name,
+        showMemberPicker: false
+      });
+      
+      if (member.id !== 'all') {
+        this.loadMemberStats(member.id);
+      }
     }
   },
 

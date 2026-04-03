@@ -32,7 +32,7 @@
 | 11 | `pages/approval/approval` | 审批页 - 审批假勤/期望排班申请 | 护士长 |
 | 12 | `pages/statistics/statistics` | 统计页 - 个人/科室排班统计 | 全员 |
 | 13 | `pages/expect-schedule/expect-schedule` | 期望排班页 - 护士提交排班期望 | 全员 |
-| 14 | `pages/leave-apply/leave-apply` | 假勤申请页 - 请假/调班/换班申请 | 全员 |
+| 14 | `pages/leave-apply/leave-apply` | 假勤申请页 - 请假/调班/申请换班 | 全员 |
 | 15 | `pages/print-schedule/print-schedule` | 打印排班页 - 导出排班表 | 护士长 |
 
 ### 1.2 页面跳转关系

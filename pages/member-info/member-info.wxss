@@ -108,6 +108,7 @@
   color: #333;
   min-height: 80rpx;
   line-height: 1.6;
+  text-align: right;
 }
 
 .info-value[disabled] {

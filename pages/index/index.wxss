@@ -1,5 +1,46 @@
 /* pages/index/index.wxss */
 
+/* 启动加载提示 */
+.launch-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #F5F7FA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #E5E5E5;
+  border-top-color: #4A90D9;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
 .index-container {
   min-height: 100vh;
   background: #F5F7FA;
@@ -125,7 +166,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: 8rpx;
+  padding-top: 6rpx;
   position: relative;
   box-sizing: border-box;
 }
@@ -245,17 +286,67 @@
   border-radius: 16rpx;
 }
 
+.dept-info-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
 .invite-text {
   font-size: 30rpx;
   color: #4A90D9;
+}
+
+.search-icon {
+  width: 60rpx;
+  height: 40rpx;
+  padding: 8rpx;
+  margin-left: 6rpx;
+  margin-top: 9rpx;
+  opacity: 0.6;
 }
 
 .invite-text-hover {
   opacity: 0.7;
 }
 
+/* 搜索框 */
+.search-section {
+  margin: 0 20rpx 20rpx;
+  padding: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  padding: 16rpx 24rpx;
+  border: 1rpx solid #E5E5E5;
+  border-radius: 12rpx;
+}
+
+.search-close {
+  font-size: 40rpx;
+  color: #999;
+  padding: 0 8rpx;
+}
+
+/* 无搜索结果 */
+.no-result {
+  margin: 20rpx;
+  padding: 80rpx 0;
+  text-align: center;
+}
+
+.no-result-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
 .invite-btn {
-  font-size: 17rpx;
+  font-size: 30rpx;
   color: #4A90D9;
   background: transparent;
   border: none;
@@ -266,12 +357,20 @@
   width: auto;
   min-width: 0;
   min-height: 0;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
   font-weight: normal;
 }
 
 .invite-btn::after {
   display: none;
+}
+
+.invite-icon {
+  width: 60rpx;
+  height: 40rpx;
+  margin-left: 6rpx;
 }
 
 /* 成员列表区 */

@@ -5,6 +5,9 @@ const util = require('../../utils/util');
 
 Page({
   data: {
+    // 启动加载状态
+    isLaunching: true, // 是否正在启动检查
+
     // 科室信息
     department: {},
     isCreator: false,
@@ -32,6 +35,11 @@ Page({
     // 成员列表
     members: [],
 
+    // 搜索相关
+    showSearchInput: false,
+    searchKeyword: '',
+    filteredMembers: [],
+
     // 弹窗相关
     showDayModal: false,
     selectedDate: '',
@@ -47,10 +55,36 @@ Page({
   },
 
   onLoad() {
+    // 启动时先检查登录状态
+    this.checkLoginAndInit();
+  },
+
+  // 检查登录状态并初始化
+  checkLoginAndInit() {
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (!token || !userInfo) {
+      // 未登录，显示加载提示后跳转到登录页
+      this.setData({ isLaunching: true });
+
+      setTimeout(() => {
+        wx.redirectTo({ url: '/pages/login/login' });
+      }, 500);
+      return;
+    }
+
+    // 已登录，初始化首页
+    this.setData({ isLaunching: false });
     this.checkDepartment();
   },
 
   onShow() {
+    // 如果正在启动检查，不执行
+    if (this.data.isLaunching) {
+      return;
+    }
+
     // 如果已经初始化过，则只刷新数据
     if (this.data.initialized) {
       if (this.data.hasDepartment) {
@@ -116,24 +150,25 @@ Page({
   async checkDepartment() {
     // 立即设置标志，防止 onShow 重复调用
     this.setData({ initialized: true });
-    
+
     const hasDept = app.hasDepartment();
     const role = app.getRole();
-    
+
     // 从本地存储获取科室和用户信息
     const department = wx.getStorageSync('department');
     const userInfo = wx.getStorageSync('userInfo');
-    
+
     // 判断是否为创建者
     const isCreator = department && department.creatorId === userInfo?.id;
     const isLeader = this.checkIsLeader(hasDept, role, isCreator);
-    
-    this.setData({ 
+
+    this.setData({
       hasDepartment: hasDept,
       role: role,
       isLeader: isLeader,
       isCreator: isCreator,
-      department: department || {}
+      department: department || {},
+      isLaunching: false  // 完成启动检查
     });
 
     // 初始化日历（无论有无科室都显示）
@@ -562,7 +597,10 @@ Page({
         };
       });
       
-      this.setData({ members });
+      this.setData({ 
+        members,
+        filteredMembers: members  // 初始化过滤后的成员列表
+      });
     } catch (error) {
       // 加载成员失败
     }
@@ -810,11 +848,11 @@ Page({
     
     // 不能踢自己
     if (id === userInfo?.id) {
-      util.showError('不能踢出自己');
+      util.showError('不能移除自己');
       return;
     }
 
-    const confirm = await util.showConfirm('确认踢出', `确定要将 ${name} 移出科室吗？`);
+    const confirm = await util.showConfirm('确认移除', `确定要将 ${name} 移出科室吗？`);
     if (!confirm) return;
 
     try {
@@ -886,7 +924,7 @@ Page({
     if (!this.data.isCreator) return;
     
     wx.showActionSheet({
-      itemList: ['解散科室', '转让科室', '踢出成员'],
+      itemList: ['解散科室', '转让科室', '移除成员'],
       success: (res) => {
         switch (res.tapIndex) {
           case 0:
@@ -1006,5 +1044,86 @@ Page({
       util.hideLoading();
       util.showError(error.message || error.msg || '操作失败');
     }
+  },
+
+  // 显示成员操作菜单（非护士长专属）
+  showMemberActions() {
+    wx.showActionSheet({
+      itemList: ['退出科室'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.quitDepartment();
+        }
+      }
+    });
+  },
+
+  // 退出科室
+  async quitDepartment() {
+    const confirm = await util.showConfirm('确认退出', '退出后将无法查看科室排班信息，确定要退出吗？');
+    if (!confirm) return;
+
+    try {
+      util.showLoading('退出中...');
+      await api.quitDepartment(this.data.department.id);
+      util.hideLoading();
+      
+      // 清除本地科室数据
+      app.setDepartment(null);
+      wx.removeStorageSync('department');
+      
+      util.showSuccess('已退出科室');
+
+      // 跳转到身份选择页
+      setTimeout(() => {
+        wx.reLaunch({ url: '/pages/role-select/role-select' });
+      }, 1500);
+    } catch (error) {
+      util.hideLoading();
+      util.showError(error.message || error.msg || '退出失败');
+    }
+  },
+
+  // 切换搜索框显示
+  toggleSearch() {
+    this.setData({
+      showSearchInput: !this.data.showSearchInput,
+      searchKeyword: '',
+      filteredMembers: this.data.members
+    });
+  },
+
+  // 关闭搜索框
+  closeSearch() {
+    this.setData({
+      showSearchInput: false,
+      searchKeyword: '',
+      filteredMembers: this.data.members
+    });
+  },
+
+  // 搜索输入
+  onSearchInput(e) {
+    const keyword = e.detail.value.trim();
+    this.setData({ searchKeyword: keyword });
+    this.filterMembers(keyword);
+  },
+
+  // 过滤成员列表
+  filterMembers(keyword) {
+    if (!keyword) {
+      // 如果关键字为空，显示所有成员
+      this.setData({ filteredMembers: this.data.members });
+      return;
+    }
+
+    // 模糊匹配成员名称（不区分大小写）
+    const filtered = this.data.members.filter(member => {
+      const name = member.nickName.toLowerCase();
+      const searchKey = keyword.toLowerCase();
+      return name.includes(searchKey);
+    });
+
+    this.setData({ filteredMembers: filtered });
   }
 });

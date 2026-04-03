@@ -24,79 +24,65 @@
     </view>
   </view>
 </view>
+
 <view class="package-container">
   <!-- 期望列表 -->
   <view class="package-list">
-    <view class="package-item card" wx:for="{{myExpects}}" wx:key="id">
+    <view class="package-item card {{item.status !== 'pending' ? 'processed' : ''}}" wx:for="{{myExpects}}" wx:key="id" bindtap="showDetail" data-index="{{index}}">
+      <!-- 盖章样式的审批状态 -->
+      <view class="stamp {{item.status}}">
+        <text class="stamp-text">{{item.statusName}}</text>
+      </view>
+
+      <!-- 卡片头部 -->
+      <view class="card-header">
+        <text class="user-name">{{item.userName}}</text>
+        <text class="type-badge {{item.type}}">{{item.typeName}}</text>
+      </view>
+
       <!-- 期望排班类型 -->
       <block wx:if="{{item.type === 'schedule'}}">
-        <view class="package-row">
-          <view class="row-left">
-            <text class="row-label">类型：</text>
-            <text class="type-badge schedule">{{item.typeName}}</text>
+        <view class="card-body">
+          <view class="info-row">
+            <text class="info-label">日期：</text>
+            <text class="info-value">{{item.startDate}}</text>
           </view>
-          <view class="status-tag {{item.status}}">{{item.statusName}}</view>
+          <view class="info-row">
+            <text class="info-label">班次：</text>
+            <text class="info-value">{{item.shiftCode ? item.shiftCode + '-' : ''}}{{item.shiftName || '无'}}</text>
+          </view>
         </view>
-        <view class="package-row schedule-row">
-          <text class="row-label">日期：</text>
-          <text class="swap-box left">{{item.startDate}}</text>
-        </view>
-
-        <view class="package-row schedule-row">
-          <text class="row-label">班次：</text>
-          <text class="swap-box left" style="color: {{item.shiftColor || '#333'}}">{{item.shiftCode ? item.shiftCode + '-' : ''}}{{item.shiftName || '无'}}</text>
+        <view class="card-footer">
+          <text class="submit-time">{{item.createTime}}</text>
         </view>
       </block>
 
       <!-- 换班类型 -->
       <block wx:if="{{item.type === 'swap'}}">
-        <view class="package-row">
-          <view class="row-left">
-            <text class="row-label">类型：</text>
-            <text class="type-badge swap">{{item.typeName}}</text>
+        <view class="card-body">
+          <view class="info-row">
+            <text class="info-label">日期：</text>
+            <text class="info-value swap-left">{{item.myDate}}</text>
+            <text class="swap-icon">⇄</text>
+            <text class="info-value swap-right">{{item.targetDate}}</text>
           </view>
-          <view class="status-tag {{item.status}}">{{item.statusName}}</view>
-        </view>
-
-        <view class="package-row swap-row">
-          <text class="row-label">日期：</text>
-          <view class="swap-content">
-            <text class="swap-box">{{item.myDate}}</text>
-            <text class="swap-arrow">⇄</text>
-            <text class="swap-box">{{item.targetDate}}</text>
+          <view class="info-row">
+            <text class="info-label">对象：</text>
+            <text class="info-value swap-left">{{item.userName}}</text>
+            <text class="swap-icon">⇄</text>
+            <text class="info-value swap-right">{{item.targetUserName}}</text>
           </view>
-        </view>
-
-        <view class="package-row swap-row">
-          <text class="row-label">对象：</text>
-          <view class="swap-content">
-            <text class="swap-box">{{item.userName}}</text>
-            <text class="swap-arrow">⇄</text>
-            <text class="swap-box">{{item.targetUserName}}</text>
+          <view class="info-row">
+            <text class="info-label">班次：</text>
+            <text class="info-value swap-left">{{item.myShiftName || '无'}}</text>
+            <text class="swap-icon">⇄</text>
+            <text class="info-value swap-right">{{item.targetShiftName || '无'}}</text>
           </view>
         </view>
-
-        <view class="package-row swap-row">
-          <text class="row-label">班次：</text>
-          <view class="swap-content">
-            <text class="swap-box" style="color: {{item.myShiftColor}}">{{item.myShiftName || '无'}}</text>
-            <text class="swap-arrow">⇄</text>
-            <text class="swap-box" style="color: {{item.targetShiftColor}}">{{item.targetShiftName || '无'}}</text>
-          </view>
+        <view class="card-footer">
+          <text class="submit-time">{{item.createTime}}</text>
         </view>
       </block>
-
-      <view class="package-row footer-row">
-        <view class="row-left remark-content" wx:if="{{item.remark}}">
-          <text class="row-label">备注：</text>
-          <text class="row-value">{{item.remark}}</text>
-        </view>
-        <view class="row-left" wx:else>
-          <text class="row-label">备注：</text>
-          <text class="row-value empty">-</text>
-        </view>
-        <text class="submit-time" wx:if="{{item.createTime}}">{{item.createTime}}</text>
-      </view>
     </view>
 
     <!-- 空状态 -->
@@ -112,11 +98,83 @@
   </view>
 </view>
 
-<!-- 换班申请弹窗 -->
+<!-- 详情弹窗 -->
+<view class="bottom-modal-mask {{showDetailModal ? 'show' : ''}}" bindtap="closeDetailModal">
+  <view class="bottom-modal detail-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{currentItem.typeName}}详情</text>
+      <view class="modal-close" bindtap="closeDetailModal">×</view>
+    </view>
+
+    <view class="modal-body" wx:if="{{currentItem}}">
+      <!-- 基本信息 -->
+      <view class="detail-header">
+        <text class="detail-user-name">{{currentItem.userName}}</text>
+        <text class="type-badge {{currentItem.type}}">{{currentItem.typeName}}</text>
+      </view>
+
+      <!-- 期望排班详情 -->
+      <block wx:if="{{currentItem.type === 'schedule'}}">
+        <view class="detail-section">
+          <view class="detail-row">
+            <text class="detail-label">日期</text>
+            <text class="detail-value">{{currentItem.startDate}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">班次</text>
+            <text class="detail-value" style="color: {{currentItem.shiftColor || '#333'}}">{{currentItem.shiftCode ? currentItem.shiftCode + '-' : ''}}{{currentItem.shiftName || '无'}}</text>
+          </view>
+          <view class="detail-row" wx:if="{{currentItem.remark}}">
+            <text class="detail-label">备注</text>
+            <text class="detail-value">{{currentItem.remark}}</text>
+          </view>
+          <view class="detail-row" wx:if="{{currentItem.approveRemark}}">
+            <text class="detail-label">审批</text>
+            <text class="detail-value">{{currentItem.approveRemark}}</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 换班详情 -->
+      <block wx:if="{{currentItem.type === 'swap'}}">
+        <view class="detail-section">
+          <view class="detail-row swap-detail-row">
+            <text class="detail-label">日期：</text>
+            <text class="detail-value swap-detail-left">{{currentItem.myDate}}</text>
+            <text class="swap-detail-icon">⇄</text>
+            <text class="detail-value swap-detail-right">{{currentItem.targetDate}}</text>
+          </view>
+          <view class="detail-row swap-detail-row">
+            <text class="detail-label">对象：</text>
+            <text class="detail-value swap-detail-left">{{currentItem.userName}}</text>
+            <text class="swap-detail-icon">⇄</text>
+            <text class="detail-value swap-detail-right">{{currentItem.targetUserName}}</text>
+          </view>
+          <view class="detail-row swap-detail-row">
+            <text class="detail-label">班次：</text>
+            <text class="detail-value swap-detail-left">{{currentItem.myShiftName || '无'}}</text>
+            <text class="swap-detail-icon">⇄</text>
+            <text class="detail-value swap-detail-right">{{currentItem.targetShiftName || '无'}}</text>
+          </view>
+          <view class="detail-row" wx:if="{{currentItem.remark}}">
+            <text class="detail-label">备注：</text>
+            <text class="detail-value">{{currentItem.remark}}</text>
+          </view>
+          <view class="detail-row" wx:if="{{currentItem.approveRemark}}">
+            <text class="detail-label">审批：</text>
+            <text class="detail-value">{{currentItem.approveRemark}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+</view>
+
+<!-- 申请换班弹窗 -->
 <view class="bottom-modal-mask {{showSwapModal ? 'show' : ''}}" bindtap="closeSwapModal">
   <view class="bottom-modal swap-modal" catchtap="stopPropagation">
     <view class="modal-header">
-      <text class="modal-title">换班申请</text>
+      <text class="modal-title">申请换班</text>
       <view class="modal-close" bindtap="closeSwapModal">×</view>
     </view>
 

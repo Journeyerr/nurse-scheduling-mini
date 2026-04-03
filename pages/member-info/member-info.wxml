@@ -80,7 +80,7 @@
         disabled="{{!isSelf}}"
         bindinput="onInputChange"
         data-field="seniority"
-        placeholder="请输入年资（年）"
+        placeholder="请输入年资"
         type="number"
       />
     </view>

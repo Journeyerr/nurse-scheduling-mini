@@ -8,7 +8,6 @@ App({
     currentTeamId: null,     // 当前班组ID
     tempNewShift: null,      // 临时存储新班种数据（用于创建科室时）
     baseUrl: 'http://localhost:8080/api',  // 后端接口地址
-    // baseUrl: 'https://paiban.echophp.top/api'  // 后端接口地址
   },
 
   onLaunch() {

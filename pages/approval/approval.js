@@ -7,7 +7,10 @@ Page({
     expectList: [],
     expectPending: 0,
     shiftList: [],
-    initialized: false  // 是否已初始化
+    initialized: false,  // 是否已初始化
+    showDetailModal: false,  // 显示详情弹窗
+    currentItem: null,  // 当前查看的申请
+    approvalRemark: ''  // 审批意见
   },
 
   onLoad() {
@@ -53,7 +56,7 @@ Page({
         let displayInfo = {};
         if (item.type === 'swap') {
           displayInfo = {
-            typeName: '换班申请',
+            typeName: '申请换班',
             myShiftCode: myShift ? myShift.code : '',
             myShiftName: myShift ? myShift.name : '',
             myShiftColor: myShift ? myShift.color : '#999',
@@ -85,17 +88,55 @@ Page({
     }
   },
 
+  // 显示详情
+  showDetail(e) {
+    const { index } = e.currentTarget.dataset;
+    const item = this.data.expectList[index];
+    
+    this.setData({
+      showDetailModal: true,
+      currentItem: item,
+      approvalRemark: ''
+    });
+  },
+
+  // 关闭详情弹窗
+  closeDetailModal() {
+    this.setData({
+      showDetailModal: false,
+      currentItem: null,
+      approvalRemark: ''
+    });
+  },
+
+  // 阻止冒泡
+  stopPropagation() {},
+
+  // 输入审批意见
+  onApprovalRemarkInput(e) {
+    this.setData({
+      approvalRemark: e.detail.value
+    });
+  },
+
   // 通过审批
   async handleApprove(e) {
     const { id } = e.currentTarget.dataset;
+    const { approvalRemark } = this.data;
     
     try {
       util.showLoading('处理中...');
       
-      await api.approveExpectSchedule({ id, status: 'approved' });
+      await api.approveExpectSchedule({ 
+        id, 
+        status: 'approved',
+        approveRemark: approvalRemark
+      });
       
       util.hideLoading();
       util.showSuccess('已通过');
+      
+      this.closeDetailModal();
       this.loadData();
     } catch (error) {
       util.hideLoading();
@@ -106,6 +147,7 @@ Page({
   // 拒绝审批
   async handleReject(e) {
     const { id } = e.currentTarget.dataset;
+    const { approvalRemark } = this.data;
     
     const confirm = await util.showConfirm('确认拒绝', '确定要拒绝该申请吗？');
     if (!confirm) return;
@@ -113,10 +155,16 @@ Page({
     try {
       util.showLoading('处理中...');
       
-      await api.approveExpectSchedule({ id, status: 'rejected' });
+      await api.approveExpectSchedule({ 
+        id, 
+        status: 'rejected',
+        approveRemark: approvalRemark
+      });
       
       util.hideLoading();
       util.showSuccess('已拒绝');
+      
+      this.closeDetailModal();
       this.loadData();
     } catch (error) {
       util.hideLoading();

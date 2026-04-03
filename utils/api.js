@@ -420,6 +420,15 @@ const updateMemberInfo = (memberId, data) => {
   return request({ url: `/department/member/${memberId}`, method: 'PUT', data });
 };
 
+const quitDepartment = (departmentId) => {
+  if (USE_MOCK) return mockRequest('quitDepartment');
+  const deptId = departmentId || getCurrentDepartmentId();
+  if (!deptId) {
+    return Promise.reject({ message: '科室ID不存在' });
+  }
+  return request({ url: '/department/quit', method: 'POST', params: { departmentId: deptId } });
+};
+
 // ========== 班种相关接口 ==========
 
 const getShiftList = (departmentId) => {
@@ -669,5 +678,7 @@ module.exports = {
   getShiftPackageList,
   createShiftPackage,
   updateShiftPackage,
-  deleteShiftPackage
+  deleteShiftPackage,
+  // 退出科室
+  quitDepartment
 };

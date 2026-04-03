@@ -9,7 +9,8 @@ Page({
     currentYear: 2024,
     currentMonth: 1,
     shiftList: [],
-    statisticsData: []
+    statisticsData: [],
+    shareImagePath: '' // 分享图片路径
   },
 
   onLoad() {
@@ -28,6 +29,8 @@ Page({
   async loadData() {
     await this.loadShiftList();
     await this.loadStatisticsData();
+    // 数据加载完成后自动生成分享图片
+    this.generateImage();
   },
 
   // 加载班种列表
@@ -106,25 +109,316 @@ Page({
   },
 
   // 保存图片
-  saveImage() {
-    wx.showLoading({ title: '生成中...' });
-    
-    const query = wx.createSelectorQuery();
-    query.select('#scheduleCanvas').boundingClientRect(rect => {
+  async saveImage() {
+    try {
+      wx.showLoading({ title: '生成中...' });
+
+      // 请求保存到相册的权限
+      const auth = await wx.getSetting();
+      if (!auth.authSetting['scope.writePhotosAlbum']) {
+        await wx.authorize({ scope: 'scope.writePhotosAlbum' });
+      }
+
+      // 使用 Canvas 绘制排班表
+      const canvasWidth = 750;
+      const rowHeight = 80;
+      const nameWidth = 150;
+      const shiftWidth = (canvasWidth - nameWidth) / (this.data.shiftList.length || 1);
+
+      // 计算画布高度
+      const headerHeight = 100;
+      const legendHeight = 120;
+      const canvasHeight = headerHeight + (this.data.statisticsData.length + 1) * rowHeight + legendHeight + 100;
+
+      // 获取 Canvas 实例
+      const query = wx.createSelectorQuery();
+      query.select('#myCanvas')
+        .fields({ node: true, size: true })
+        .exec(async (res) => {
+          const canvas = res[0].node;
+          const ctx = canvas.getContext('2d');
+
+          canvas.width = canvasWidth;
+          canvas.height = canvasHeight;
+
+          // 绘制白色背景
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+          // 绘制标题
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 36px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(
+            `${this.data.department.name} - ${this.data.currentYear}年${this.data.currentMonth}月排班表`,
+            canvasWidth / 2,
+            60
+          );
+
+          // 绘制表头
+          let y = headerHeight;
+          ctx.fillStyle = '#f5f5f5';
+          ctx.fillRect(0, y, canvasWidth, rowHeight);
+
+          ctx.strokeStyle = '#e0e0e0';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(0, y, canvasWidth, rowHeight);
+
+          // 表头：姓名
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('姓名', nameWidth / 2, y + 50);
+
+          // 表头：班次
+          this.data.shiftList.forEach((shift, index) => {
+            const x = nameWidth + index * shiftWidth;
+            ctx.strokeRect(x, y, shiftWidth, rowHeight);
+            ctx.fillText(shift.code, x + shiftWidth / 2, y + 50);
+          });
+
+          // 绘制数据行
+          y += rowHeight;
+          this.data.statisticsData.forEach((member, rowIndex) => {
+            ctx.fillStyle = rowIndex % 2 === 0 ? '#ffffff' : '#fafafa';
+            ctx.fillRect(0, y, canvasWidth, rowHeight);
+
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.strokeRect(0, y, canvasWidth, rowHeight);
+
+            // 姓名
+            ctx.fillStyle = '#333333';
+            ctx.font = '28px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(member.memberName, nameWidth / 2, y + 50);
+
+            // 各班次统计
+            member.shiftCounts.forEach((shiftCount, colIndex) => {
+              const x = nameWidth + colIndex * shiftWidth;
+              ctx.strokeRect(x, y, shiftWidth, rowHeight);
+              ctx.fillStyle = '#4A90D9';
+              ctx.fillText(
+                shiftCount.count > 0 ? shiftCount.count.toString() : '-',
+                x + shiftWidth / 2,
+                y + 50
+              );
+            });
+
+            y += rowHeight;
+          });
+
+          // 绘制图例
+          y += 40;
+          ctx.fillStyle = '#666666';
+          ctx.font = '24px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('图例：', 30, y);
+
+          this.data.shiftList.forEach((shift, index) => {
+            const x = 30 + index * 180;
+            const legendY = y + 40;
+
+            // 绘制颜色块
+            ctx.fillStyle = shift.color;
+            ctx.fillRect(x, legendY - 20, 30, 30);
+
+            // 绘制文字
+            ctx.fillStyle = '#333333';
+            ctx.font = '24px sans-serif';
+            ctx.fillText(`${shift.code}: ${shift.name}`, x + 40, legendY);
+          });
+
+          // 转换为图片
+          wx.canvasToTempFilePath({
+            canvas: canvas,
+            success: (res) => {
+              // 保存图片路径用于分享
+              this.setData({ shareImagePath: res.tempFilePath });
+
+              // 保存到相册
+              wx.saveImageToPhotosAlbum({
+                filePath: res.tempFilePath,
+                success: () => {
+                  wx.hideLoading();
+                  wx.showToast({
+                    title: '已保存到相册',
+                    icon: 'success'
+                  });
+                },
+                fail: (err) => {
+                  wx.hideLoading();
+                  console.error('保存失败', err);
+                  wx.showToast({
+                    title: '保存失败',
+                    icon: 'none'
+                  });
+                }
+              });
+            },
+            fail: (err) => {
+              wx.hideLoading();
+              console.error('生成图片失败', err);
+              wx.showToast({
+                title: '生成图片失败',
+                icon: 'none'
+              });
+            }
+          });
+        });
+    } catch (error) {
       wx.hideLoading();
-      wx.showModal({
-        title: '保存排班表',
-        content: '请使用手机截图功能保存当前排班表',
-        showCancel: false
-      });
-    }).exec();
+      console.error('保存图片失败', error);
+
+      if (error.errMsg && error.errMsg.includes('auth deny')) {
+        wx.showModal({
+          title: '提示',
+          content: '需要您授权保存相册权限',
+          confirmText: '去授权',
+          success: (res) => {
+            if (res.confirm) {
+              wx.openSetting();
+            }
+          }
+        });
+      } else {
+        wx.showToast({
+          title: '保存失败',
+          icon: 'none'
+        });
+      }
+    }
   },
 
   // 分享排班
-  shareSchedule() {
+  async shareSchedule() {
+    // 如果还没有生成图片，先生成
+    if (!this.data.shareImagePath) {
+      await this.generateImage();
+    }
+
+    // 触发分享
     wx.showShareMenu({
       withShareTicket: true,
       menus: ['shareAppMessage']
+    });
+  },
+
+  // 生成图片（不保存）
+  generateImage() {
+    return new Promise((resolve, reject) => {
+      const canvasWidth = 750;
+      const rowHeight = 80;
+      const nameWidth = 150;
+      const shiftWidth = (canvasWidth - nameWidth) / (this.data.shiftList.length || 1);
+
+      const headerHeight = 100;
+      const legendHeight = 120;
+      const canvasHeight = headerHeight + (this.data.statisticsData.length + 1) * rowHeight + legendHeight + 100;
+
+      const query = wx.createSelectorQuery();
+      query.select('#myCanvas')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          const canvas = res[0].node;
+          const ctx = canvas.getContext('2d');
+
+          canvas.width = canvasWidth;
+          canvas.height = canvasHeight;
+
+          // 绘制白色背景
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+          // 绘制标题
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 36px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(
+            `${this.data.department.name} - ${this.data.currentYear}年${this.data.currentMonth}月排班表`,
+            canvasWidth / 2,
+            60
+          );
+
+          // 绘制表头
+          let y = headerHeight;
+          ctx.fillStyle = '#f5f5f5';
+          ctx.fillRect(0, y, canvasWidth, rowHeight);
+
+          ctx.strokeStyle = '#e0e0e0';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(0, y, canvasWidth, rowHeight);
+
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('姓名', nameWidth / 2, y + 50);
+
+          this.data.shiftList.forEach((shift, index) => {
+            const x = nameWidth + index * shiftWidth;
+            ctx.strokeRect(x, y, shiftWidth, rowHeight);
+            ctx.fillText(shift.code, x + shiftWidth / 2, y + 50);
+          });
+
+          // 绘制数据行
+          y += rowHeight;
+          this.data.statisticsData.forEach((member, rowIndex) => {
+            ctx.fillStyle = rowIndex % 2 === 0 ? '#ffffff' : '#fafafa';
+            ctx.fillRect(0, y, canvasWidth, rowHeight);
+
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.strokeRect(0, y, canvasWidth, rowHeight);
+
+            ctx.fillStyle = '#333333';
+            ctx.font = '28px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(member.memberName, nameWidth / 2, y + 50);
+
+            member.shiftCounts.forEach((shiftCount, colIndex) => {
+              const x = nameWidth + colIndex * shiftWidth;
+              ctx.strokeRect(x, y, shiftWidth, rowHeight);
+              ctx.fillStyle = '#4A90D9';
+              ctx.fillText(
+                shiftCount.count > 0 ? shiftCount.count.toString() : '-',
+                x + shiftWidth / 2,
+                y + 50
+              );
+            });
+
+            y += rowHeight;
+          });
+
+          // 绘制图例
+          y += 40;
+          ctx.fillStyle = '#666666';
+          ctx.font = '24px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('图例：', 30, y);
+
+          this.data.shiftList.forEach((shift, index) => {
+            const x = 30 + index * 180;
+            const legendY = y + 40;
+
+            ctx.fillStyle = shift.color;
+            ctx.fillRect(x, legendY - 20, 30, 30);
+
+            ctx.fillStyle = '#333333';
+            ctx.font = '24px sans-serif';
+            ctx.fillText(`${shift.code}: ${shift.name}`, x + 40, legendY);
+          });
+
+          // 转换为图片
+          wx.canvasToTempFilePath({
+            canvas: canvas,
+            success: (res) => {
+              this.setData({ shareImagePath: res.tempFilePath });
+              resolve(res.tempFilePath);
+            },
+            fail: (err) => {
+              console.error('生成图片失败', err);
+              reject(err);
+            }
+          });
+        });
     });
   },
 
@@ -132,7 +426,8 @@ Page({
   onShareAppMessage() {
     return {
       title: `${this.data.department.name} - ${this.data.currentYear}年${this.data.currentMonth}月排班表`,
-      path: '/pages/index/index'
+      path: '/pages/index/index',
+      imageUrl: this.data.shareImagePath || ''
     };
   }
 });

@@ -23,7 +23,7 @@
           </view>
         </view>
       </view>
-      
+
       <!-- 数据行 -->
       <view class="table-row" wx:for="{{statisticsData}}" wx:key="memberId">
         <view class="table-cell name-cell">{{item.memberName}}</view>
@@ -32,7 +32,7 @@
         </view>
       </view>
     </view>
-    
+
     <!-- 图例 -->
     <view class="legend-section">
       <text class="legend-title">图例：</text>
@@ -45,9 +45,12 @@
     </view>
   </view>
 
+  <!-- Canvas 用于生成图片 -->
+  <canvas type="2d" id="myCanvas" style="position: absolute; left: -9999px; width: 750px; height: 1334px;"></canvas>
+
   <!-- 操作按钮 -->
   <view class="action-buttons">
     <button class="btn-primary" bindtap="saveImage">保存图片</button>
-    <button class="btn-secondary" bindtap="shareSchedule">分享排班</button>
+    <button class="btn-secondary" open-type="share">分享排班</button>
   </view>
 </view>

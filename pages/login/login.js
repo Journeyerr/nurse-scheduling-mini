@@ -22,8 +22,9 @@ Page({
 
   // 检查登录状态
   checkLoginStatus() {
+    const token = wx.getStorageSync('token');
     const userInfo = wx.getStorageSync('userInfo');
-    if (userInfo) {
+    if (token && userInfo) {
       this.redirectToNext();
     }
   },
@@ -126,7 +127,7 @@ Page({
 
     if (department) {
       // 有科室，直接进入首页
-      wx.redirectTo({ url: '/pages/index/index' });
+      wx.reLaunch({ url: '/pages/index/index' });
     } else {
       // 无科室，进入身份选择页
       let url = '/pages/role-select/role-select';
@@ -134,7 +135,7 @@ Page({
         // 如果有邀请码，传递给身份选择页
         url += `?inviteCode=${inviteCode}`;
       }
-      wx.redirectTo({ url });
+      wx.reLaunch({ url });
     }
   }
 });

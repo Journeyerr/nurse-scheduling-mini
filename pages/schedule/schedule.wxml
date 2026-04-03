@@ -54,7 +54,7 @@
     <!-- 表头 -->
     <view class="table-header">
       <view class="header-status">
-        <text class="status-text">未发布</text>
+        <text class="status-text">排班日历</text>
       </view>
       <view class="header-dates">
         <view class="header-cell" wx:for="{{weekDates}}" wx:key="fullDate">
