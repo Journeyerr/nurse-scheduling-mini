@@ -7,6 +7,7 @@ Page({
   data: {
     // 启动加载状态
     isLaunching: true, // 是否正在启动检查
+    isLoggedIn: false, // 是否已登录
 
     // 科室信息
     department: {},
@@ -65,17 +66,35 @@ Page({
     const userInfo = wx.getStorageSync('userInfo');
 
     if (!token || !userInfo) {
-      // 未登录，显示加载提示后跳转到登录页
-      this.setData({ isLaunching: true });
+      // 未登录，允许浏览首页，但不加载数据
+      // 默认显示护士长角色
+      this.setData({
+        isLaunching: false,
+        isLoggedIn: false,
+        hasDepartment: false,
+        initialized: true,
+        role: 'leader',
+        isLeader: true
+      });
 
-      setTimeout(() => {
-        wx.redirectTo({ url: '/pages/login/login' });
-      }, 500);
+      // 初始化日历（未登录用户也能看到日历）
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      this.setData({
+        currentYear,
+        currentMonth
+      }, () => {
+        this.initCalendar();
+      });
       return;
     }
 
     // 已登录，初始化首页
-    this.setData({ isLaunching: false });
+    this.setData({
+      isLaunching: false,
+      isLoggedIn: true
+    });
     this.checkDepartment();
   },
 
@@ -85,9 +104,25 @@ Page({
       return;
     }
 
+    // 重新检查登录状态（用户可能刚登录返回）
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+    const isLoggedIn = !!(token && userInfo);
+
+    // 如果登录状态发生变化
+    if (isLoggedIn !== this.data.isLoggedIn) {
+      this.setData({ isLoggedIn });
+      
+      if (isLoggedIn) {
+        // 刚登录，重新初始化
+        this.checkDepartment();
+        return;
+      }
+    }
+
     // 如果已经初始化过，则只刷新数据
     if (this.data.initialized) {
-      if (this.data.hasDepartment) {
+      if (this.data.hasDepartment && this.data.isLoggedIn) {
         this.loadData();
       }
     } else {
@@ -201,7 +236,26 @@ Page({
 
   // 创建科室
   goCreateDepartment() {
-    wx.navigateTo({ 
+    // 先检查是否登录
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (!token || !userInfo) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再创建科室',
+        showCancel: false,
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return;
+    }
+
+    wx.navigateTo({
       url: '/pages/create-department/create-department',
       success: () => {
         // 跳转成功
@@ -425,6 +479,11 @@ Page({
 
   // 加载排班数据（显示当前用户自己的排班）
   async loadSchedule() {
+    // 未登录时不加载排班数据
+    if (!this.data.isLoggedIn) {
+      return;
+    }
+
     try {
       const { currentYear, currentMonth } = this.data;
       
@@ -769,6 +828,26 @@ Page({
 
   // 检查是否有科室，没有则提示
   checkDepartmentAndGo(url) {
+    // 先检查是否登录
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (!token || !userInfo) {
+      // 未登录，跳转到登录页
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再使用该功能',
+        showCancel: false,
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return false;
+    }
+
     if (!this.data.hasDepartment) {
       // 根据角色显示不同提示
       if (this.data.role === 'leader') {
@@ -869,6 +948,25 @@ Page({
 
   // 点击成员查看信息
   goMemberInfo(e) {
+    // 先检查是否登录
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (!token || !userInfo) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再查看成员信息',
+        showCancel: false,
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return;
+    }
+
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({ url: `/pages/member-info/member-info?memberId=${id}` });
   },
@@ -906,16 +1004,17 @@ Page({
 
   // 分享
   onShareAppMessage() {
-    if (this.data.hasDepartment && this.data.department.inviteCode) {
+    if (this.data.isLoggedIn && this.data.hasDepartment && this.data.department.inviteCode) {
+      // 已登录且有科室，分享邀请链接
       return {
         title: `邀请你加入${this.data.department.name}`,
         path: `/pages/login/login?inviteCode=${this.data.department.inviteCode}`
       };
     }
-    // 没有科室时，分享小程序首页
+    // 未登录或没有科室，分享小程序首页
     return {
       title: '护士排班系统 - 高效便捷的排班管理工具',
-      path: '/pages/login/login'
+      path: '/pages/index/index'
     };
   },
 
@@ -1086,6 +1185,25 @@ Page({
 
   // 切换搜索框显示
   toggleSearch() {
+    // 先检查是否登录
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (!token || !userInfo) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再使用搜索功能',
+        showCancel: false,
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return;
+    }
+
     this.setData({
       showSearchInput: !this.data.showSearchInput,
       searchKeyword: '',

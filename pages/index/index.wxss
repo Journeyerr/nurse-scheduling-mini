@@ -634,6 +634,12 @@
   margin-right: 20rpx;
 }
 
+.action-icon-img {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 20rpx;
+}
+
 .action-text {
   font-size: 32rpx;
   color: #333;
@@ -641,8 +647,16 @@
 }
 
 .action-arrow {
+  display: flex;
+  align-items: center;
   font-size: 28rpx;
   color: #999;
+}
+
+.arrow-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-left: 8rpx;
 }
 
 .switch-role {

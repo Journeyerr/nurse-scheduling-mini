@@ -137,5 +137,10 @@ Page({
       }
       wx.reLaunch({ url });
     }
+  },
+
+  // 跳过登录，直接进入首页
+  skipLogin() {
+    wx.reLaunch({ url: '/pages/index/index' });
   }
 });

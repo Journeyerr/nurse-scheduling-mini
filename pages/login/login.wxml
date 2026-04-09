@@ -2,10 +2,8 @@
 <view class="login-container">
   <!-- Logo区域 -->
   <view class="logo-section">
-    <view class="logo-icon">
-      <text class="logo-text">护</text>
-    </view>
-    <text class="app-name">护士排班系统</text>
+    <image class="logo-image" src="/assets/images/logo.png" mode="aspectFit"></image>
+    <text class="app-name">排班小护</text>
     <text class="app-desc">专业的科室排班管理工具</text>
   </view>
 
@@ -15,6 +13,9 @@
       <text class="btn-text">微信一键登录</text>
     </button>
     <text class="login-tip">登录即表示同意《用户协议》和《隐私政策》</text>
+    <view class="skip-login" bindtap="skipLogin">
+      <text class="skip-text">暂不登录，先逛逛</text>
+    </view>
   </view>
 
   <!-- 版本信息 -->

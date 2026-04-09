@@ -301,7 +301,7 @@ const realRequest = (options) => {
           }
         } else if (res.statusCode === 401) {
           app.clearUserInfo();
-          wx.reLaunch({ url: '/pages/login/login' });
+          // 不自动跳转到登录页，让页面自己处理未登录状态
           reject(res.data);
         } else {
           reject(res.data);

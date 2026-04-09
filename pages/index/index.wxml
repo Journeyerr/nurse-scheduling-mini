@@ -201,10 +201,13 @@
     <block wx:if="{{role === 'leader'}}">
       <view class="footer-action" bindtap="goCreateDepartment" hover-class="footer-action-hover">
         <view class="action-left">
-          <text class="action-icon">+</text>
+          <image class="action-icon-img" src="/assets/images/create-dept.png" mode="aspectFit"></image>
           <text class="action-text">创建我的科室</text>
         </view>
-        <text class="action-arrow">去创建 ›</text>
+        <view class="action-arrow">
+          <text>去创建</text>
+          <image class="arrow-icon" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
+        </view>
       </view>
       <view class="switch-role" bindtap="switchToNurse">
         <text class="switch-role-text">切换为护士</text>
@@ -215,10 +218,13 @@
     <block wx:else>
       <button class="footer-action-btn" open-type="share" hover-class="footer-action-hover">
         <view class="action-left">
-          <text class="action-icon">♥</text>
+          <image class="action-icon-img" src="/assets/images/share-leader.png" mode="aspectFit"></image>
           <text class="action-text">分享给护士长</text>
         </view>
-        <text class="action-arrow">去分享 ›</text>
+        <view class="action-arrow">
+          <text>去分享</text>
+          <image class="arrow-icon" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
+        </view>
       </button>
       <view class="switch-role" bindtap="switchToLeader">
         <text class="switch-role-text">切换为护士长</text>
