@@ -13,6 +13,8 @@ Page({
       { startTime: '', endTime: '', startIsNextDay: false, endIsNextDay: false }
     ], // 时间段数组
     duration: '', // 时长
+    coefficient: '1.0', // 班种系数，默认1
+    isRest: false, // 是否为休息班
     currentColor: '#7BA3C8',
     colorList: [
       '#7BA3C8', '#9B8AA8', '#A8B5BD',
@@ -118,7 +120,9 @@ Page({
           code: shift.code,
           name: shift.name,
           timeSlots: timeSlots.length > 0 ? timeSlots : [{ startTime: '', startIsNextDay: false, endTime: '', endIsNextDay: false }],
-          currentColor: shift.color
+          currentColor: shift.color,
+          coefficient: shift.coefficient != null ? String(shift.coefficient) : '1.0',
+          isRest: !!shift.isRest
         });
 
         // 计算时长
@@ -304,6 +308,16 @@ Page({
     this.setData({ duration: e.detail.value });
   },
 
+  // 班种系数输入
+  onCoefficientInput(e) {
+    this.setData({ coefficient: e.detail.value });
+  },
+
+  // 休息班开关
+  onRestChange(e) {
+    this.setData({ isRest: e.detail.value });
+  },
+
   // 阻止冒泡
   stopPropagation() {},
 
@@ -324,7 +338,7 @@ Page({
   },
 
   async handleSubmit() {
-    const { isEdit, isSelectMode, shiftId, code, name, timeSlots, duration, currentColor } = this.data;
+    const { isEdit, isSelectMode, shiftId, code, name, timeSlots, duration, currentColor, coefficient, isRest } = this.data;
 
     if (!code || !name) {
       util.showError('请填写班种编号和名称');
@@ -351,7 +365,9 @@ Page({
       name: name.trim(),
       timeSlots: formattedSlots,
       duration: duration ? parseFloat(duration) : 0,
-      color: currentColor
+      color: currentColor,
+      coefficient: coefficient && coefficient !== '' ? parseFloat(coefficient) : 1.0,
+      isRest: isRest ? 1 : 0
     };
 
     // 选择模式：不调用API，直接返回数据

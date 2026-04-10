@@ -74,6 +74,18 @@
 
 .shift-header {
   margin-bottom: 6rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.shift-rest-tag {
+  font-size: 20rpx;
+  color: #52C41A;
+  background: #F6FFED;
+  padding: 2rpx 10rpx;
+  border-radius: 4rpx;
+  border: 1rpx solid #B7EB8F;
 }
 
 .shift-name {
@@ -101,6 +113,12 @@
 .shift-duration {
   font-size: 28rpx;
   color: #4A90D9;
+  margin-left: 4rpx;
+}
+
+.shift-coefficient {
+  font-size: 24rpx;
+  color: #E89B7C;
   margin-left: 4rpx;
 }
 
@@ -243,6 +261,35 @@
 
 .input-placeholder {
   color: #BBB;
+}
+
+/* 一行多字段布局 */
+.inline-fields {
+  display: flex;
+  gap: 16rpx;
+  align-items: flex-end;
+}
+
+.inline-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.inline-field .form-input {
+  width: 100%;
+}
+
+.inline-field.switch-field {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.inline-field.switch-field switch {
+  transform: scale(0.8);
+  transform-origin: top center;
+  margin-top: 8rpx;
 }
 
 /* 时间段样式 */
@@ -389,11 +436,23 @@
 }
 
 .preview-name {
-  display: block;
   font-size: 28rpx;
   color: #333;
   font-weight: 500;
+}
+
+.preview-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 4rpx;
+}
+
+.preview-duration {
+  font-size: 24rpx;
+  color: #4A90D9;
+  flex-shrink: 0;
+  margin-left: 8rpx;
 }
 
 .preview-times {
@@ -514,10 +573,16 @@
   height: 440rpx;
 }
 
+.time-selector picker-view {
+  height: 100%;
+}
+
 .picker-item {
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32rpx;
   color: #333;
+  height: 44px;
+  line-height: 44px;
 }

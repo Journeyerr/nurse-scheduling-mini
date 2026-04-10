@@ -41,6 +41,14 @@ Page({
       totalDays: 0,
       restDays: 0,
       totalHours: 0
+    },
+
+    // 排行列表（筛选后）
+    rankList: [],
+    totalSummary: {
+      totalSchedules: 0,
+      totalRestSchedules: 0,
+      totalHours: 0
     }
   },
 
@@ -121,7 +129,18 @@ Page({
       const app = getApp();
       const departmentId = app.globalData.currentTeamId || app.globalData.department?.id;
       const res = await api.getDepartmentStatistics(this.data.currentYear, this.data.currentMonth, departmentId);
-      this.setData({ deptStats: res.data || {} });
+      const deptStats = res.data || {};
+      // 给每个成员记录原始排行序号
+      const memberRank = (deptStats.memberRank || []).map((m, i) => ({ ...m, rankIndex: i }));
+      this.setData({
+        deptStats: { ...deptStats, memberRank },
+        rankList: memberRank,
+        totalSummary: {
+          totalSchedules: deptStats.totalSchedules,
+          totalRestSchedules: deptStats.totalRestSchedules,
+          totalHours: deptStats.totalHours
+        }
+      });
     } catch (error) {
       // 加载科室统计失败
     }
@@ -153,23 +172,45 @@ Page({
     const member = this.data.memberOptions.find(m => m.id === memberId);
     
     if (member) {
-      this.setData({
+      const updates = {
         selectedMemberId: member.id,
         selectedMemberName: member.name,
         showMemberPicker: false
-      });
-      
-      if (member.id !== 'all') {
-        this.loadMemberStats(member.id);
+      };
+
+      if (member.id === 'all') {
+        // 全部成员：恢复完整排行
+        const deptStats = this.data.deptStats;
+        updates.rankList = deptStats.memberRank || [];
+        updates.totalSummary = {
+          totalSchedules: deptStats.totalSchedules,
+          totalRestSchedules: deptStats.totalRestSchedules,
+          totalHours: deptStats.totalHours
+        };
+        updates.memberStats = { totalDays: 0, restDays: 0, totalHours: 0 };
+      } else {
+        // 选中某人：只显示该人的排行（保留原始排行序号）
+        const memberRank = this.data.deptStats.memberRank || [];
+        const found = memberRank.find(m => m.id === member.id);
+        updates.rankList = found ? [found] : [];
+        // 用排行数据直接填充统计面板
+        if (found) {
+          updates.memberStats = {
+            totalDays: found.scheduleCount || 0,
+            restDays: found.restCount || 0,
+            totalHours: found.totalHours || 0
+          };
+        }
       }
+
+      this.setData(updates);
     }
   },
 
   // 加载成员统计
   async loadMemberStats(memberId) {
     try {
-      const res = await api.getMyStatistics(this.data.currentYear, this.data.currentMonth);
-      // 这里应该传入memberId，API需要支持
+      const res = await api.getMemberStatistics(memberId, this.data.currentYear, this.data.currentMonth);
       this.setData({ memberStats: res.data || {} });
     } catch (error) {
       // 加载成员统计失败

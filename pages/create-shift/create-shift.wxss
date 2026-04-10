@@ -43,6 +43,55 @@
   font-size: 28rpx;
 }
 
+/* 系数输入行 */
+.form-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  flex-shrink: 0;
+}
+
+.form-row-left .form-label {
+  margin-bottom: 0;
+}
+
+.form-hint {
+  font-size: 22rpx;
+  color: #BBB;
+}
+
+.input.input-small {
+  width: 200rpx !important;
+  flex: none;
+  text-align: right;
+  min-height: 76rpx;
+}
+
+/* 休息班开关行 */
+.form-switch-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8rpx;
+}
+
+.switch-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  flex-shrink: 0;
+}
+
+.switch-left .form-label {
+  margin-bottom: 0;
+}
+
 /* 时间选择器横向布局 */
 .time-slots {
   display: flex;

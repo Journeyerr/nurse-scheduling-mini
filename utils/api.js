@@ -599,6 +599,11 @@ const getDepartmentStatistics = (year, month, departmentId) => {
   return request({ url: '/statistics/department', data: { departmentId: deptId, year, month } });
 };
 
+const getMemberStatistics = (memberId, year, month) => {
+  if (USE_MOCK) return mockRequest('getMyStatistics', { year, month });
+  return request({ url: '/statistics/member', data: { memberId, year, month } });
+};
+
 // ========== 班种套餐相关接口 ==========
 
 const getShiftPackageList = (departmentId) => {
@@ -673,6 +678,7 @@ module.exports = {
   submitSwapRequest,
   // 统计相关
   getMyStatistics,
+  getMemberStatistics,
   getDepartmentStatistics,
   // 班种套餐相关
   getShiftPackageList,

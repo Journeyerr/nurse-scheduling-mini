@@ -20,6 +20,7 @@
       <view class="shift-content">
         <view class="shift-header">
           <text class="shift-name">{{item.name}}</text>
+          <text class="shift-rest-tag" wx:if="{{item.isRest}}">休息</text>
         </view>
         <view class="shift-times">
           <view class="time-slot" wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
@@ -29,6 +30,7 @@
             <text class="time-text">{{item.startTime}}-{{item.endTime}}</text>
           </view>
           <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
+          <text class="shift-coefficient" wx:if="{{item.coefficient && item.coefficient != 1 && item.coefficient != 1.0}}">×{{item.coefficient}}</text>
         </view>
       </view>
       <view class="shift-actions">
@@ -118,17 +120,40 @@
         </view>
       </view>
 
-      <!-- 时长 -->
+      <!-- 时长 / 班种系数 / 休息班 一行布局 -->
       <view class="form-item">
-        <text class="form-label">时长（小时）</text>
-        <input
-          class="form-input"
-          type="digit"
-          placeholder="自动计算或手动输入"
-          placeholder-class="input-placeholder"
-          value="{{editingShift.duration}}"
-          bindinput="onDurationInput"
-        />
+        <view class="inline-fields">
+          <view class="inline-field">
+            <text class="form-label">时长(小时)</text>
+            <input
+              class="form-input"
+              type="digit"
+              placeholder="自动计算"
+              placeholder-class="input-placeholder"
+              value="{{editingShift.duration}}"
+              bindinput="onDurationInput"
+            />
+          </view>
+          <view class="inline-field">
+            <text class="form-label">班种系数</text>
+            <input
+              class="form-input"
+              type="digit"
+              placeholder="1.0"
+              placeholder-class="input-placeholder"
+              value="{{editingShift.coefficient}}"
+              bindinput="onCoefficientInput"
+            />
+          </view>
+          <view class="inline-field switch-field">
+            <text class="form-label">休息班</text>
+            <switch
+              checked="{{editingShift.isRest}}"
+              bindchange="toggleIsRest"
+              color="#4A90D9"
+            />
+          </view>
+        </view>
       </view>
 
       <!-- 颜色选择 -->
@@ -156,7 +181,10 @@
             <text class="preview-code" style="color: {{editingShift.color}}">{{editingShift.code || 'A'}}</text>
           </view>
           <view class="preview-info">
-            <text class="preview-name">{{editingShift.name || '班种名称'}}</text>
+            <view class="preview-name-row">
+              <text class="preview-name">{{editingShift.name || '班种名称'}}</text>
+              <text class="preview-duration" wx:if="{{editingShift.duration}}">{{editingShift.duration}}h</text>
+            </view>
             <view class="preview-times">
               <text class="preview-time" wx:for="{{editingShift.timeSlots}}" wx:key="index">
                 {{item.startTime || '00:00'}}-{{item.endTime || '00:00'}}{{item.endIsNextDay ? '次日' : ''}}

@@ -70,6 +70,29 @@
         bindinput="onDurationInput"
       />
     </view>
+
+    <view class="form-item form-row-item">
+      <view class="form-row-left">
+        <text class="form-label">班种系数</text>
+        <text class="form-hint">用于酬劳计算</text>
+      </view>
+      <input
+        class="input input-small"
+        type="digit"
+        placeholder="默认1.0"
+        placeholder-class="input-placeholder"
+        value="{{coefficient}}"
+        bindinput="onCoefficientInput"
+      />
+    </view>
+
+    <view class="form-item form-switch-item">
+      <view class="switch-left">
+        <text class="form-label">标记为休息班</text>
+        <text class="form-hint">休息班不计入工作排班数</text>
+      </view>
+      <switch checked="{{isRest}}" bindchange="onRestChange" color="#4A90D9" />
+    </view>
     
     <view class="form-item">
       <text class="form-label">编号字体颜色</text>

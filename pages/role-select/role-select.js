@@ -2,7 +2,11 @@
 const app = getApp();
 
 Page({
-  data: {},
+  data: {
+    showNameModal: false,
+    inputName: '',
+    pendingInviteCode: ''
+  },
 
   onLoad(options) {
     // 检查是否有邀请参数（护士通过邀请链接进入）
@@ -25,24 +29,43 @@ Page({
 
   // 处理邀请
   handleInvite(inviteCode) {
-    wx.showModal({
-      title: '加入科室',
-      content: '检测到邀请信息，是否加入该科室？',
-      success: (res) => {
-        if (res.confirm) {
-          this.joinDepartment(inviteCode);
-        }
-      }
-    });
+    this.setData({ pendingInviteCode: inviteCode, showNameModal: true, inputName: '' });
+  },
+
+  // 输入名称
+  onNameInput(e) {
+    this.setData({ inputName: e.detail.value });
+  },
+
+  // 取消加入
+  cancelJoin() {
+    this.setData({ showNameModal: false, pendingInviteCode: '', inputName: '' });
+  },
+
+  // 确认加入
+  async confirmJoin() {
+    const name = this.data.inputName.trim();
+    if (!name) {
+      wx.showToast({ title: '请输入姓名', icon: 'none' });
+      return;
+    }
+    this.setData({ showNameModal: false });
+    await this.joinDepartment(this.data.pendingInviteCode, name);
   },
 
   // 加入科室
-  async joinDepartment(inviteCode) {
+  async joinDepartment(inviteCode, nickName) {
     const api = require('../../utils/api');
     const util = require('../../utils/util');
 
     try {
       util.showLoading('加入中...');
+
+      // 先更新用户昵称
+      if (nickName) {
+        await api.updateUserInfo({ nickName });
+      }
+
       const res = await api.joinDepartment({ inviteCode });
       util.hideLoading();
 

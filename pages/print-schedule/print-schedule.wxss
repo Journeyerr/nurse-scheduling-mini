@@ -37,7 +37,7 @@
 
 /* 排班表预览 */
 .schedule-preview {
-  padding: 30rpx;
+  padding: 20rpx 10rpx;
   background: #fff;
 }
 
@@ -56,8 +56,6 @@
 }
 
 .table-cell {
-  flex: 1;
-  min-width: 120rpx;
   height: 80rpx;
   display: flex;
   align-items: center;
@@ -65,6 +63,8 @@
   font-size: 26rpx;
   color: #333;
   border-right: 1rpx solid #E8E8E8;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .table-cell:last-child {
@@ -72,10 +72,8 @@
 }
 
 .name-cell {
-  flex: 0 0 140rpx;
-  min-width: 140rpx;
-  justify-content: flex-start;
-  padding-left: 20rpx;
+  justify-content: center;
+  padding-left: 8rpx;
 }
 
 .shift-header {
@@ -85,17 +83,22 @@
 }
 
 .shift-badge-small {
-  padding: 10rpx 20rpx;
-  border-radius: 6rpx;
+  padding: 10rpx 0;
   font-size: 24rpx;
   font-weight: bold;
-  border: 2rpx solid;
   white-space: nowrap;
+  text-align: center;
 }
 
 .count-text {
   font-size: 28rpx;
   color: #333;
+}
+
+.coefficient-text {
+  font-size: 26rpx;
+  color: #4A90D9;
+  font-weight: bold;
 }
 
 /* 图例 */

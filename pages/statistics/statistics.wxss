@@ -242,7 +242,7 @@
 }
 
 .rank-number {
-  font-size: 24rpx;
+  font-size: 25rpx;
   font-weight: bold;
   color: #fff;
 }
@@ -259,20 +259,22 @@
 
 .rank-right {
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 .rank-data-item {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 0 24rpx;
+  padding: 0 16rpx;
+  min-width: 80rpx;
 }
 
 .rank-data-label {
   font-size: 22rpx;
   color: #999;
-  margin-bottom: 6rpx;
+  margin-bottom: 8rpx;
 }
 
 .rank-data-value {
@@ -283,8 +285,25 @@
 
 .rank-data-divider {
   width: 1rpx;
-  height: 40rpx;
+  align-self: center;
+  height: 50rpx;
   background: #E0E0E0;
+}
+
+/* 合计行 */
+.rank-total-row {
+  background: linear-gradient(135deg, #F0F7FF 0%, #E8F4FD 100%);
+  border-color: #C5DDF0;
+}
+
+.rank-total-label {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #4A90D9 !important;
+}
+
+.rank-total-value {
+  color: #4A90D9 !important;
 }
 
 /* 成员选择弹窗 */

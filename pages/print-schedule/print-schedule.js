@@ -10,7 +10,8 @@ Page({
     currentMonth: 1,
     shiftList: [],
     statisticsData: [],
-    shareImagePath: '' // 分享图片路径
+    shareImagePath: '', // 分享图片路径
+    cellWidths: { name: 140, shift: 120, coefficient: 100 } // 动态列宽
   },
 
   onLoad() {
@@ -70,18 +71,57 @@ Page({
             count: count
           };
         });
+
+        // 计算系数总和：非休息班的次数 × 系数
+        let coefficientSum = 0;
+        shiftList.forEach((shift, index) => {
+          const count = shiftCounts[index].count;
+          if (count > 0 && !shift.isRest) {
+            const coefficient = shift.coefficient || 1.0;
+            coefficientSum += coefficient * count;
+          }
+        });
+        coefficientSum = Math.round(coefficientSum * 10) / 10;
         
         return {
           memberId: member.id,
           memberName: member.nickName,
-          shiftCounts
+          shiftCounts,
+          coefficientSum: coefficientSum > 0 ? coefficientSum : 0
         };
       });
       
-      this.setData({ statisticsData });
+      this.setData({ statisticsData, cellWidths: this.calcCellWidths(shiftList.length) });
     } catch (error) {
       // 加载统计数据失败
     }
+  },
+
+  // 根据班种数量动态计算列宽（rpx）
+  calcCellWidths(shiftCount) {
+    // 卡片可用宽度：750 - 20*2(外层padding) - 10*2(卡片padding) = 690rpx
+    const totalWidth = 690;
+    const shiftCountSafe = Math.max(shiftCount, 1);
+
+    let nameWidth, coefficientWidth, shiftWidth;
+
+    if (shiftCountSafe <= 3) {
+      nameWidth = 140;
+      coefficientWidth = 100;
+    } else if (shiftCountSafe <= 5) {
+      nameWidth = 120;
+      coefficientWidth = 90;
+    } else {
+      nameWidth = 100;
+      coefficientWidth = 80;
+    }
+
+    shiftWidth = Math.round((totalWidth - nameWidth - coefficientWidth) / shiftCountSafe);
+
+    // 确保班种列最小宽度
+    shiftWidth = Math.max(shiftWidth, 60);
+
+    return { name: nameWidth, shift: shiftWidth, coefficient: coefficientWidth };
   },
 
   // 上个月
@@ -119,16 +159,21 @@ Page({
         await wx.authorize({ scope: 'scope.writePhotosAlbum' });
       }
 
-      // 使用 Canvas 绘制排班表
-      const canvasWidth = 750;
+      const { cellWidths } = this.data;
+      const shiftCount = this.data.shiftList.length || 1;
+      // rpx 转 px（rpx / 2），Canvas 用 px
+      const nameWidth = cellWidths.name / 2;
+      const shiftWidth = cellWidths.shift / 2;
+      const coefficientWidth = cellWidths.coefficient / 2;
+      const canvasWidth = nameWidth + shiftWidth * shiftCount + coefficientWidth;
       const rowHeight = 80;
-      const nameWidth = 150;
-      const shiftWidth = (canvasWidth - nameWidth) / (this.data.shiftList.length || 1);
 
       // 计算画布高度
       const headerHeight = 100;
       const legendHeight = 120;
       const canvasHeight = headerHeight + (this.data.statisticsData.length + 1) * rowHeight + legendHeight + 100;
+
+      const coefficientX = canvasWidth - coefficientWidth;
 
       // 获取 Canvas 实例
       const query = wx.createSelectorQuery();
@@ -177,6 +222,11 @@ Page({
             ctx.fillText(shift.code, x + shiftWidth / 2, y + 50);
           });
 
+          // 表头：系数
+          ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
+          ctx.fillStyle = '#333333';
+          ctx.fillText('系数', coefficientX + coefficientWidth / 2, y + 50);
+
           // 绘制数据行
           y += rowHeight;
           this.data.statisticsData.forEach((member, rowIndex) => {
@@ -203,6 +253,15 @@ Page({
                 y + 50
               );
             });
+
+            // 系数
+            ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
+            ctx.fillStyle = '#E89B7C';
+            ctx.fillText(
+              member.coefficientSum > 0 ? member.coefficientSum.toString() : '-',
+              coefficientX + coefficientWidth / 2,
+              y + 50
+            );
 
             y += rowHeight;
           });
@@ -309,11 +368,14 @@ Page({
       const canvasWidth = 750;
       const rowHeight = 80;
       const nameWidth = 150;
-      const shiftWidth = (canvasWidth - nameWidth) / (this.data.shiftList.length || 1);
+      const coefficientWidth = 100;
+      const shiftWidth = (canvasWidth - nameWidth - coefficientWidth) / (this.data.shiftList.length || 1);
 
       const headerHeight = 100;
       const legendHeight = 120;
       const canvasHeight = headerHeight + (this.data.statisticsData.length + 1) * rowHeight + legendHeight + 100;
+
+      const coefficientX = canvasWidth - coefficientWidth;
 
       const query = wx.createSelectorQuery();
       query.select('#myCanvas')
@@ -351,13 +413,17 @@ Page({
           ctx.fillStyle = '#333333';
           ctx.font = 'bold 28px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText('姓名', nameWidth / 2, y + 50);
 
           this.data.shiftList.forEach((shift, index) => {
             const x = nameWidth + index * shiftWidth;
             ctx.strokeRect(x, y, shiftWidth, rowHeight);
             ctx.fillText(shift.code, x + shiftWidth / 2, y + 50);
           });
+
+          // 表头：系数
+          ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
+          ctx.fillStyle = '#333333';
+          ctx.fillText('系数', coefficientX + coefficientWidth / 2, y + 50);
 
           // 绘制数据行
           y += rowHeight;
@@ -383,6 +449,15 @@ Page({
                 y + 50
               );
             });
+
+            // 系数
+            ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
+            ctx.fillStyle = '#E89B7C';
+            ctx.fillText(
+              member.coefficientSum > 0 ? member.coefficientSum.toString() : '-',
+              coefficientX + coefficientWidth / 2,
+              y + 50
+            );
 
             y += rowHeight;
           });

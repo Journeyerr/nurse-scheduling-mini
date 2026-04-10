@@ -26,6 +26,9 @@ Page({
     const userInfo = wx.getStorageSync('userInfo');
     if (token && userInfo) {
       this.redirectToNext();
+    } else if (this.data.inviteCode) {
+      // 有邀请码但未登录，自动登录
+      this.handleLogin();
     }
   },
 

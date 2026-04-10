@@ -41,4 +41,17 @@
   <view class="footer">
     <text class="footer-text">护士只能通过邀请链接加入科室</text>
   </view>
+
+  <!-- 填写名称弹窗 -->
+  <view class="modal-mask" wx:if="{{showNameModal}}" bindtap="cancelJoin">
+    <view class="modal-dialog" catchtap>
+      <view class="modal-title">加入科室</view>
+      <view class="modal-desc">请输入您的姓名，方便科室成员识别</view>
+      <input class="modal-input" placeholder="请输入姓名" value="{{inputName}}" bindinput="onNameInput" maxlength="10" focus="{{showNameModal}}" />
+      <view class="modal-buttons">
+        <view class="modal-btn cancel" bindtap="cancelJoin">取消</view>
+        <view class="modal-btn confirm" bindtap="confirmJoin">确认加入</view>
+      </view>
+    </view>
+  </view>
 </view>

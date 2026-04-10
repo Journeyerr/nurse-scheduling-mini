@@ -74,8 +74,8 @@
         <text class="stats-label">排班总数</text>
       </view>
       <view class="stats-item">
-        <text class="stats-value">{{deptStats.totalMembers}}</text>
-        <text class="stats-label">参与人数</text>
+        <text class="stats-value">{{deptStats.totalRestSchedules}}</text>
+        <text class="stats-label">休息数</text>
       </view>
       <view class="stats-item">
         <text class="stats-value">{{deptStats.totalHours}}h</text>
@@ -99,13 +99,14 @@
     </view>
     
     <!-- 成员排班排行 -->
-    <view class="rank-section" wx:if="{{selectedMemberId === 'all'}}">
-      <view class="detail-title">成员排行</view>
+    <view class="rank-section">
+      <view class="detail-title" wx:if="{{selectedMemberId === 'all'}}">成员排行（共{{rankList.length}}人）</view>
+      <view class="detail-title" wx:else>{{selectedMemberName}}</view>
       <view class="rank-list">
-        <view class="rank-item" wx:for="{{deptStats.memberRank}}" wx:key="id">
+        <view class="rank-item" wx:for="{{rankList}}" wx:key="id">
           <view class="rank-left">
-            <view class="rank-medal rank-medal-{{index < 3 ? (index + 1) : 'default'}}">
-              <text class="rank-number">{{index + 1}}</text>
+            <view class="rank-medal rank-medal-{{item.rankIndex < 3 ? (item.rankIndex + 1) : 'default'}}">
+              <text class="rank-number">{{item.rankIndex + 1}}</text>
             </view>
             <text class="rank-name">{{item.name}}</text>
           </view>
@@ -116,8 +117,33 @@
             </view>
             <view class="rank-data-divider"></view>
             <view class="rank-data-item">
+              <text class="rank-data-label">休息</text>
+              <text class="rank-data-value">{{item.restCount}}</text>
+            </view>
+            <view class="rank-data-divider"></view>
+            <view class="rank-data-item">
               <text class="rank-data-label">工时</text>
               <text class="rank-data-value">{{item.totalHours}}h</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 合计行（仅全部成员时显示） -->
+        <view class="rank-item rank-total-row" wx:if="{{selectedMemberId === 'all'}}">
+          <view class="rank-left">
+            <text class="rank-name rank-total-label">合计</text>
+          </view>
+          <view class="rank-right">
+            <view class="rank-data-item">
+              <text class="rank-data-value rank-total-value">{{totalSummary.totalSchedules}}</text>
+            </view>
+            <view class="rank-data-divider"></view>
+            <view class="rank-data-item">
+              <text class="rank-data-value rank-total-value">{{totalSummary.totalRestSchedules}}</text>
+            </view>
+            <view class="rank-data-divider"></view>
+            <view class="rank-data-item">
+              <text class="rank-data-value rank-total-value">{{totalSummary.totalHours}}h</text>
             </view>
           </view>
         </view>

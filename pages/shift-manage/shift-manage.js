@@ -18,6 +18,8 @@ Page({
         { startTime: '', endTime: '', startIsNextDay: false, endIsNextDay: false }
       ],
       duration: '',
+      coefficient: '1.0',
+      isRest: false,
       color: '#7BA3C8'
     },
     colorList: [
@@ -104,6 +106,7 @@ Page({
         
         return {
           ...item,
+          coefficient: item.coefficient != null ? parseFloat(item.coefficient).toFixed(1) : '1.0',
           timeSlots
         };
       });
@@ -135,6 +138,8 @@ Page({
           { startTime: '', endTime: '', startIsNextDay: false, endIsNextDay: false }
         ],
         duration: '',
+        coefficient: '1.0',
+        isRest: false,
         color: '#7BA3C8'
       },
       canSubmit: false
@@ -156,6 +161,8 @@ Page({
           name: shift.name,
           timeSlots: shift.timeSlots.length > 0 ? shift.timeSlots : [{ startTime: '', startIsNextDay: false, endTime: '', endIsNextDay: false }],
           duration: shift.duration ? String(shift.duration) : '',
+          coefficient: shift.coefficient ? String(shift.coefficient) : '1.0',
+          isRest: !!shift.isRest,
           color: shift.color
         },
         canSubmit: true
@@ -192,6 +199,20 @@ Page({
   onDurationInput(e) {
     this.setData({
       'editingShift.duration': e.detail.value
+    });
+  },
+
+  // 输入班种系数
+  onCoefficientInput(e) {
+    this.setData({
+      'editingShift.coefficient': e.detail.value
+    });
+  },
+
+  // 切换是否休息
+  toggleIsRest(e) {
+    this.setData({
+      'editingShift.isRest': e.detail.value
     });
   },
 
@@ -409,6 +430,8 @@ Page({
       name: editingShift.name.trim(),
       timeSlots: formattedSlots,
       duration: editingShift.duration ? parseFloat(editingShift.duration) : 0,
+      coefficient: editingShift.coefficient ? parseFloat(editingShift.coefficient) : 1.0,
+      isRest: editingShift.isRest ? 1 : 0,
       color: editingShift.color
     };
 

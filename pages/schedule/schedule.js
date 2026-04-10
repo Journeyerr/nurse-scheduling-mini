@@ -531,9 +531,9 @@ Page({
       const date = weekDates[focusCell.dateIndex].fullDate;
       const member = members.find(m => m.id === focusCell.memberId);
       
-      // 检查是否已有排班（排除本地新增的）
+      // 检查是否已有排班（排除本地新增的和期望排班）
       const existingSchedule = member?.schedules[date];
-      if (existingSchedule && !existingSchedule.id.startsWith('local_')) {
+      if (existingSchedule && !existingSchedule.id?.startsWith('local_') && !existingSchedule.isExpect) {
         wx.showModal({
           title: '排班冲突',
           content: `${member.nickName} ${date} 已排班 ${existingSchedule.name}，不能重复排班`,
@@ -562,7 +562,7 @@ Page({
         return m;
       });
       
-      // 记录变更
+      // 记录变更（先移除同一成员同一日期的旧本地新增记录，避免重复）
       const newAdd = {
         memberId: focusCell.memberId,
         memberName: member?.nickName || '',
@@ -573,6 +573,8 @@ Page({
         shiftColor: shift.color
       };
       
+      const filteredAdds = localChanges.adds.filter(a => !(a.memberId === focusCell.memberId && a.date === date));
+      
       // 移动到下一个日期
       const nextDateIndex = focusCell.dateIndex < 6 ? focusCell.dateIndex + 1 : null;
       
@@ -580,7 +582,7 @@ Page({
         members: updatedMembers,
         localChanges: {
           ...localChanges,
-          adds: [...localChanges.adds, newAdd]
+          adds: [...filteredAdds, newAdd]
         },
         focusCell: nextDateIndex !== null ? {
           memberId: focusCell.memberId,
@@ -649,7 +651,8 @@ Page({
         localChanges: {
           adds: newAdds,
           deletes: newDeletes
-        }
+        },
+        focusCell: { memberId, dateIndex: parseInt(dateIndex) }
       });
       return;
     }
@@ -703,8 +706,8 @@ Page({
           
           // 如果该日期已有排班，先记录删除
           if (newSchedules[date]) {
-            if (!newSchedules[date].id.startsWith('local_')) {
-              // 已存在的，记录删除
+            if (!newSchedules[date].id?.startsWith('local_') && !newSchedules[date].isExpect) {
+              // 已存在的真实排班，记录删除
               if (!newAdds.some(a => a.memberId === member.id && a.date === date)) {
                 localChanges.deletes.push({
                   scheduleId: newSchedules[date].id,
@@ -723,7 +726,11 @@ Page({
             color: shift.color
           };
           
-          // 记录新增
+          // 记录新增（先移除同一成员同一日期的旧本地新增记录，避免重复）
+          const existIdx = newAdds.findIndex(a => a.memberId === m.id && a.date === date);
+          if (existIdx !== -1) {
+            newAdds.splice(existIdx, 1);
+          }
           newAdds.push({
             memberId: m.id,
             memberName: m.nickName,
