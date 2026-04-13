@@ -36,10 +36,18 @@ Page({
     // 成员列表
     members: [],
 
+    // 成员选择器
+    showMemberPicker: false,
+    pickerMode: '', // 'transfer' | 'kick'
+    pickerMembers: [],
+    pickerIndex: 0,
+
     // 搜索相关
     showSearchInput: false,
     searchKeyword: '',
     filteredMembers: [],
+    memberExpanded: false,
+    displayMembers: [],
 
     // 弹窗相关
     showDayModal: false,
@@ -194,7 +202,7 @@ Page({
     const userInfo = wx.getStorageSync('userInfo');
 
     // 判断是否为创建者
-    const isCreator = department && department.creatorId === userInfo?.id;
+    const isCreator = department && department.creatorId == userInfo?.id;
     const isLeader = this.checkIsLeader(hasDept, role, isCreator);
 
     this.setData({
@@ -341,10 +349,23 @@ Page({
         // 获取用户信息失败
       }
     }
+
+    // 从服务器获取最新的科室信息，更新缓存和 isCreator 状态
+    try {
+      const deptRes = await api.getDepartmentInfo();
+      department = deptRes.data;
+      wx.setStorageSync('department', department);
+    } catch (error) {
+      // 获取科室信息失败，使用缓存数据
+    }
     
+    const isCreator = department && department.creatorId == userInfo?.id;
+    const isLeader = this.checkIsLeader(true, this.data.role, isCreator);
+
     this.setData({
       department: department || {},
-      isCreator: department && department.creatorId === userInfo?.id
+      isCreator: isCreator,
+      isLeader: isLeader
     });
 
     // 加载排班和成员数据
@@ -647,8 +668,8 @@ Page({
       }
       
       const members = (res.data || []).map(item => {
-        const isCreator = item.id === department?.creatorId;
-        const isSelf = item.id === userInfo?.id;
+        const isCreator = item.isCreator === true;
+        const isSelf = item.id == userInfo?.id;
         return {
           ...item,
           isCreator,
@@ -656,10 +677,11 @@ Page({
         };
       });
       
-      this.setData({ 
+      this.setData({
         members,
-        filteredMembers: members  // 初始化过滤后的成员列表
+        filteredMembers: members
       });
+      this.updateDisplayMembers();
     } catch (error) {
       // 加载成员失败
     }
@@ -1025,17 +1047,20 @@ Page({
     wx.showActionSheet({
       itemList: ['解散科室', '转让科室', '移除成员'],
       success: (res) => {
-        switch (res.tapIndex) {
-          case 0:
-            this.dismissDepartment();
-            break;
-          case 1:
-            this.transferDepartment();
-            break;
-          case 2:
-            this.kickMember();
-            break;
-        }
+        // 延迟执行，避免连续弹出 ActionSheet 导致失败
+        setTimeout(() => {
+          switch (res.tapIndex) {
+            case 0:
+              this.dismissDepartment();
+              break;
+            case 1:
+              this.transferDepartment();
+              break;
+            case 2:
+              this.kickMember();
+              break;
+          }
+        }, 300);
       }
     });
   },
@@ -1066,83 +1091,96 @@ Page({
     }
   },
 
-  // 转让科室
-  async transferDepartment() {
-    // 筛选出非创建者的成员
-    const transferableMembers = this.data.members.filter(m => !m.isCreator);
+  // 转让科室 - 显示 picker
+  transferDepartment() {
+    const userInfo = wx.getStorageSync('userInfo');
+    // 排除自己，显示其他所有成员
+    const transferableMembers = this.data.members.filter(m => m.id != userInfo?.id);
     
     if (transferableMembers.length === 0) {
       util.showError('暂无其他成员可转让');
       return;
     }
 
-    // 显示成员列表供选择
-    const memberNames = transferableMembers.map(m => m.nickName);
-    const { tapIndex } = await wx.showActionSheet({
-      itemList: memberNames
+    this.setData({
+      pickerMode: 'transfer',
+      pickerMembers: transferableMembers,
+      pickerIndex: 0,
+      showMemberPicker: true
     });
-
-    if (tapIndex === undefined) return;
-
-    const selectedMember = transferableMembers[tapIndex];
-    const confirm = await util.showConfirm('确认转让', `确定将科室转让给 ${selectedMember.nickName} 吗？`);
-    if (!confirm) return;
-
-    try {
-      util.showLoading('转让中...');
-      await api.transferDepartment(this.data.department.id, { newCreatorId: selectedMember.id });
-      util.hideLoading();
-      
-      // 更新本地数据
-      const userInfo = wx.getStorageSync('userInfo');
-      const department = this.data.department;
-      department.creatorId = selectedMember.id;
-      wx.setStorageSync('department', department);
-      
-      util.showSuccess('已转让');
-      
-      // 刷新页面
-      this.checkDepartment();
-    } catch (error) {
-      util.hideLoading();
-      util.showError(error.message || error.msg || '转让失败');
-    }
   },
 
-  // 踢出成员
-  async kickMember() {
-    // 筛选出非创建者的成员
-    const kickableMembers = this.data.members.filter(m => !m.isCreator);
+  // 踢出成员 - 显示 picker
+  kickMember() {
+    const userInfo = wx.getStorageSync('userInfo');
+    // 排除自己，显示其他所有成员
+    const kickableMembers = this.data.members.filter(m => m.id != userInfo?.id);
     
     if (kickableMembers.length === 0) {
       util.showError('暂无其他成员可踢出');
       return;
     }
 
-    // 显示成员列表供选择
-    const memberNames = kickableMembers.map(m => m.nickName);
-    const { tapIndex } = await wx.showActionSheet({
-      itemList: memberNames
+    this.setData({
+      pickerMode: 'kick',
+      pickerMembers: kickableMembers,
+      pickerIndex: 0,
+      showMemberPicker: true
     });
+  },
 
-    if (tapIndex === undefined) return;
+  // picker 滚动选择
+  onPickerChange(e) {
+    this.setData({ pickerIndex: e.detail.value[0] });
+  },
 
-    const selectedMember = kickableMembers[tapIndex];
-    const confirm = await util.showConfirm('确认踢出', `确定要将 ${selectedMember.nickName} 移出科室吗？`);
-    if (!confirm) return;
+  // picker 确认选择
+  async onPickerConfirm() {
+    const { pickerMode, pickerMembers, pickerIndex } = this.data;
+    this.setData({ showMemberPicker: false });
 
-    try {
-      util.showLoading('处理中...');
-      await api.kickMember(this.data.department.id, { memberId: selectedMember.id });
-      util.hideLoading();
-      util.showSuccess('已移出');
-      
-      // 刷新成员列表
-      this.loadMembers(this.data.department);
-    } catch (error) {
-      util.hideLoading();
-      util.showError(error.message || error.msg || '操作失败');
+    const selectedMember = pickerMembers[pickerIndex];
+    if (!selectedMember) return;
+
+    if (pickerMode === 'transfer') {
+      const confirm = await util.showConfirm('确认转让', `确定将科室转让给 ${selectedMember.nickName || '未命名用户'} 吗？`);
+      if (!confirm) return;
+
+      try {
+        util.showLoading('转让中...');
+        await api.transferDepartment(this.data.department.id, { newCreatorId: selectedMember.id });
+        util.hideLoading();
+        
+        const department = this.data.department;
+        department.creatorId = selectedMember.id;
+        wx.setStorageSync('department', department);
+        
+        util.showSuccess('已转让');
+        this.checkDepartment();
+      } catch (error) {
+        util.hideLoading();
+        util.showError(error.message || error.msg || '转让失败');
+      }
+    } else if (pickerMode === 'kick') {
+      const confirm = await util.showConfirm('确认踢出', `确定要将 ${selectedMember.nickName || '未命名用户'} 移出科室吗？`);
+      if (!confirm) return;
+
+      try {
+        util.showLoading('处理中...');
+        await api.kickMember(this.data.department.id, { memberId: selectedMember.id });
+        util.hideLoading();
+        util.showSuccess('已移出');
+        this.loadMembers(this.data.department);
+      } catch (error) {
+        util.hideLoading();
+        util.showError(error.message || error.msg || '操作失败');
+      }
     }
+  },
+
+  // picker 取消
+  onPickerCancel() {
+    this.setData({ showMemberPicker: false });
   },
 
   // 显示成员操作菜单（非护士长专属）
@@ -1207,8 +1245,10 @@ Page({
     this.setData({
       showSearchInput: !this.data.showSearchInput,
       searchKeyword: '',
-      filteredMembers: this.data.members
+      filteredMembers: this.data.members,
+      memberExpanded: false
     });
+    this.updateDisplayMembers();
   },
 
   // 关闭搜索框
@@ -1216,8 +1256,10 @@ Page({
     this.setData({
       showSearchInput: false,
       searchKeyword: '',
-      filteredMembers: this.data.members
+      filteredMembers: this.data.members,
+      memberExpanded: false
     });
+    this.updateDisplayMembers();
   },
 
   // 搜索输入
@@ -1230,18 +1272,37 @@ Page({
   // 过滤成员列表
   filterMembers(keyword) {
     if (!keyword) {
-      // 如果关键字为空，显示所有成员
-      this.setData({ filteredMembers: this.data.members });
+      this.setData({ filteredMembers: this.data.members, memberExpanded: false });
+      this.updateDisplayMembers();
       return;
     }
 
-    // 模糊匹配成员名称（不区分大小写）
     const filtered = this.data.members.filter(member => {
       const name = member.nickName.toLowerCase();
       const searchKey = keyword.toLowerCase();
       return name.includes(searchKey);
     });
 
-    this.setData({ filteredMembers: filtered });
+    // 搜索时展开全部结果
+    this.setData({ filteredMembers: filtered, memberExpanded: true });
+    this.updateDisplayMembers();
+  },
+
+    // 模糊匹配成员名称（不区分大小写）
+  // 更新显示的成员列表（折叠/展开）
+  updateDisplayMembers() {
+    const { filteredMembers, memberExpanded } = this.data;
+    if (memberExpanded || filteredMembers.length <= 3) {
+      this.setData({ displayMembers: filteredMembers });
+    } else {
+      this.setData({ displayMembers: filteredMembers.slice(0, 3) });
+    }
+  },
+
+  // 展开/收起成员列表
+  toggleMemberList() {
+    const memberExpanded = !this.data.memberExpanded;
+    this.setData({ memberExpanded });
+    this.updateDisplayMembers();
   }
 });

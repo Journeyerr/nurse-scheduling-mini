@@ -120,13 +120,11 @@
     <view class="dept-info-row">
       <view class="dept-info-left" bindtap="showDepartmentActions" hover-class="invite-text-hover">
         <text class="dept-name-text">{{department.name}}</text>
-        <text class="dept-sep">|</text>
-        <text class="dept-count-text">{{members.length}}人</text>
-        <text class="dept-sep">|</text>
         <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit"></image>
       </view>
       <button class="invite-btn-new" size="mini" open-type="share">
         <text class="invite-link-text">邀请成员</text>
+        <image class="invite-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
       </button>
     </view>
   </view>
@@ -136,32 +134,17 @@
     <view class="dept-info-row">
       <view class="dept-info-left" bindtap="showMemberActions" hover-class="invite-text-hover">
         <text class="dept-name-text">{{department.name}}</text>
-        <text class="dept-sep">|</text>
-        <text class="dept-count-text">{{members.length}}人</text>
-        <text class="dept-sep">|</text>
         <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit"></image>
       </view>
     </view>
   </view>
 
-  <!-- 搜索框（所有有科室的用户可见） -->
-  <view class="search-section card" wx:if="{{showSearchInput}}">
-    <input 
-      class="search-input" 
-      placeholder="搜索成员姓名" 
-      value="{{searchKeyword}}"
-      bindinput="onSearchInput"
-      focus="{{showSearchInput}}"
-    />
-    <text class="search-close" bindtap="closeSearch">×</text>
-  </view>
-
-  <!-- 成员列表区 -->
-  <view class="member-section card" wx:if="{{hasDepartment && filteredMembers.length > 0}}">
+  <!-- 成员列表区（搜索时隐藏） -->
+  <view class="member-section card" wx:if="{{hasDepartment && !showSearchInput && filteredMembers.length > 0}}">
     <view class="member-list">
       <view 
         class="member-item" 
-        wx:for="{{filteredMembers}}" 
+        wx:for="{{displayMembers}}" 
         wx:key="id"
         bindtap="goMemberInfo"
         data-id="{{item.id}}"
@@ -198,11 +181,56 @@
         <text class="member-arrow">›</text>
       </view>
     </view>
+    <!-- 底部操作栏：展开/收起 -->
+    <view class="member-toggle" wx:if="{{filteredMembers.length > 3}}" bindtap="toggleMemberList">
+      <text class="member-toggle-text">{{memberExpanded ? '收起' : '展开更多（共' + filteredMembers.length + '人）'}}</text>
+      <text class="member-toggle-arrow {{memberExpanded ? 'arrow-up' : 'arrow-down'}}">›</text>
+    </view>
+    <view class="member-toggle" wx:elif="{{filteredMembers.length <= 3 && filteredMembers.length > 0}}">
+      <text class="member-toggle-text">共{{filteredMembers.length}}人</text>
+    </view>
   </view>
 
-  <!-- 无搜索结果提示 -->
-  <view class="no-result card" wx:if="{{hasDepartment && searchKeyword && filteredMembers.length === 0}}">
-    <text class="no-result-text">未找到匹配的成员</text>
+  <!-- 搜索弹窗 -->
+  <view class="search-mask" wx:if="{{showSearchInput}}" catchtouchmove="stopPropagation">
+    <view class="search-header">
+      <input 
+        class="search-mask-input" 
+        placeholder="搜索成员姓名" 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        focus="{{showSearchInput}}"
+        adjust-position="{{true}}"
+      />
+      <text class="search-mask-close" bindtap="closeSearch">取消</text>
+    </view>
+    <scroll-view scroll-y class="search-result-list">
+      <view 
+        class="member-item" 
+        wx:for="{{filteredMembers}}" 
+        wx:key="id"
+        bindtap="goMemberInfo"
+        data-id="{{item.id}}"
+      >
+        <view class="member-left">
+          <view class="member-avatar-text" wx:if="{{!item.avatarUrl}}">
+            <text>{{item.nickName[0]}}</text>
+          </view>
+          <image class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill" wx:else></image>
+          <view class="member-info">
+            <view class="member-name-row">
+              <text class="member-name">{{item.nickName}}</text>
+              <view class="tag tag-self" wx:if="{{item.isSelf}}">我</view>
+              <view class="tag tag-creator" wx:if="{{item.isCreator}}">创建者</view>
+            </view>
+          </view>
+        </view>
+        <text class="member-arrow">›</text>
+      </view>
+      <view class="no-result" wx:if="{{searchKeyword && filteredMembers.length === 0}}">
+        <text class="no-result-text">未找到匹配的成员</text>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- 无科室时的底部操作区 -->
@@ -283,6 +311,22 @@
     <view class="invite-modal-actions">
       <button class="invite-cancel" bindtap="closeInviteModal">取消</button>
       <button class="invite-confirm" open-type="share">邀请</button>
+    </view>
+  </view>
+</view>
+
+<!-- 成员选择器弹窗 -->
+<view class="modal-mask" wx:if="{{showMemberPicker}}" bindtap="onPickerCancel">
+  <view class="picker-modal" catchtap="stopPropagation">
+    <view class="picker-modal-title">{{pickerMode === 'transfer' ? '选择转让对象' : '选择移除成员'}}</view>
+    <picker-view class="picker-view" value="{{[pickerIndex]}}" bindchange="onPickerChange" indicator-style="height: 80rpx;">
+      <picker-view-column>
+        <view class="picker-item" wx:for="{{pickerMembers}}" wx:key="id">{{item.nickName || '未命名用户'}}</view>
+      </picker-view-column>
+    </picker-view>
+    <view class="picker-modal-actions">
+      <view class="picker-btn picker-cancel" bindtap="onPickerCancel">取消</view>
+      <view class="picker-btn picker-confirm" bindtap="onPickerConfirm">确定</view>
     </view>
   </view>
 </view>

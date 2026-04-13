@@ -153,8 +153,8 @@
 </view>
 
 <!-- 成员选择弹窗 -->
-<view class="picker-mask" wx:if="{{showMemberPicker}}" bindtap="hidePicker">
-  <view class="picker-popup" catchtap="stopPropagation">
+<view class="picker-mask" wx:if="{{showMemberPicker}}" bindtap="hidePicker" catchtouchmove="stopPropagation">
+  <view class="picker-popup" catchtap="stopPropagation" catchtouchmove="stopPropagation">
     <view class="picker-header">
       <text class="picker-title">选择成员</text>
       <text class="picker-close" bindtap="hidePicker">×</text>

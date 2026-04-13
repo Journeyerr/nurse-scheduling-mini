@@ -166,6 +166,9 @@ Page({
     this.setData({ showMemberPicker: false });
   },
 
+  // 阻止事件冒泡和穿透
+  stopPropagation() {},
+
   // 切换成员
   onMemberChange(e) {
     const memberId = e.currentTarget.dataset.id;
