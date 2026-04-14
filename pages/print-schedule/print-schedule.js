@@ -148,6 +148,188 @@ Page({
     this.loadStatisticsData();
   },
 
+  // 核心绘制方法（saveImage 和 generateImage 共用）
+  _drawScheduleCanvas() {
+    return new Promise((resolve, reject) => {
+      const shiftCount = this.data.shiftList.length || 1;
+      const dpr = wx.getWindowInfo().pixelRatio || 2;
+
+      // 逻辑尺寸（px）
+      const canvasLogicWidth = 750;
+      const nameWidth = 150;
+      const coefficientWidth = 100;
+      const shiftWidth = (canvasLogicWidth - nameWidth - coefficientWidth) / shiftCount;
+      const rowHeight = 80;
+      const headerHeight = 120;
+      const footerPadding = 80;
+
+      // 计算图例需要几行
+      const legendCols = Math.min(shiftCount, 4);
+      const legendRows = Math.ceil(shiftCount / legendCols);
+      const legendHeight = legendRows * 50 + 40;
+
+      const dataRowCount = this.data.statisticsData.length;
+      const canvasLogicHeight = headerHeight + (dataRowCount + 1) * rowHeight + legendHeight + footerPadding;
+
+      const coefficientX = canvasLogicWidth - coefficientWidth;
+
+      const query = wx.createSelectorQuery();
+      query.select('#myCanvas')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (!res[0]) {
+            reject(new Error('Canvas not found'));
+            return;
+          }
+          const canvas = res[0].node;
+          const ctx = canvas.getContext('2d');
+
+          // 设置 canvas 实际像素尺寸（高清）
+          canvas.width = canvasLogicWidth * dpr;
+          canvas.height = canvasLogicHeight * dpr;
+
+          // 缩放绘制上下文
+          ctx.scale(dpr, dpr);
+
+          // 绘制白色背景
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvasLogicWidth, canvasLogicHeight);
+
+          // 绘制标题
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 32px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(
+            `${this.data.department.name} - ${this.data.currentYear}年${this.data.currentMonth}月排班表`,
+            canvasLogicWidth / 2,
+            50
+          );
+
+          // 绘制表头
+          let y = headerHeight;
+          ctx.fillStyle = '#f5f5f5';
+          ctx.fillRect(0, y, canvasLogicWidth, rowHeight);
+
+          ctx.strokeStyle = '#e0e0e0';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(0, y, canvasLogicWidth, rowHeight);
+
+          // 表头：姓名
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 26px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('姓名', nameWidth / 2, y + rowHeight / 2);
+
+          // 表头：班次
+          this.data.shiftList.forEach((shift, index) => {
+            const x = nameWidth + index * shiftWidth;
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.strokeRect(x, y, shiftWidth, rowHeight);
+            ctx.fillStyle = '#333333';
+            ctx.font = 'bold 24px sans-serif';
+            ctx.fillText(shift.code || shift.name, x + shiftWidth / 2, y + rowHeight / 2);
+          });
+
+          // 表头：系数
+          ctx.strokeStyle = '#e0e0e0';
+          ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 26px sans-serif';
+          ctx.fillText('系数', coefficientX + coefficientWidth / 2, y + rowHeight / 2);
+
+          // 绘制数据行
+          y += rowHeight;
+          this.data.statisticsData.forEach((member, rowIndex) => {
+            ctx.fillStyle = rowIndex % 2 === 0 ? '#ffffff' : '#fafafa';
+            ctx.fillRect(0, y, canvasLogicWidth, rowHeight);
+
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.strokeRect(0, y, canvasLogicWidth, rowHeight);
+
+            // 姓名
+            ctx.fillStyle = '#333333';
+            ctx.font = '26px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(member.memberName, nameWidth / 2, y + rowHeight / 2);
+
+            // 各班次统计
+            member.shiftCounts.forEach((shiftCount, colIndex) => {
+              const x = nameWidth + colIndex * shiftWidth;
+              ctx.strokeStyle = '#e0e0e0';
+              ctx.strokeRect(x, y, shiftWidth, rowHeight);
+              ctx.fillStyle = '#4A90D9';
+              ctx.font = '26px sans-serif';
+              ctx.fillText(
+                shiftCount.count > 0 ? shiftCount.count.toString() : '-',
+                x + shiftWidth / 2,
+                y + rowHeight / 2
+              );
+            });
+
+            // 系数
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
+            ctx.fillStyle = '#E89B7C';
+            ctx.font = 'bold 26px sans-serif';
+            ctx.fillText(
+              member.coefficientSum > 0 ? member.coefficientSum.toString() : '-',
+              coefficientX + coefficientWidth / 2,
+              y + rowHeight / 2
+            );
+
+            y += rowHeight;
+          });
+
+          // 绘制图例（自动换行）
+          y += 30;
+          ctx.fillStyle = '#666666';
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('图例：', 30, y + 15);
+
+          y += 35;
+          const legendItemWidth = 170;
+          const maxCols = Math.floor((canvasLogicWidth - 40) / legendItemWidth);
+          this.data.shiftList.forEach((shift, index) => {
+            const col = index % maxCols;
+            const row = Math.floor(index / maxCols);
+            const x = 30 + col * legendItemWidth;
+            const legendY = y + row * 45;
+
+            // 绘制颜色块
+            ctx.fillStyle = shift.color || '#999';
+            ctx.fillRect(x, legendY - 10, 24, 24);
+
+            // 绘制文字
+            ctx.fillStyle = '#333333';
+            ctx.font = '22px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${shift.code}: ${shift.name}（×${shift.coefficient || 1.0}）`, x + 32, legendY + 2);
+          });
+
+          // 转换为图片
+          wx.canvasToTempFilePath({
+            canvas: canvas,
+            width: canvasLogicWidth * dpr,
+            height: canvasLogicHeight * dpr,
+            destWidth: canvasLogicWidth * dpr,
+            destHeight: canvasLogicHeight * dpr,
+            success: (res) => {
+              resolve(res.tempFilePath);
+            },
+            fail: (err) => {
+              console.error('生成图片失败', err);
+              reject(err);
+            }
+          });
+        });
+    });
+  },
+
   // 保存图片
   async saveImage() {
     try {
@@ -159,171 +341,22 @@ Page({
         await wx.authorize({ scope: 'scope.writePhotosAlbum' });
       }
 
-      const { cellWidths } = this.data;
-      const shiftCount = this.data.shiftList.length || 1;
-      // rpx 转 px（rpx / 2），Canvas 用 px
-      const nameWidth = cellWidths.name / 2;
-      const shiftWidth = cellWidths.shift / 2;
-      const coefficientWidth = cellWidths.coefficient / 2;
-      const canvasWidth = nameWidth + shiftWidth * shiftCount + coefficientWidth;
-      const rowHeight = 80;
+      const tempFilePath = await this._drawScheduleCanvas();
+      this.setData({ shareImagePath: tempFilePath });
 
-      // 计算画布高度
-      const headerHeight = 100;
-      const legendHeight = 120;
-      const canvasHeight = headerHeight + (this.data.statisticsData.length + 1) * rowHeight + legendHeight + 100;
-
-      const coefficientX = canvasWidth - coefficientWidth;
-
-      // 获取 Canvas 实例
-      const query = wx.createSelectorQuery();
-      query.select('#myCanvas')
-        .fields({ node: true, size: true })
-        .exec(async (res) => {
-          const canvas = res[0].node;
-          const ctx = canvas.getContext('2d');
-
-          canvas.width = canvasWidth;
-          canvas.height = canvasHeight;
-
-          // 绘制白色背景
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-          // 绘制标题
-          ctx.fillStyle = '#333333';
-          ctx.font = 'bold 36px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(
-            `${this.data.department.name} - ${this.data.currentYear}年${this.data.currentMonth}月排班表`,
-            canvasWidth / 2,
-            60
-          );
-
-          // 绘制表头
-          let y = headerHeight;
-          ctx.fillStyle = '#f5f5f5';
-          ctx.fillRect(0, y, canvasWidth, rowHeight);
-
-          ctx.strokeStyle = '#e0e0e0';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(0, y, canvasWidth, rowHeight);
-
-          // 表头：姓名
-          ctx.fillStyle = '#333333';
-          ctx.font = 'bold 28px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('姓名', nameWidth / 2, y + 50);
-
-          // 表头：班次
-          this.data.shiftList.forEach((shift, index) => {
-            const x = nameWidth + index * shiftWidth;
-            ctx.strokeRect(x, y, shiftWidth, rowHeight);
-            ctx.fillText(shift.code, x + shiftWidth / 2, y + 50);
-          });
-
-          // 表头：系数
-          ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
-          ctx.fillStyle = '#333333';
-          ctx.fillText('系数', coefficientX + coefficientWidth / 2, y + 50);
-
-          // 绘制数据行
-          y += rowHeight;
-          this.data.statisticsData.forEach((member, rowIndex) => {
-            ctx.fillStyle = rowIndex % 2 === 0 ? '#ffffff' : '#fafafa';
-            ctx.fillRect(0, y, canvasWidth, rowHeight);
-
-            ctx.strokeStyle = '#e0e0e0';
-            ctx.strokeRect(0, y, canvasWidth, rowHeight);
-
-            // 姓名
-            ctx.fillStyle = '#333333';
-            ctx.font = '28px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(member.memberName, nameWidth / 2, y + 50);
-
-            // 各班次统计
-            member.shiftCounts.forEach((shiftCount, colIndex) => {
-              const x = nameWidth + colIndex * shiftWidth;
-              ctx.strokeRect(x, y, shiftWidth, rowHeight);
-              ctx.fillStyle = '#4A90D9';
-              ctx.fillText(
-                shiftCount.count > 0 ? shiftCount.count.toString() : '-',
-                x + shiftWidth / 2,
-                y + 50
-              );
-            });
-
-            // 系数
-            ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
-            ctx.fillStyle = '#E89B7C';
-            ctx.fillText(
-              member.coefficientSum > 0 ? member.coefficientSum.toString() : '-',
-              coefficientX + coefficientWidth / 2,
-              y + 50
-            );
-
-            y += rowHeight;
-          });
-
-          // 绘制图例
-          y += 40;
-          ctx.fillStyle = '#666666';
-          ctx.font = '24px sans-serif';
-          ctx.textAlign = 'left';
-          ctx.fillText('图例：', 30, y);
-
-          this.data.shiftList.forEach((shift, index) => {
-            const x = 30 + index * 180;
-            const legendY = y + 40;
-
-            // 绘制颜色块
-            ctx.fillStyle = shift.color;
-            ctx.fillRect(x, legendY - 20, 30, 30);
-
-            // 绘制文字
-            ctx.fillStyle = '#333333';
-            ctx.font = '24px sans-serif';
-            ctx.fillText(`${shift.code}: ${shift.name}`, x + 40, legendY);
-          });
-
-          // 转换为图片
-          wx.canvasToTempFilePath({
-            canvas: canvas,
-            success: (res) => {
-              // 保存图片路径用于分享
-              this.setData({ shareImagePath: res.tempFilePath });
-
-              // 保存到相册
-              wx.saveImageToPhotosAlbum({
-                filePath: res.tempFilePath,
-                success: () => {
-                  wx.hideLoading();
-                  wx.showToast({
-                    title: '已保存到相册',
-                    icon: 'success'
-                  });
-                },
-                fail: (err) => {
-                  wx.hideLoading();
-                  console.error('保存失败', err);
-                  wx.showToast({
-                    title: '保存失败',
-                    icon: 'none'
-                  });
-                }
-              });
-            },
-            fail: (err) => {
-              wx.hideLoading();
-              console.error('生成图片失败', err);
-              wx.showToast({
-                title: '生成图片失败',
-                icon: 'none'
-              });
-            }
-          });
-        });
+      // 保存到相册
+      wx.saveImageToPhotosAlbum({
+        filePath: tempFilePath,
+        success: () => {
+          wx.hideLoading();
+          wx.showToast({ title: '已保存到相册', icon: 'success' });
+        },
+        fail: (err) => {
+          wx.hideLoading();
+          console.error('保存失败', err);
+          wx.showToast({ title: '保存失败', icon: 'none' });
+        }
+      });
     } catch (error) {
       wx.hideLoading();
       console.error('保存图片失败', error);
@@ -340,161 +373,29 @@ Page({
           }
         });
       } else {
-        wx.showToast({
-          title: '保存失败',
-          icon: 'none'
-        });
+        wx.showToast({ title: '保存失败', icon: 'none' });
       }
     }
   },
 
   // 分享排班
   async shareSchedule() {
-    // 如果还没有生成图片，先生成
     if (!this.data.shareImagePath) {
       await this.generateImage();
     }
-
-    // 触发分享
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage']
-    });
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage'] });
   },
 
   // 生成图片（不保存）
-  generateImage() {
-    return new Promise((resolve, reject) => {
-      const canvasWidth = 750;
-      const rowHeight = 80;
-      const nameWidth = 150;
-      const coefficientWidth = 100;
-      const shiftWidth = (canvasWidth - nameWidth - coefficientWidth) / (this.data.shiftList.length || 1);
-
-      const headerHeight = 100;
-      const legendHeight = 120;
-      const canvasHeight = headerHeight + (this.data.statisticsData.length + 1) * rowHeight + legendHeight + 100;
-
-      const coefficientX = canvasWidth - coefficientWidth;
-
-      const query = wx.createSelectorQuery();
-      query.select('#myCanvas')
-        .fields({ node: true, size: true })
-        .exec((res) => {
-          const canvas = res[0].node;
-          const ctx = canvas.getContext('2d');
-
-          canvas.width = canvasWidth;
-          canvas.height = canvasHeight;
-
-          // 绘制白色背景
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-          // 绘制标题
-          ctx.fillStyle = '#333333';
-          ctx.font = 'bold 36px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(
-            `${this.data.department.name} - ${this.data.currentYear}年${this.data.currentMonth}月排班表`,
-            canvasWidth / 2,
-            60
-          );
-
-          // 绘制表头
-          let y = headerHeight;
-          ctx.fillStyle = '#f5f5f5';
-          ctx.fillRect(0, y, canvasWidth, rowHeight);
-
-          ctx.strokeStyle = '#e0e0e0';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(0, y, canvasWidth, rowHeight);
-
-          ctx.fillStyle = '#333333';
-          ctx.font = 'bold 28px sans-serif';
-          ctx.textAlign = 'center';
-
-          this.data.shiftList.forEach((shift, index) => {
-            const x = nameWidth + index * shiftWidth;
-            ctx.strokeRect(x, y, shiftWidth, rowHeight);
-            ctx.fillText(shift.code, x + shiftWidth / 2, y + 50);
-          });
-
-          // 表头：系数
-          ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
-          ctx.fillStyle = '#333333';
-          ctx.fillText('系数', coefficientX + coefficientWidth / 2, y + 50);
-
-          // 绘制数据行
-          y += rowHeight;
-          this.data.statisticsData.forEach((member, rowIndex) => {
-            ctx.fillStyle = rowIndex % 2 === 0 ? '#ffffff' : '#fafafa';
-            ctx.fillRect(0, y, canvasWidth, rowHeight);
-
-            ctx.strokeStyle = '#e0e0e0';
-            ctx.strokeRect(0, y, canvasWidth, rowHeight);
-
-            ctx.fillStyle = '#333333';
-            ctx.font = '28px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(member.memberName, nameWidth / 2, y + 50);
-
-            member.shiftCounts.forEach((shiftCount, colIndex) => {
-              const x = nameWidth + colIndex * shiftWidth;
-              ctx.strokeRect(x, y, shiftWidth, rowHeight);
-              ctx.fillStyle = '#4A90D9';
-              ctx.fillText(
-                shiftCount.count > 0 ? shiftCount.count.toString() : '-',
-                x + shiftWidth / 2,
-                y + 50
-              );
-            });
-
-            // 系数
-            ctx.strokeRect(coefficientX, y, coefficientWidth, rowHeight);
-            ctx.fillStyle = '#E89B7C';
-            ctx.fillText(
-              member.coefficientSum > 0 ? member.coefficientSum.toString() : '-',
-              coefficientX + coefficientWidth / 2,
-              y + 50
-            );
-
-            y += rowHeight;
-          });
-
-          // 绘制图例
-          y += 40;
-          ctx.fillStyle = '#666666';
-          ctx.font = '24px sans-serif';
-          ctx.textAlign = 'left';
-          ctx.fillText('图例：', 30, y);
-
-          this.data.shiftList.forEach((shift, index) => {
-            const x = 30 + index * 180;
-            const legendY = y + 40;
-
-            ctx.fillStyle = shift.color;
-            ctx.fillRect(x, legendY - 20, 30, 30);
-
-            ctx.fillStyle = '#333333';
-            ctx.font = '24px sans-serif';
-            ctx.fillText(`${shift.code}: ${shift.name}`, x + 40, legendY);
-          });
-
-          // 转换为图片
-          wx.canvasToTempFilePath({
-            canvas: canvas,
-            success: (res) => {
-              this.setData({ shareImagePath: res.tempFilePath });
-              resolve(res.tempFilePath);
-            },
-            fail: (err) => {
-              console.error('生成图片失败', err);
-              reject(err);
-            }
-          });
-        });
-    });
+  async generateImage() {
+    try {
+      const tempFilePath = await this._drawScheduleCanvas();
+      this.setData({ shareImagePath: tempFilePath });
+      return tempFilePath;
+    } catch (err) {
+      console.error('生成图片失败', err);
+      throw err;
+    }
   },
 
   // 分享

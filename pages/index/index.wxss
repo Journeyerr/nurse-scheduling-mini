@@ -531,6 +531,12 @@
   color: #CCC;
 }
 
+.member-arrow-img {
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.4;
+}
+
 /* 标签样式 */
 .tag {
   display: inline-block;

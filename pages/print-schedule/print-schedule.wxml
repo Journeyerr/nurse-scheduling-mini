@@ -50,7 +50,7 @@
   </view>
 
   <!-- Canvas 用于生成图片 -->
-  <canvas type="2d" id="myCanvas" style="position: absolute; left: -9999px; width: 750px; height: 1334px;"></canvas>
+  <canvas type="2d" id="myCanvas" style="position: absolute; left: -9999px; width: 750px; height: 2000px;"></canvas>
 
   <!-- 操作按钮 -->
   <view class="action-buttons">

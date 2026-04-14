@@ -178,7 +178,7 @@
             </view>
           </view>
         </view>
-        <text class="member-arrow">›</text>
+        <image class="member-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
       </view>
     </view>
     <!-- 底部操作栏：展开/收起 -->
@@ -213,10 +213,26 @@
         data-id="{{item.id}}"
       >
         <view class="member-left">
-          <view class="member-avatar-text" wx:if="{{!item.avatarUrl}}">
+          <view 
+            class="member-avatar-text" 
+            wx:if="{{!item.avatarUrl}}"
+            catchtap="onAvatarTap"
+            data-id="{{item.id}}"
+            data-phone="{{item.phone}}"
+            data-isself="{{item.isSelf}}"
+          >
             <text>{{item.nickName[0]}}</text>
           </view>
-          <image class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill" wx:else></image>
+          <image 
+            class="member-avatar" 
+            src="{{item.avatarUrl}}" 
+            mode="aspectFill" 
+            wx:else
+            catchtap="onAvatarTap"
+            data-id="{{item.id}}"
+            data-phone="{{item.phone}}"
+            data-isself="{{item.isSelf}}"
+          ></image>
           <view class="member-info">
             <view class="member-name-row">
               <text class="member-name">{{item.nickName}}</text>
@@ -225,7 +241,7 @@
             </view>
           </view>
         </view>
-        <text class="member-arrow">›</text>
+        <image class="member-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
       </view>
       <view class="no-result" wx:if="{{searchKeyword && filteredMembers.length === 0}}">
         <text class="no-result-text">未找到匹配的成员</text>
