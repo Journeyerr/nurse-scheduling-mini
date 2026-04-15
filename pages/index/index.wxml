@@ -340,8 +340,8 @@
 <!-- 成员选择器弹窗 -->
 <view class="modal-mask" wx:if="{{showMemberPicker}}" bindtap="onPickerCancel">
   <view class="picker-modal" catchtap="stopPropagation">
-    <view class="picker-modal-title">{{pickerMode === 'transfer' ? '选择转让对象' : '选择移除成员'}}</view>
-    <picker-view class="picker-view" value="{{[pickerIndex]}}" bindchange="onPickerChange" indicator-style="height: 80rpx;">
+    <view class="picker-modal-title">{{pickerMode === 'transfer' ? '选择转让对象' : pickerMode === 'admin' ? '选择管理员' : '选择移除成员'}}</view>
+    <picker-view class="picker-view" value="{{[pickerIndex]}}" bindchange="onPickerChange" indicator-style="height: 80rpx;" immediate-change="{{true}}">
       <picker-view-column>
         <view class="picker-item" wx:for="{{pickerMembers}}" wx:key="id">{{item.nickName || '未命名用户'}}</view>
       </picker-view-column>

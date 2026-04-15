@@ -51,6 +51,9 @@ Page({
     showPublishModal: false,
     publishStats: null,  // 统计数据
     
+    // 底部工具栏
+    toolbarTab: 'shift',  // 'shift' | 'package'
+    
     initialized: false  // 是否已初始化
   },
 
@@ -900,6 +903,12 @@ Page({
   // 关闭弹窗
   closeMemberModal() {
     this.setData({ showMemberModal: false });
+  },
+
+  // 切换工具栏标签
+  switchToolbarTab(e) {
+    const { tab } = e.currentTarget.dataset;
+    this.setData({ toolbarTab: tab });
   },
 
   // 跳转创建套餐

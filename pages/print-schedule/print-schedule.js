@@ -283,7 +283,7 @@ Page({
             y += rowHeight;
           });
 
-          // 绘制图例（自动换行）
+          // 绘制图例（自动换行，防止文字溢出覆盖）
           y += 30;
           ctx.fillStyle = '#666666';
           ctx.font = '22px sans-serif';
@@ -294,21 +294,42 @@ Page({
           y += 35;
           const legendItemWidth = 170;
           const maxCols = Math.floor((canvasLogicWidth - 40) / legendItemWidth);
+          // 重新计算图例实际行数和高度（可能因文字换行增加行数）
+          let legendCurrentY = y;
+          let currentCol = 0;
           this.data.shiftList.forEach((shift, index) => {
-            const col = index % maxCols;
-            const row = Math.floor(index / maxCols);
+            const col = currentCol % maxCols;
+            const row = Math.floor(currentCol / maxCols);
             const x = 30 + col * legendItemWidth;
-            const legendY = y + row * 45;
+            const itemY = y + row * 45;
+
+            // 计算文字可用最大宽度（防止溢出到下一个图例项）
+            const textX = x + 32;
+            const maxTextWidth = legendItemWidth - 36;
 
             // 绘制颜色块
             ctx.fillStyle = shift.color || '#999';
-            ctx.fillRect(x, legendY - 10, 24, 24);
+            ctx.fillRect(x, itemY - 10, 24, 24);
 
-            // 绘制文字
+            // 绘制文字（截断防溢出）
             ctx.fillStyle = '#333333';
             ctx.font = '22px sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText(`${shift.code}: ${shift.name}（×${shift.coefficient || 1.0}）`, x + 32, legendY + 2);
+            ctx.textBaseline = 'middle';
+
+            let legendText = `${shift.code}: ${shift.name}（×${shift.coefficient || 1.0}）`;
+            // 测量文字宽度，超出则截断
+            let measuredWidth = ctx.measureText(legendText).width;
+            if (measuredWidth > maxTextWidth) {
+              // 逐步截断直到 fits
+              while (legendText.length > 0 && ctx.measureText(legendText + '…').width > maxTextWidth) {
+                legendText = legendText.slice(0, -1);
+              }
+              legendText += '…';
+            }
+            ctx.fillText(legendText, textX, itemY + 2);
+
+            legendCurrentY = itemY;
           });
 
           // 转换为图片
@@ -333,14 +354,42 @@ Page({
   // 保存图片
   async saveImage() {
     try {
-      wx.showLoading({ title: '生成中...' });
-
-      // 请求保存到相册的权限
+      // 先请求相册权限（必须在用户点击的同步上下文中请求，否则手机上会失败）
       const auth = await wx.getSetting();
-      if (!auth.authSetting['scope.writePhotosAlbum']) {
-        await wx.authorize({ scope: 'scope.writePhotosAlbum' });
+      if (auth.authSetting['scope.writePhotosAlbum'] === false) {
+        wx.showModal({
+          title: '提示',
+          content: '需要您授权保存到相册的权限，请前往设置开启',
+          confirmText: '去设置',
+          success: (res) => {
+            if (res.confirm) {
+              wx.openSetting();
+            }
+          }
+        });
+        return;
       }
 
+      if (!auth.authSetting['scope.writePhotosAlbum']) {
+        try {
+          await wx.authorize({ scope: 'scope.writePhotosAlbum' });
+        } catch (authErr) {
+          wx.showModal({
+            title: '提示',
+            content: '需要您授权保存到相册的权限，请前往设置开启',
+            confirmText: '去设置',
+            success: (res) => {
+              if (res.confirm) {
+                wx.openSetting();
+              }
+            }
+          });
+          return;
+        }
+      }
+
+      // 权限已获取，绘制图片
+      wx.showLoading({ title: '生成中...' });
       const tempFilePath = await this._drawScheduleCanvas();
       this.setData({ shareImagePath: tempFilePath });
 
@@ -360,21 +409,7 @@ Page({
     } catch (error) {
       wx.hideLoading();
       console.error('保存图片失败', error);
-
-      if (error.errMsg && error.errMsg.includes('auth deny')) {
-        wx.showModal({
-          title: '提示',
-          content: '需要您授权保存相册权限',
-          confirmText: '去授权',
-          success: (res) => {
-            if (res.confirm) {
-              wx.openSetting();
-            }
-          }
-        });
-      } else {
-        wx.showToast({ title: '保存失败', icon: 'none' });
-      }
+      wx.showToast({ title: '保存失败', icon: 'none' });
     }
   },
 

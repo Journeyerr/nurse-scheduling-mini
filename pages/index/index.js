@@ -411,6 +411,7 @@ Page({
     const isCreator = department && department.creatorId == userInfo?.id;
 
     // 判断是否为管理员（从成员列表中查找当前用户）
+    // 注意：首次进入时 members 可能为空，需要等 loadMembers 完成后 refreshLeaderStatus 更新
     let isAdmin = false;
     if (this.data.members.length > 0) {
       const selfMember = this.data.members.find(m => m.id == userInfo?.id);
@@ -419,12 +420,17 @@ Page({
 
     const isLeader = this.checkIsLeader(true, this.data.role, isCreator, isAdmin);
 
-    this.setData({
+    // 如果 members 为空，先保留之前的身份状态，等 loadMembers 后再刷新
+    const updates = {
       department: department || {},
       isCreator: isCreator,
-      isAdmin: isAdmin,
-      isLeader: isLeader
-    });
+    };
+    if (this.data.members.length > 0) {
+      updates.isAdmin = isAdmin;
+      updates.isLeader = isLeader;
+    }
+
+    this.setData(updates);
 
     // 加载排班和成员数据
     await Promise.all([
@@ -726,8 +732,8 @@ Page({
       }
       
       const members = (res.data || []).map(item => {
-        const isCreator = item.isCreator === true;
-        const isAdmin = item.isAdmin === true;
+        const isCreator = item.isCreator === true || item.isCreator === 'true' || item.isCreator === 1;
+        const isAdmin = item.isAdmin === true || item.isAdmin === 'true' || item.isAdmin === 1;
         const isSelf = item.id == userInfo?.id;
         return {
           ...item,
@@ -1248,12 +1254,14 @@ Page({
 
   // picker 滚动选择
   onPickerChange(e) {
-    this.setData({ pickerIndex: e.detail.value[0] });
+    // 用实例变量记录，不触发 setData 避免picker回弹
+    this._pickerIndex = e.detail.value[0];
   },
 
   // picker 确认选择
   async onPickerConfirm() {
-    const { pickerMode, pickerMembers, pickerIndex } = this.data;
+    const pickerIndex = this._pickerIndex !== undefined ? this._pickerIndex : this.data.pickerIndex;
+    const { pickerMode, pickerMembers } = this.data;
     this.setData({ showMemberPicker: false });
 
     const selectedMember = pickerMembers[pickerIndex];

@@ -312,7 +312,7 @@
 
 .dept-separator {
   color: #ccc;
-  margin: 0 15rpx;
+  margin-left: 15rpx;
   font-size: 28rpx;
 }
 
@@ -335,7 +335,7 @@
 }
 
 .search-icon-inline {
-  width: 70rpx;
+  width: 85rpx;
   height: 36rpx;
   /* margin-left: 8rpx; */
   margin-top: 14rpx;

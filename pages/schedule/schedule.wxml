@@ -104,65 +104,62 @@
     <text class="add-icon">+</text>
   </view>
 
-  <!-- 班种区域 -->
-  <view class="shift-section card">
-    <view class="section-header">
-      <text class="section-title">班种</text>
-    </view>
-    <view class="shift-list">
-      <view 
-        class="shift-item {{currentShift === item.id ? 'active' : ''}}" 
-        wx:for="{{shiftList}}" 
-        wx:key="id"
-        bindtap="selectShift"
-        data-id="{{item.id}}"
-      >
-        <view class="shift-header">
-          <view class="shift-badge" style="background-color: {{item.color}}20; border-color: {{item.color}}">
-            <text class="badge-code" style="color: {{item.color}}">{{item.code}}</text>
-          </view>
-          <text class="shift-name">{{item.name}}</text>
-          <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
-          <text class="shift-check" wx:if="{{currentShift === item.id}}">✓</text>
-        </view>
-        <view class="shift-times">
-          <text class="time-text" wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
-            {{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}{{index < (item.timeSlots.length - 1) ? ' / ' : ''}}
-          </text>
-        </view>
+  <!-- 底部工具栏占位（防止内容被固定工具栏遮挡） -->
+  <view class="toolbar-placeholder"></view>
+
+  <!-- 固定底部工具栏 -->
+  <view class="bottom-toolbar">
+    <!-- 工具栏标签切换 -->
+    <view class="toolbar-tabs">
+      <view class="toolbar-tab {{toolbarTab === 'shift' ? 'active' : ''}}" bindtap="switchToolbarTab" data-tab="shift">
+        <text>班种</text>
+        <view class="tab-indicator" wx:if="{{toolbarTab === 'shift'}}">●</view>
+      </view>
+      <view class="toolbar-tab {{toolbarTab === 'package' ? 'active' : ''}}" bindtap="switchToolbarTab" data-tab="package">
+        <text>套餐</text>
+        <view class="tab-indicator" wx:if="{{toolbarTab === 'package'}}">●</view>
       </view>
     </view>
-  </view>
 
-  <!-- 班种套餐区域 -->
-  <view class="package-section card">
-    <view class="section-header">
-      <text class="section-title">班种套餐</text>
-    </view>
-    
-    <!-- 有套餐时显示列表 -->
-    <view class="package-list" wx:if="{{packageList.length > 0}}">
-      <view class="package-item" wx:for="{{packageList}}" wx:key="id" bindtap="applyPackage" data-id="{{item.id}}">
-        <view class="package-name-row">
-          <text class="package-name">{{item.name}}</text>
+    <!-- 班种面板 -->
+    <scroll-view scroll-x class="toolbar-panel" wx:if="{{toolbarTab === 'shift'}}">
+      <view class="toolbar-shift-list">
+        <view 
+          class="toolbar-shift-item {{currentShift === item.id ? 'active' : ''}}" 
+          wx:for="{{shiftList}}" 
+          wx:key="id"
+          bindtap="selectShift"
+          data-id="{{item.id}}"
+        >
+          <view class="toolbar-shift-badge" style="background-color: {{item.color}}20; border-color: {{item.color}}">
+            <text style="color: {{item.color}}">{{item.code}}</text>
+          </view>
+          <text class="toolbar-shift-name">{{item.name}}</text>
         </view>
-        <view class="package-shifts-row">
-          <view class="shift-cell" wx:for="{{item.shifts}}" wx:for-item="shift" wx:for-index="dayIndex" wx:key="dayIndex">
-            <text class="day-label-small">{{weekDays[dayIndex]}}</text>
-            <view class="shift-code-badge" 
-                  style="{{shift.shiftId ? 'background-color: ' + shift.color + '20; border-color: ' + shift.color + '; color: ' + shift.color : ''}}">
-              <text>{{shift.code || '休'}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 套餐面板 -->
+    <scroll-view scroll-x class="toolbar-panel" wx:if="{{toolbarTab === 'package'}}">
+      <view class="toolbar-package-list">
+        <view class="toolbar-package-item" wx:for="{{packageList}}" wx:key="id" bindtap="applyPackage" data-id="{{item.id}}">
+          <view class="toolbar-pkg-name">{{item.name}}</view>
+          <view class="toolbar-pkg-shifts">
+            <view class="toolbar-pkg-cell" wx:for="{{item.shifts}}" wx:for-item="shift" wx:for-index="dayIndex" wx:key="dayIndex">
+              <text class="toolbar-pkg-day">{{weekDays[dayIndex]}}</text>
+              <view class="toolbar-pkg-badge" 
+                    style="{{shift.shiftId ? 'background-color: ' + shift.color + '20; border-color: ' + shift.color + '; color: ' + shift.color : ''}}">
+                <text>{{shift.code || '休'}}</text>
+              </view>
             </view>
           </view>
         </view>
+        <!-- <view class="toolbar-package-add" bindtap="goCreatePackage">
+          <text class="toolbar-add-icon">+</text>
+          <text class="toolbar-add-text">添加</text>
+        </view> -->
       </view>
-    </view>
-    
-    <!-- 无套餐时显示添加按钮 -->
-    <view class="add-package-btn" wx:else bindtap="goCreatePackage">
-      <text class="add-package-icon">+</text>
-      <text class="add-package-text">添加班种套餐</text>
-    </view>
+    </scroll-view>
   </view>
 
   <!-- 添加成员弹窗 -->
