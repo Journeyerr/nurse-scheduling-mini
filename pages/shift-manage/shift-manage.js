@@ -160,7 +160,7 @@ Page({
           code: shift.code,
           name: shift.name,
           timeSlots: shift.timeSlots.length > 0 ? shift.timeSlots : [{ startTime: '', startIsNextDay: false, endTime: '', endIsNextDay: false }],
-          duration: shift.duration ? String(shift.duration) : '',
+          duration: shift.duration !== undefined && shift.duration !== null && shift.duration !== '' ? String(shift.duration) : '',
           coefficient: shift.coefficient ? String(shift.coefficient) : '1.0',
           isRest: !!shift.isRest,
           color: shift.color

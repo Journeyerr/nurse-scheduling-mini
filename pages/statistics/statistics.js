@@ -5,7 +5,7 @@ const util = require('../../utils/util');
 
 Page({
   data: {
-    isCreator: false,
+    isLeader: false,
     currentYear: 2024,
     currentMonth: 1,
     
@@ -49,13 +49,19 @@ Page({
       totalSchedules: 0,
       totalRestSchedules: 0,
       totalHours: 0
-    }
+    },
+
+    // 班种图例
+    shiftList: [],
+
+    // 是否显示系数和列
+    showCoeff: false
   },
 
   onLoad() {
     const now = new Date();
     this.setData({
-      isCreator: app.isLeader(),
+      isLeader: app.isLeader(),
       currentYear: now.getFullYear(),
       currentMonth: now.getMonth() + 1
     });
@@ -64,7 +70,10 @@ Page({
   },
 
   async loadData() {
-    if (this.data.isCreator) {
+    // 先加载班种列表（图例用 + 系数和计算依赖）
+    await this.loadShiftList();
+
+    if (this.data.isLeader) {
       await this.loadMemberOptions();
       this.loadDeptStats();
       this.loadCurrentUserStats();
@@ -87,6 +96,21 @@ Page({
     } catch (error) {
       // 加载成员列表失败
     }
+  },
+
+  // 加载班种列表（用于图例展示）
+  async loadShiftList() {
+    try {
+      const res = await api.getShiftList();
+      this.setData({ shiftList: res.data || [] });
+    } catch (error) {
+      // 加载班种失败
+    }
+  },
+
+  // 切换显示/隐藏系数和列
+  toggleShowCoeff() {
+    this.setData({ showCoeff: !this.data.showCoeff });
   },
 
   // 上个月
@@ -117,7 +141,23 @@ Page({
   async loadMyStats() {
     try {
       const res = await api.getMyStatistics(this.data.currentYear, this.data.currentMonth);
-      this.setData({ myStats: res.data || {} });
+      const data = res.data || {};
+      // 补全系数和、工时（后端可能不返回，前端计算）
+      if (data.shiftDetails && this.data.shiftList.length > 0) {
+        data.shiftDetails = data.shiftDetails.map(detail => {
+          const shift = this.data.shiftList.find(s => s.code === detail.code || s.name === detail.name);
+          const coefficient = shift ? (shift.coefficient !== undefined ? shift.coefficient : 1.0) : 1.0;
+          const duration = shift ? (shift.duration !== undefined ? shift.duration : 8) : 8;
+          if (detail.coefficientSum === undefined || detail.coefficientSum === null) {
+            detail.coefficientSum = Math.round(detail.count * coefficient * 10) / 10;
+          }
+          if (detail.hours === undefined || detail.hours === null) {
+            detail.hours = Math.round(detail.count * duration * 10) / 10;
+          }
+          return detail;
+        });
+      }
+      this.setData({ myStats: data });
     } catch (error) {
       // 加载统计失败
     }

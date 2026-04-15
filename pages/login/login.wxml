@@ -12,7 +12,7 @@
     <button class="btn-login" bindtap="handleLogin">
       <text class="btn-text">微信一键登录</text>
     </button>
-    <text class="login-tip">登录即表示同意《用户协议》和《隐私政策》</text>
+    <!-- <text class="login-tip">登录即表示同意《用户协议》和《隐私政策》</text> -->
     <view class="skip-login" bindtap="skipLogin">
       <text class="skip-text">暂不登录，先逛逛</text>
     </view>

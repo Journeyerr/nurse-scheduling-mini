@@ -5,7 +5,7 @@ const util = require('../../utils/util');
 
 Page({
   data: {
-    isCreator: false,
+    isLeader: false,
     members: [],
     filteredMembers: [],
     keyword: '',
@@ -13,7 +13,7 @@ Page({
   },
 
   onLoad() {
-    this.setData({ isCreator: app.isLeader() });
+    this.setData({ isLeader: app.isLeader() });
     this.loadMembers();
   },
 
@@ -29,9 +29,10 @@ Page({
     try {
       const res = await api.getMemberList();
       const userInfo = wx.getStorageSync('userInfo');
+      const department = wx.getStorageSync('department');
       const members = (res.data || []).map(m => ({
         ...m,
-        isCreator: m.id === userInfo?.id && this.data.isCreator
+        isCreator: m.id === department?.creatorId
       }));
       
       this.setData({ 

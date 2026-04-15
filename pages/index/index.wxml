@@ -115,11 +115,13 @@
     </view>
   </view>
 
-  <!-- 科室信息与邀请（护士长可见） -->
-  <view class="invite-section card" wx:if="{{isCreator}}">
+  <!-- 科室信息与邀请（护士长/管理员可见） -->
+  <view class="invite-section card" wx:if="{{isLoggedIn && isLeader}}">
     <view class="dept-info-row">
       <view class="dept-info-left" bindtap="showDepartmentActions" hover-class="invite-text-hover">
-        <text class="dept-name-text">{{department.name}}</text>
+        <text class="dept-name-text dept-name-link">{{department.name}}</text>
+        <!-- <image class="dept-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image> -->
+        <text class="dept-separator">|</text>
         <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit"></image>
       </view>
       <button class="invite-btn-new" size="mini" open-type="share">
@@ -129,11 +131,13 @@
     </view>
   </view>
 
-  <!-- 科室信息（非护士长成员可见） -->
-  <view class="invite-section card" wx:if="{{hasDepartment && !isCreator}}">
+  <!-- 科室信息（非护士长/管理员成员可见） -->
+  <view class="invite-section card" wx:if="{{isLoggedIn && hasDepartment && !isLeader}}">
     <view class="dept-info-row">
       <view class="dept-info-left" bindtap="showMemberActions" hover-class="invite-text-hover">
-        <text class="dept-name-text">{{department.name}}</text>
+        <text class="dept-name-text dept-name-link">{{department.name}}</text>
+        <!-- <image class="dept-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image> -->
+        <text class="dept-separator">|</text>
         <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit"></image>
       </view>
     </view>
@@ -175,6 +179,7 @@
               <text class="member-name">{{item.nickName}}</text>
               <view class="tag tag-self" wx:if="{{item.isSelf}}">我</view>
               <view class="tag tag-creator" wx:if="{{item.isCreator}}">创建者</view>
+              <view class="tag tag-admin {{isCreator ? 'tag-removable' : ''}}" wx:if="{{item.isAdmin && !item.isCreator}}" catchtap="{{isCreator ? 'onAdminTagTap' : ''}}" data-id="{{item.id}}" data-name="{{item.nickName}}">管理员</view>
             </view>
           </view>
         </view>
@@ -238,6 +243,7 @@
               <text class="member-name">{{item.nickName}}</text>
               <view class="tag tag-self" wx:if="{{item.isSelf}}">我</view>
               <view class="tag tag-creator" wx:if="{{item.isCreator}}">创建者</view>
+              <view class="tag tag-admin {{isCreator ? 'tag-removable' : ''}}" wx:if="{{item.isAdmin && !item.isCreator}}" catchtap="{{isCreator ? 'onAdminTagTap' : ''}}" data-id="{{item.id}}" data-name="{{item.nickName}}">管理员</view>
             </view>
           </view>
         </view>

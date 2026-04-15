@@ -83,9 +83,9 @@ const MOCK_DATA = {
       restDays: 8,
       leaveDays: 2,
       shiftDetails: [
-        { name: '白班', code: 'A', color: '#7BA3C8', count: 10 },
-        { name: '中班', code: 'P', color: '#6BAF92', count: 4 },
-        { name: '夜班', code: 'N', color: '#9B8AA8', count: 8 }
+        { name: '白班', code: 'A', color: '#7BA3C8', count: 10, coefficientSum: 10.0 },
+        { name: '中班', code: 'P', color: '#6BAF92', count: 4, coefficientSum: 4.0 },
+        { name: '夜班', code: 'N', color: '#9B8AA8', count: 8, coefficientSum: 16.0 }
       ]
     },
     deptStats: {
@@ -155,6 +155,12 @@ const getMockData = (apiName, data) => {
     case 'kickMember':
       MOCK_DATA.members = MOCK_DATA.members.filter(m => m.id !== data.memberId);
       return { success: true };
+    case 'setAdmin':
+      MOCK_DATA.members = MOCK_DATA.members.map(m =>
+        m.id === data.memberId ? { ...m, isAdmin: data.isAdmin } : m
+      );
+      return { success: true };
+    case 'getMemberList':
     case 'getInviteLink':
       return { inviteCode: MOCK_DATA.department.inviteCode };
     case 'getMemberInfo':
@@ -401,6 +407,15 @@ const kickMember = (departmentId, data) => {
   return request({ url: '/department/kick', method: 'POST', data, params: { departmentId: deptId } });
 };
 
+const setAdmin = (departmentId, data) => {
+  if (USE_MOCK) return mockRequest('setAdmin', data);
+  const deptId = departmentId || getCurrentDepartmentId();
+  if (!deptId) {
+    return Promise.reject({ message: '科室ID不存在' });
+  }
+  return request({ url: '/department/admin', method: 'POST', data, params: { departmentId: deptId } });
+};
+
 const getInviteLink = (departmentId) => {
   if (USE_MOCK) return mockRequest('getInviteLink');
   const deptId = departmentId || getCurrentDepartmentId();
@@ -645,6 +660,7 @@ module.exports = {
   transferDepartment,
   getMemberList,
   kickMember,
+  setAdmin,
   getInviteLink,
   getMemberInfo,
   updateMemberInfo,

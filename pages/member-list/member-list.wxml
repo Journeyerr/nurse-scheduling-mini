@@ -42,7 +42,7 @@
         </view>
       </view>
       
-      <view class="member-actions" wx:if="{{isCreator && !item.isCreator}}">
+      <view class="member-actions" wx:if="{{isLeader && !item.isCreator}}">
         <button class="btn-kick" bindtap="kickMember" data-id="{{item.id}}" data-name="{{item.nickName}}">
           移出
         </button>

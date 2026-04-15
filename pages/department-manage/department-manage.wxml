@@ -24,14 +24,14 @@
       <text class="menu-arrow">›</text>
     </view>
     
-    <!-- 转让科室 -->
-    <view class="menu-item" bindtap="handleTransfer">
+    <!-- 转让科室（仅创建者） -->
+    <view class="menu-item" wx:if="{{isCreator}}" bindtap="handleTransfer">
       <text class="menu-text">转让科室</text>
       <text class="menu-arrow">›</text>
     </view>
     
-    <!-- 解散科室 -->
-    <view class="menu-item danger" bindtap="handleDismiss">
+    <!-- 解散科室（仅创建者） -->
+    <view class="menu-item danger" wx:if="{{isCreator}}" bindtap="handleDismiss">
       <text class="menu-text danger-text">解散科室</text>
       <text class="menu-arrow">›</text>
     </view>

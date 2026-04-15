@@ -4,6 +4,7 @@ App({
     userInfo: null,          // 用户信息
     department: null,        // 科室信息
     isCreator: false,        // 是否为创建者（护士长）
+    isAdmin: false,          // 是否为管理员
     role: null,              // 用户角色：'leader' 或 'nurse'
     currentTeamId: null,     // 当前班组ID
     tempNewShift: null,      // 临时存储新班种数据（用于创建科室时）
@@ -61,11 +62,17 @@ App({
     wx.setStorageSync('department', department);
   },
 
+  // 设置管理员状态
+  setAdmin(isAdmin) {
+    this.globalData.isAdmin = isAdmin;
+  },
+
   // 清除用户信息（退出登录）
   clearUserInfo() {
     this.globalData.userInfo = null;
     this.globalData.department = null;
     this.globalData.isCreator = false;
+    this.globalData.isAdmin = false;
     this.globalData.role = null;
     this.globalData.currentTeamId = null;
     wx.removeStorageSync('userInfo');
@@ -78,8 +85,8 @@ App({
     return !!this.globalData.department;
   },
 
-  // 判断是否为护士长
+  // 判断是否为护士长（创建者或管理员）
   isLeader() {
-    return this.globalData.isCreator;
+    return this.globalData.isCreator || this.globalData.isAdmin;
   }
 });

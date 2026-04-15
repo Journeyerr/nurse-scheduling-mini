@@ -7,6 +7,7 @@ Page({
   data: {
     department: {},
     members: [],
+    isCreator: false,
     selectMode: false,
     selectedMember: ''
   },
@@ -26,12 +27,13 @@ Page({
       const userInfo = wx.getStorageSync('userInfo');
       const members = (res.data || []).map(item => ({
         ...item,
-        isCreator: item.id === userInfo?.id
+        isCreator: item.id === department?.creatorId
       }));
       
       this.setData({
         department: department || {},
-        members
+        members,
+        isCreator: department ? department.creatorId === userInfo?.id : false
       });
     } catch (error) {
       // 加载数据失败

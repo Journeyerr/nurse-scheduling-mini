@@ -68,7 +68,7 @@ Page({
       code: newShift.code || newShift.name.substring(0, 2),
       color: newShift.color || '#4A90D9',
       timeSlots: newShift.timeSlots || [], // 添加时间段数据
-      duration: newShift.duration || '', // 添加时长数据
+      duration: newShift.duration !== undefined && newShift.duration !== '' ? newShift.duration : '', // 添加时长数据
       selected: true
     };
     
@@ -154,7 +154,7 @@ Page({
         code: item.code,
         color: item.color,
         timeSlots: item.timeSlots || [],
-        duration: item.duration || 0
+        duration: item.duration !== undefined && item.duration !== '' ? item.duration : 0
       }));
 
       const res = await api.createDepartment({ 

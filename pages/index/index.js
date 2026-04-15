@@ -14,7 +14,8 @@ Page({
     isCreator: false,
     hasDepartment: false, // 是否有科室
     role: null, // 用户角色：'leader' 或 'nurse'
-    isLeader: false, // 是否为护士长（综合判断）
+    isLeader: false, // 是否为护士长（综合判断：创建者或管理员）
+    isAdmin: false, // 是否为管理员
     initialized: false, // 是否已初始化
 
     // 日历相关
@@ -203,16 +204,30 @@ Page({
 
     // 判断是否为创建者
     const isCreator = department && department.creatorId == userInfo?.id;
-    const isLeader = this.checkIsLeader(hasDept, role, isCreator);
+
+    // 判断是否为管理员（从成员列表中查找当前用户）
+    let isAdmin = false;
+    if (this.data.members.length > 0) {
+      const selfMember = this.data.members.find(m => m.id == userInfo?.id);
+      isAdmin = !!(selfMember && selfMember.isAdmin);
+    }
+
+    const isLeader = this.checkIsLeader(hasDept, role, isCreator, isAdmin);
 
     this.setData({
       hasDepartment: hasDept,
       role: role,
       isLeader: isLeader,
       isCreator: isCreator,
+      isAdmin: isAdmin,
       department: department || {},
       isLaunching: false  // 完成启动检查
     });
+
+    // 护士长/管理员加载待审批数量
+    if (isLeader) {
+      this.loadPendingCount();
+    }
 
     // 初始化日历（无论有无科室都显示）
     const now = new Date();
@@ -232,14 +247,48 @@ Page({
     });
   },
 
-  // 判断是否为护士长（综合科室状态和角色）
-  checkIsLeader(hasDept, role, isCreator) {
-    // 有科室时，看 isCreator
+  // 判断是否为护士长（综合科室状态和角色：创建者或管理员）
+  checkIsLeader(hasDept, role, isCreator, isAdmin = false) {
     if (hasDept) {
-      return isCreator;
+      return isCreator || isAdmin;
     }
-    // 无科室时，看 role
     return role === 'leader';
+  },
+
+  // 根据最新成员列表刷新护士长/管理员身份
+  refreshLeaderStatus() {
+    const department = wx.getStorageSync('department');
+    const userInfo = wx.getStorageSync('userInfo');
+    
+    if (!department) return;
+    
+    const hasDept = app.hasDepartment();
+    const isCreator = department.creatorId == userInfo?.id;
+    
+    let isAdmin = false;
+    if (this.data.members.length > 0) {
+      const selfMember = this.data.members.find(m => m.id == userInfo?.id);
+      isAdmin = !!(selfMember && selfMember.isAdmin);
+    }
+    
+    const newIsLeader = this.checkIsLeader(hasDept, this.data.role, isCreator, isAdmin);
+    
+    // 只有身份发生变化时才更新（避免不必要的 setData）
+    if (newIsLeader !== this.data.isLeader || isAdmin !== this.data.isAdmin || isCreator !== this.data.isCreator) {
+      this.setData({
+        isLeader: newIsLeader,
+        isAdmin: isAdmin,
+        isCreator: isCreator
+      });
+      
+      // 同步到 app 全局
+      app.setAdmin(isAdmin);
+      
+      // 身份变为 leader 时加载待审批数
+      if (newIsLeader && !this.data.pendingCount) {
+        this.loadPendingCount();
+      }
+    }
   },
 
   // 创建科室
@@ -360,11 +409,20 @@ Page({
     }
     
     const isCreator = department && department.creatorId == userInfo?.id;
-    const isLeader = this.checkIsLeader(true, this.data.role, isCreator);
+
+    // 判断是否为管理员（从成员列表中查找当前用户）
+    let isAdmin = false;
+    if (this.data.members.length > 0) {
+      const selfMember = this.data.members.find(m => m.id == userInfo?.id);
+      isAdmin = !!(selfMember && selfMember.isAdmin);
+    }
+
+    const isLeader = this.checkIsLeader(true, this.data.role, isCreator, isAdmin);
 
     this.setData({
       department: department || {},
       isCreator: isCreator,
+      isAdmin: isAdmin,
       isLeader: isLeader
     });
 
@@ -374,7 +432,7 @@ Page({
       this.loadMembers(department)
     ]);
     
-    if (this.data.isCreator) {
+    if (this.data.isLeader) {
       this.loadPendingCount();
     }
   },
@@ -669,10 +727,12 @@ Page({
       
       const members = (res.data || []).map(item => {
         const isCreator = item.isCreator === true;
+        const isAdmin = item.isAdmin === true;
         const isSelf = item.id == userInfo?.id;
         return {
           ...item,
           isCreator,
+          isAdmin,
           isSelf
         };
       });
@@ -682,6 +742,9 @@ Page({
         filteredMembers: members
       });
       this.updateDisplayMembers();
+      
+      // 成员加载完成后，重新判断管理员身份（首次加载时 members 可能为空）
+      this.refreshLeaderStatus();
     } catch (error) {
       // 加载成员失败
     }
@@ -940,9 +1003,30 @@ Page({
     wx.navigateTo({ url: '/pages/leave-apply/leave-apply' });
   },
 
+  // 点击管理员标签（创建者取消管理员）
+  async onAdminTagTap(e) {
+    if (!this.data.isCreator) return;
+    
+    const { id, name } = e.currentTarget.dataset;
+    
+    const confirm = await util.showConfirm('取消管理员', `确定取消 ${name || '该成员'} 的管理员身份吗？`);
+    if (!confirm) return;
+    
+    try {
+      util.showLoading('处理中...');
+      await api.setAdmin(this.data.department.id, { memberId: id, isAdmin: false });
+      util.hideLoading();
+      util.showSuccess('已取消管理员');
+      this.loadMembers(this.data.department);
+    } catch (error) {
+      util.hideLoading();
+      util.showError(error.message || error.msg || '操作失败');
+    }
+  },
+
   // 长按成员（踢人）
   async onMemberLongPress(e) {
-    if (!this.data.isCreator) return;
+    if (!this.data.isLeader) return;
     
     const { id, name } = e.currentTarget.dataset;
     const userInfo = wx.getStorageSync('userInfo');
@@ -1040,28 +1124,61 @@ Page({
     };
   },
 
-  // 显示科室操作菜单（护士长专属）
+  // 显示科室操作菜单（护士长/管理员专属）
   showDepartmentActions() {
-    if (!this.data.isCreator) return;
+    if (!this.data.isLeader) return;
+    
+    // 根据角色动态生成菜单：创建者显示全部，管理员只显示移除成员+退出科室
+    const items = this.data.isCreator
+      ? ['添加管理员', '解散科室', '转让科室', '移除成员']
+      : ['移除成员', '退出科室'];
     
     wx.showActionSheet({
-      itemList: ['解散科室', '转让科室', '移除成员'],
+      itemList: items,
       success: (res) => {
         // 延迟执行，避免连续弹出 ActionSheet 导致失败
         setTimeout(() => {
-          switch (res.tapIndex) {
-            case 0:
+          const action = items[res.tapIndex];
+          switch (action) {
+            case '添加管理员':
+              this.addAdmin();
+              break;
+            case '解散科室':
               this.dismissDepartment();
               break;
-            case 1:
+            case '转让科室':
               this.transferDepartment();
               break;
-            case 2:
+            case '移除成员':
               this.kickMember();
+              break;
+            case '退出科室':
+              this.quitDepartment();
               break;
           }
         }, 300);
       }
+    });
+  },
+
+  // 添加管理员 - 显示成员选择器
+  addAdmin() {
+    const userInfo = wx.getStorageSync('userInfo');
+    // 排除自己和已经是管理员的成员
+    const candidateMembers = this.data.members.filter(m =>
+      m.id != userInfo?.id && !m.isAdmin && !m.isCreator
+    );
+    
+    if (candidateMembers.length === 0) {
+      util.showError('暂无可设为管理员的成员');
+      return;
+    }
+
+    this.setData({
+      pickerMode: 'admin',
+      pickerMembers: candidateMembers,
+      pickerIndex: 0,
+      showMemberPicker: true
     });
   },
 
@@ -1160,6 +1277,20 @@ Page({
       } catch (error) {
         util.hideLoading();
         util.showError(error.message || error.msg || '转让失败');
+      }
+    } else if (pickerMode === 'admin') {
+      const confirm = await util.showConfirm('确认设为管理员', `确定将 ${selectedMember.nickName || '未命名用户'} 设为科室管理员吗？管理员拥有与护士长相同的权限。`);
+      if (!confirm) return;
+
+      try {
+        util.showLoading('设置中...');
+        await api.setAdmin(this.data.department.id, { memberId: selectedMember.id, isAdmin: true });
+        util.hideLoading();
+        util.showSuccess('已设为管理员');
+        this.loadMembers(this.data.department);
+      } catch (error) {
+        util.hideLoading();
+        util.showError(error.message || error.msg || '操作失败');
       }
     } else if (pickerMode === 'kick') {
       const confirm = await util.showConfirm('确认踢出', `确定要将 ${selectedMember.nickName || '未命名用户'} 移出科室吗？`);
@@ -1306,3 +1437,4 @@ Page({
     this.updateDisplayMembers();
   }
 });
+/*  */

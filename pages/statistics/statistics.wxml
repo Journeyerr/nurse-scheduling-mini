@@ -12,7 +12,7 @@
   </view>
 
   <!-- 个人统计（护士） -->
-  <view class="stats-section card" wx:if="{{!isCreator}}">
+  <view class="stats-section card" wx:if="{{!isLeader}}">
     <view class="section-title">我的排班统计</view>
     <view class="stats-grid">
       <view class="stats-item">
@@ -31,18 +31,36 @@
     
     <view class="stats-detail">
       <view class="detail-title">班次详情</view>
-      <view class="detail-list">
-        <view class="detail-item" wx:for="{{myStats.shiftDetails}}" wx:key="name">
+      <!-- 表头 -->
+      <view class="shift-table-header">
+        <text class="shift-col-name">班次</text>
+        <view class="shift-col-right">
+          <text class="shift-col-count">次数</text>
+          <text class="shift-col-hours">工时</text>
+          <text class="shift-col-hours" wx:if="{{showCoeff}}">系数和</text>
+        </view>
+      </view>
+      <!-- 班次行 -->
+      <view class="shift-table-row" wx:for="{{myStats.shiftDetails}}" wx:key="name">
+        <view class="shift-row-left">
           <view class="detail-color" style="background-color: {{item.color}}"></view>
           <text class="detail-name">{{item.name}}</text>
-          <text class="detail-count">{{item.count}}次</text>
         </view>
+        <view class="shift-row-right">
+          <text class="shift-count-val">{{item.count}}</text>
+          <text class="shift-hours-val">{{item.hours || 0}}h</text>
+          <text class="shift-coeff-val" wx:if="{{showCoeff}}">{{item.coefficientSum || 0}}</text>
+        </view>
+      </view>
+      <!-- 系数和开关 -->
+      <view class="coeff-toggle" bindtap="toggleShowCoeff">
+        <text>{{showCoeff ? '隐藏系数和' : '显示系数和'}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 全员统计（护士长） -->
-  <view class="stats-section card" wx:if="{{isCreator}}">
+  <!-- 全员统计（护士长/管理员） -->
+  <view class="stats-section card" wx:if="{{isLeader}}">
     <!-- 我的统计横幅 -->
     <view class="my-stats-banner">
       <view class="banner-item">
@@ -100,7 +118,7 @@
     
     <!-- 成员排班排行 -->
     <view class="rank-section">
-      <view class="detail-title" wx:if="{{selectedMemberId === 'all'}}">成员排行（共{{rankList.length}}人）</view>
+      <view class="detail-title" wx:if="{{selectedMemberId === 'all'}}">成员列表（共{{rankList.length}}人）</view>
       <view class="detail-title" wx:else>{{selectedMemberName}}</view>
       <view class="rank-list">
         <view class="rank-item" wx:for="{{rankList}}" wx:key="id">
@@ -150,6 +168,17 @@
       </view>
     </view>
   </view>
+
+  <!-- 班次图例（普通护士可见） -->
+  <view class="legend-section card" wx:if="{{!isLeader}}">
+    <view class="legend-list">
+      <view class="legend-item" wx:for="{{shiftList}}" wx:key="id">
+        <view class="legend-color" style="background-color: {{item.color}}"></view>
+        <text class="legend-text">{{item.code}}: {{item.name}}（×{{item.coefficient || 1.0}}）</text>
+      </view>
+    </view>
+  </view>
+
 </view>
 
 <!-- 成员选择弹窗 -->
