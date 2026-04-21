@@ -190,6 +190,66 @@
   color: #CCC;
 }
 
+/* 法定假日样式 */
+.day-cell.holiday .day-number {
+  color: #E8380D;
+}
+
+.day-cell.holiday.other-month {
+}
+
+.day-cell.holiday.other-month .day-number {
+  color: #F5A090;
+}
+
+/* 假日标识 - 显示在日期数字右上角 */
+.day-number-wrapper {
+  position: relative;
+}
+
+.holiday-badge {
+  position: absolute;
+  top: -6rpx;
+  right: -14rpx;
+  font-size: 14rpx;
+  color: #fff;
+  background: #E8380D;
+  border-radius: 4rpx;
+  padding: 2rpx 4rpx;
+  line-height: 1;
+  font-weight: normal;
+  transform: scale(0.85);
+  transform-origin: left top;
+}
+
+.day-cell.holiday.other-month .holiday-badge {
+  background: #F5A090;
+}
+
+/* 调休工作日样式 */
+.day-cell.workday .day-number {
+  color: #333;
+}
+
+.day-cell.workday {
+  position: relative;
+}
+
+.workday-badge {
+  position: absolute;
+  top: -6rpx;
+  right: -14rpx;
+  font-size: 14rpx;
+  color: #adb1b4;
+  transform: scale(0.85);
+  transform-origin: left top;
+  font-weight: bold;
+}
+
+.day-cell.workday.other-month .workday-badge {
+  color: #A0C4E8;
+}
+
 .day-cell.today .day-number-wrapper {
   background: #4A90D9;
   border-radius: 50%;

@@ -30,6 +30,9 @@ Page({
     
     // 所有成员（用于弹窗选择）
     allMembers: [],
+    selectedMemberMap: {},  // {id: true} 选中映射
+    allSelected: false,     // 是否全选
+    selectedMemberCount: 0, // 已选人数
     
     // 弹窗
     showMemberModal: false,
@@ -54,6 +57,15 @@ Page({
     // 底部工具栏
     toolbarTab: 'shift',  // 'shift' | 'package'
     
+    // 拖拽排序相关
+    dragIndex: -1,            // 正在拖拽的行索引
+    insertBeforeIndex: -1,    // 插入位置指示（-1表示在最后，0表示在行0之前，1表示在行1之前...）
+    dragOffsetY: 0,           // 拖拽偏移量（rpx）
+    dragStartTimestamp: 0,    // 触摸开始时间戳
+    isDragging: false,        // 是否正在拖拽
+    dragThreshold: 350,       // 长按触发阈值（ms）
+    rowHeight: 104,           // 行高（rpx）
+    
     initialized: false  // 是否已初始化
   },
 
@@ -71,7 +83,7 @@ Page({
 
   // 初始化周日期
   initWeekDates() {
-    const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
     const today = new Date();
     const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
@@ -196,9 +208,9 @@ Page({
       }
       
       const res = await api.getMemberList();
-      const members = (res.data || []).map(m => ({ ...m, selected: false }));
+      const members = (res.data || []).map(m => ({ ...m, id: String(m.id), selected: false }));
       
-      this.setData({ allMembers: members });
+      this.setData({ allMembers: members, selectedMemberMap: {}, allSelected: false, selectedMemberCount: 0 });
     } catch (error) {
       this.setData({ allMembers: [] });
     }
@@ -502,7 +514,7 @@ Page({
     const weekDates = weekRange.dates.map((d, i) => ({
       date: new Date(d).getDate(),
       fullDate: d,
-      day: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][i]
+      day: ['一', '二', '三', '四', '五', '六', '日'][i]
     }));
     
     const startParts = weekDates[0].fullDate.split('-');
@@ -867,14 +879,37 @@ Page({
 
   // 切换成员选择
   toggleMember(e) {
-    const { id } = e.currentTarget.dataset;
+    const memberId = String(e.currentTarget.dataset.id);
     const allMembers = this.data.allMembers.map(m => {
-      if (m.id === id) {
+      if (m.id === memberId) {
         return { ...m, selected: !m.selected };
       }
       return m;
     });
-    this.setData({ allMembers });
+    const selectedCount = allMembers.filter(m => m.selected).length;
+    const map = {};
+    allMembers.forEach(m => { if (m.selected) map[m.id] = true; });
+    this.setData({
+      allMembers,
+      selectedMemberMap: map,
+      allSelected: allMembers.length > 0 && selectedCount === allMembers.length,
+      selectedMemberCount: selectedCount
+    });
+  },
+
+  // 全选/取消全选
+  toggleSelectAll() {
+    const allMembers = this.data.allMembers;
+    const allSelected = allMembers.length > 0 && allMembers.every(m => m.selected);
+    if (allSelected) {
+      const updated = allMembers.map(m => ({ ...m, selected: false }));
+      this.setData({ allMembers: updated, selectedMemberMap: {}, allSelected: false, selectedMemberCount: 0 });
+    } else {
+      const updated = allMembers.map(m => ({ ...m, selected: true }));
+      const map = {};
+      updated.forEach(m => { map[m.id] = true; });
+      this.setData({ allMembers: updated, selectedMemberMap: map, allSelected: true, selectedMemberCount: updated.length });
+    }
   },
 
   // 确认成员选择
@@ -914,6 +949,116 @@ Page({
   // 跳转创建套餐
   goCreatePackage() {
     wx.navigateTo({ url: '/pages/shift-package/shift-package' });
+  },
+
+  // ========== 拖拽排序 ==========
+  
+  // 拖拽开始
+  onDragStart(e) {
+    const { index } = e.currentTarget.dataset;
+    const touch = e.touches[0];
+    
+    this.dragStartData = {
+      index: index,
+      startY: touch.clientY,
+      timestamp: Date.now(),
+      moved: false,
+      activated: false
+    };
+    
+    // 长按定时器
+    this.longPressTimer = setTimeout(() => {
+      if (this.dragStartData && !this.dragStartData.moved) {
+        this.setData({
+          isDragging: true,
+          dragIndex: index,
+          insertBeforeIndex: index,
+          dragOffsetY: 0
+        });
+        
+        this.dragStartData.activated = true;
+      }
+    }, this.data.dragThreshold);
+  },
+  
+  // 拖拽移动
+  onDragMove(e) {
+    if (!this.dragStartData) return;
+    
+    const touch = e.touches[0];
+    const moveY = touch.clientY - this.dragStartData.startY;
+    
+    // 如果还没激活拖拽，检查是否移动太多（取消长按）
+    if (!this.dragStartData.activated) {
+      if (Math.abs(moveY) > 10) {
+        this.dragStartData.moved = true;
+        clearTimeout(this.longPressTimer);
+      }
+      return;
+    }
+    
+    // 正在拖拽中 - 计算偏移
+    const rpxRatio = 750 / wx.getSystemInfoSync().windowWidth;
+    const offsetY = moveY * rpxRatio;
+    
+    const { dragIndex, members, rowHeight } = this.data;
+    
+    // 计算插入位置：基于拖拽偏移量，判断在哪一行之前插入
+    // insertBeforeIndex 的含义：插入到第 insertBeforeIndex 行之前
+    // 如果 insertBeforeIndex = 0，插入到最前面
+    // 如果 insertBeforeIndex = members.length，插入到最后面
+    let insertBeforeIndex;
+    
+    if (offsetY >= 0) {
+      // 向下拖动
+      const moveRows = Math.floor(offsetY / rowHeight + 0.3);
+      insertBeforeIndex = Math.min(dragIndex + moveRows + 1, members.length);
+    } else {
+      // 向上拖动
+      const moveRows = Math.floor(-offsetY / rowHeight + 0.7);
+      insertBeforeIndex = Math.max(dragIndex - moveRows, 0);
+    }
+    
+    this.setData({
+      dragOffsetY: offsetY,
+      insertBeforeIndex: insertBeforeIndex
+    });
+  },
+  
+  // 拖拽结束
+  onDragEnd(e) {
+    clearTimeout(this.longPressTimer);
+    
+    if (!this.dragStartData || !this.dragStartData.activated) {
+      this.dragStartData = null;
+      return;
+    }
+    
+    const { dragIndex, insertBeforeIndex, members } = this.data;
+    
+    // 计算实际要插入的目标位置
+    // insertBeforeIndex 表示"在第N行之前插入"
+    // 如果拖拽行在插入位置之前，splice目标要减1
+    if (dragIndex >= 0 && insertBeforeIndex >= 0 && insertBeforeIndex !== dragIndex) {
+      const newMembers = [...members];
+      const [movedItem] = newMembers.splice(dragIndex, 1);
+      
+      // splice 的插入位置：如果原位置在插入位置之前，需要减1
+      const targetIndex = dragIndex < insertBeforeIndex ? insertBeforeIndex - 1 : insertBeforeIndex;
+      newMembers.splice(targetIndex, 0, movedItem);
+      
+      this.setData({ members: newMembers });
+    }
+    
+    // 重置拖拽状态
+    this.setData({
+      isDragging: false,
+      dragIndex: -1,
+      insertBeforeIndex: -1,
+      dragOffsetY: 0
+    });
+    
+    this.dragStartData = null;
   },
 
   // 阻止冒泡

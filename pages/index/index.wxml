@@ -38,7 +38,7 @@
         <view class="calendar-grid">
           <view class="week-row" wx:for="{{item}}" wx:for-item="week" wx:key="index">
             <view
-              class="day-cell {{day.isToday ? 'today' : ''}} {{!day.isCurrentMonth ? 'other-month' : ''}}"
+              class="day-cell {{day.isToday ? 'today' : ''}} {{!day.isCurrentMonth ? 'other-month' : ''}} {{day.isHoliday ? 'holiday' : ''}} {{day.isWorkday ? 'workday' : ''}}"
               wx:for="{{week}}"
               wx:for-item="day"
               wx:key="date"
@@ -48,6 +48,8 @@
             >
               <view class="day-number-wrapper">
                 <text class="day-number" wx:if="{{day.day}}">{{day.day}}</text>
+                <text class="holiday-badge" wx:if="{{day.isHoliday && day.isCurrentMonth}}">休</text>
+                <text class="workday-badge" wx:if="{{day.isWorkday && day.isCurrentMonth}}">班</text>
               </view>
               <!-- 显示排班编码 -->
               <text class="schedule-code" style="color: {{day.scheduleColor}}" wx:if="{{day.scheduleCode}}">{{day.scheduleCode}}</text>

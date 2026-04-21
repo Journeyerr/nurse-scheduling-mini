@@ -18,6 +18,13 @@
     <text class="publish-btn" bindtap="publishSchedule">发布</text>
   </view>
 
+  <!-- 拖拽遮罩 - 拖拽时阻止页面滚动 -->
+  <view 
+    class="drag-mask {{isDragging ? 'show' : ''}}" 
+    catchtouchmove="onDragMove"
+    catchtouchend="onDragEnd"
+  ></view>
+
   <!-- 日历选择弹窗 -->
   <view class="calendar-modal-mask {{showCalendarModal ? 'show' : ''}}" bindtap="hideCalendarModal">
     <view class="calendar-modal" catchtap="stopPropagation">
@@ -66,8 +73,24 @@
     
     <!-- 成员排班行 -->
     <view class="table-body">
-      <view class="table-row" wx:for="{{members}}" wx:for-index="memberIndex" wx:key="id">
-        <view class="member-cell">
+      <view 
+        class="table-row {{dragIndex === memberIndex ? 'dragging' : ''}}" 
+        wx:for="{{members}}" 
+        wx:for-index="memberIndex" 
+        wx:key="id"
+        style="{{dragIndex === memberIndex ? 'transform: translateY(' + dragOffsetY + 'rpx); z-index: 10;' : ''}}"
+      >
+        <!-- 插入位置指示线 - 在当前行之前 -->
+        <view class="insert-indicator top" wx:if="{{isDragging && insertBeforeIndex === memberIndex && dragIndex !== memberIndex}}"></view>
+        
+        <view 
+          class="member-cell drag-handle"
+          catchtouchstart="onDragStart"
+          catchtouchmove="onDragMove"
+          catchtouchend="onDragEnd"
+          data-index="{{memberIndex}}"
+        >
+          <view class="drag-icon">⠿</view>
           <text class="member-name">{{item.nickName}}</text>
         </view>
         <view class="date-cells">
@@ -94,7 +117,12 @@
             </view>
           </view>
         </view>
+        <!-- 插入位置指示线 - 在当前行之后（即在memberIndex+1行之前） -->
+        <view class="insert-indicator bottom" wx:if="{{isDragging && insertBeforeIndex === memberIndex + 1 && dragIndex !== memberIndex && dragIndex !== memberIndex + 1}}"></view>
       </view>
+      
+      <!-- 插入位置指示线 - 在最后一行之后 -->
+      <view class="insert-indicator-standalone" wx:if="{{isDragging && insertBeforeIndex === members.length && dragIndex !== members.length - 1}}"></view>
     </view>
   </view>
 
@@ -165,20 +193,33 @@
   <!-- 添加成员弹窗 -->
   <view class="member-modal-mask {{showMemberModal ? 'show' : ''}}" bindtap="closeMemberModal">
     <view class="member-modal" catchtap="stopPropagation">
-      <view class="member-modal-body">
-        <view 
-          class="member-option {{item.selected ? 'selected' : ''}}" 
-          wx:for="{{allMembers}}" 
+      <view class="member-modal-header">
+        <text class="member-modal-title">选择成员</text>
+        <view class="member-modal-header-right">
+          <text class="member-action-btn" bindtap="toggleSelectAll">
+            <text wx:if="{{allSelected}}">取消全选</text>
+            <text wx:else>全选</text>
+          </text>
+          <text class="member-action-count">已选{{selectedMemberCount}}人</text>
+          <text class="member-modal-close" bindtap="closeMemberModal">×</text>
+        </view>
+      </view>
+      <scroll-view scroll-y class="member-modal-body">
+        <view
+          class="member-option {{selectedMemberMap[item.id] ? 'selected' : ''}}"
+          wx:for="{{allMembers}}"
           wx:key="id"
           bindtap="toggleMember"
           data-id="{{item.id}}"
         >
+          <view class="member-checkbox {{selectedMemberMap[item.id] ? 'checked' : ''}}">
+            <text class="member-check-icon" wx:if="{{selectedMemberMap[item.id]}}">✓</text>
+          </view>
           <text class="member-name-text">{{item.nickName}}</text>
-          <checkbox checked="{{item.selected}}" />
         </view>
-      </view>
+      </scroll-view>
       <view class="member-modal-footer">
-        <button class="btn-primary" bindtap="confirmMembers">确定</button>
+        <view class="member-confirm-btn" bindtap="confirmMembers">确定</view>
       </view>
     </view>
   </view>

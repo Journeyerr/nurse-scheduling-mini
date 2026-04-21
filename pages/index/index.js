@@ -27,6 +27,10 @@ Page({
     isChangingMonth: false, // 防止重复切换月份
     weekDays: ['一', '二', '三', '四', '五', '六', '日'],
 
+    // 假日数据（从后端获取，缓存）
+    holidayMap: {},   // { 'YYYY-MM-DD': '假日名称' }
+    workdayMap: {},   // { 'YYYY-MM-DD': true }
+
     // 排班数据
     scheduleData: {},
     scheduleCount: 0, // 排班数据数量
@@ -94,7 +98,9 @@ Page({
         currentYear,
         currentMonth
       }, () => {
-        this.initCalendar();
+        this.loadHolidays().then(() => {
+          this.initCalendar();
+        });
       });
       return;
     }
@@ -104,7 +110,9 @@ Page({
       isLaunching: false,
       isLoggedIn: true
     });
-    this.checkDepartment();
+    this.loadHolidays().then(() => {
+      this.checkDepartment();
+    });
   },
 
   onShow() {
@@ -245,6 +253,40 @@ Page({
         this.loadData();
       }
     });
+  },
+
+  // 加载假日数据（从后端获取，缓存到本地）
+  async loadHolidays() {
+    // 先尝试从缓存读取
+    const cachedHolidayMap = wx.getStorageSync('holidayMap');
+    const cachedWorkdayMap = wx.getStorageSync('workdayMap');
+    if (cachedHolidayMap && cachedWorkdayMap) {
+      this.setData({ holidayMap: cachedHolidayMap, workdayMap: cachedWorkdayMap });
+      return;
+    }
+    try {
+      const res = await api.getHolidayList();
+      const data = res.data || {};
+      this.setData({
+        holidayMap: data.holidays || {},
+        workdayMap: data.workdays || {}
+      });
+      // 缓存到本地
+      wx.setStorageSync('holidayMap', data.holidays || {});
+      wx.setStorageSync('workdayMap', data.workdays || {});
+    } catch (error) {
+      // 加载失败使用空数据
+    }
+  },
+
+  // 获取指定日期的假日信息（使用后端数据）
+  getHolidayInfo(date) {
+    const holidayMap = this.data.holidayMap || {};
+    const workdayMap = this.data.workdayMap || {};
+    const isHoliday = holidayMap.hasOwnProperty(date);
+    const holidayName = holidayMap[date] || '';
+    const isWorkday = workdayMap.hasOwnProperty(date);
+    return { isHoliday, holidayName, isWorkday };
   },
 
   // 判断是否为护士长（综合科室状态和角色：创建者或管理员）
@@ -511,22 +553,30 @@ Page({
     for (let i = offset - 1; i >= 0; i--) {
       const day = daysInPrevMonth - i;
       const date = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const holidayInfo = this.getHolidayInfo(date);
       week.push({
         day,
         date,
         isCurrentMonth: false,
-        isToday: false
+        isToday: false,
+        isHoliday: holidayInfo.isHoliday,
+        holidayName: holidayInfo.holidayName,
+        isWorkday: holidayInfo.isWorkday
       });
     }
 
     // 填充当前月日期
     for (let day = 1; day <= daysInMonth; day++) {
       const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const holidayInfo = this.getHolidayInfo(date);
       week.push({
         day,
         date,
         isCurrentMonth: true,
-        isToday: util.isToday(year, month, day)
+        isToday: util.isToday(year, month, day),
+        isHoliday: holidayInfo.isHoliday,
+        holidayName: holidayInfo.holidayName,
+        isWorkday: holidayInfo.isWorkday
       });
 
       if (week.length === 7) {
@@ -548,11 +598,15 @@ Page({
       let nextDay = 1;
       while (week.length < 7) {
         const date = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(nextDay).padStart(2, '0')}`;
+        const holidayInfo = this.getHolidayInfo(date);
         week.push({
           day: nextDay,
           date,
           isCurrentMonth: false,
-          isToday: false
+          isToday: false,
+          isHoliday: holidayInfo.isHoliday,
+          holidayName: holidayInfo.holidayName,
+          isWorkday: holidayInfo.isWorkday
         });
         nextDay++;
       }
@@ -694,6 +748,9 @@ Page({
             date: day.date,
             isCurrentMonth: day.isCurrentMonth,
             isToday: day.isToday,
+            isHoliday: day.isHoliday,
+            holidayName: day.holidayName,
+            isWorkday: day.isWorkday,
             // 将排班信息扁平化
             scheduleCode: schedule ? schedule.code : '',
             scheduleColor: schedule ? schedule.color : ''

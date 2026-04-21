@@ -20,12 +20,20 @@
         <text class="stats-label">排班天数</text>
       </view>
       <view class="stats-item">
-        <text class="stats-value">{{myStats.restDays}}</text>
-        <text class="stats-label">休息天数</text>
-      </view>
-      <view class="stats-item">
         <text class="stats-value">{{myStats.totalHours}}</text>
         <text class="stats-label">总工时</text>
+      </view>
+      <view class="stats-item balance-saved" wx:if="{{myStats.balanceDays > 0}}">
+        <text class="stats-value">+{{myStats.balanceDays}}</text>
+        <text class="stats-label">欠存</text>
+      </view>
+      <view class="stats-item balance-owed" wx:elif="{{myStats.balanceDays < 0}}">
+        <text class="stats-value">{{myStats.balanceDays}}</text>
+        <text class="stats-label">欠存</text>
+      </view>
+      <view class="stats-item" wx:else>
+        <text class="stats-value stats-value-gray">0</text>
+        <text class="stats-label">欠存</text>
       </view>
     </view>
     
@@ -68,58 +76,32 @@
         <text class="banner-value">{{currentUserStats.totalDays}}</text>
       </view>
       <view class="banner-item">
-        <text class="banner-label">休息数</text>
-        <text class="banner-value">{{currentUserStats.restDays}}</text>
-      </view>
-      <view class="banner-item">
         <text class="banner-label">总工时</text>
         <text class="banner-value">{{currentUserStats.totalHours}}h</text>
       </view>
+      <view class="banner-item banner-saved" wx:if="{{currentUserStats.balanceDays > 0}}">
+        <text class="banner-label">欠存数</text>
+        <text class="banner-value">+{{currentUserStats.balanceDays}}</text>
+      </view>
+      <view class="banner-item banner-owed" wx:elif="{{currentUserStats.balanceDays < 0}}">
+        <text class="banner-label">欠存数</text>
+        <text class="banner-value">{{currentUserStats.balanceDays}}</text>
+      </view>
+      <view class="banner-item" wx:else>
+        <text class="banner-label">欠存数</text>
+        <text class="banner-value banner-value-gray">0</text>
+      </view>
     </view>
 
 
-    <!-- 成员筛选 -->
-    <view class="filter-section">
-      <view class="picker-btn" bindtap="showPicker">
-        <text>{{selectedMemberName}}</text>
-        <text class="picker-arrow">▼</text>
-      </view>
-    </view>
-    
-    <view class="stats-grid" wx:if="{{selectedMemberId === 'all'}}">
-      <view class="stats-item">
-        <text class="stats-value">{{deptStats.totalSchedules}}</text>
-        <text class="stats-label">排班总数</text>
-      </view>
-      <view class="stats-item">
-        <text class="stats-value">{{deptStats.totalRestSchedules}}</text>
-        <text class="stats-label">休息数</text>
-      </view>
-      <view class="stats-item">
-        <text class="stats-value">{{deptStats.totalHours}}h</text>
-        <text class="stats-label">总工时</text>
-      </view>
-    </view>
-    
-    <view class="stats-grid" wx:else>
-      <view class="stats-item">
-        <text class="stats-value">{{memberStats.totalDays}}</text>
-        <text class="stats-label">排班天数</text>
-      </view>
-      <view class="stats-item">
-        <text class="stats-value">{{memberStats.restDays}}</text>
-        <text class="stats-label">休息天数</text>
-      </view>
-      <view class="stats-item">
-        <text class="stats-value">{{memberStats.totalHours}}</text>
-        <text class="stats-label">总工时</text>
-      </view>
-    </view>
-    
     <!-- 成员排班排行 -->
     <view class="rank-section">
-      <view class="detail-title" wx:if="{{selectedMemberId === 'all'}}">成员列表（共{{rankList.length}}人）</view>
-      <view class="detail-title" wx:else>{{selectedMemberName}}</view>
+      <view class="rank-header" bindtap="showPicker">
+        <text wx:if="{{selectedMemberIds.length === 0}}">全部成员（{{rankList.length}}）</text>
+        <text wx:elif="{{selectedMemberIds.length === 1}}">{{rankList[0].name}}</text>
+        <text wx:else>已选{{selectedMemberIds.length}}人</text>
+        <text class="picker-arrow">▼</text>
+      </view>
       <view class="rank-list">
         <view class="rank-item" wx:for="{{rankList}}" wx:key="id">
           <view class="rank-left">
@@ -135,33 +117,44 @@
             </view>
             <view class="rank-data-divider"></view>
             <view class="rank-data-item">
-              <text class="rank-data-label">休息</text>
-              <text class="rank-data-value">{{item.restCount}}</text>
-            </view>
-            <view class="rank-data-divider"></view>
-            <view class="rank-data-item">
               <text class="rank-data-label">工时</text>
               <text class="rank-data-value">{{item.totalHours}}h</text>
+            </view>
+            <view class="rank-data-divider"></view>
+            <view class="rank-data-item rank-saved" wx:if="{{item.balanceDays > 0}}">
+              <text class="rank-data-label">欠存</text>
+              <text class="rank-data-value">+{{item.balanceDays}}</text>
+            </view>
+            <view class="rank-data-item rank-owed" wx:elif="{{item.balanceDays < 0}}">
+              <text class="rank-data-label">欠存</text>
+              <text class="rank-data-value">{{item.balanceDays}}</text>
+            </view>
+            <view class="rank-data-item" wx:else>
+              <text class="rank-data-label">欠存</text>
+              <text class="rank-data-value">0</text>
             </view>
           </view>
         </view>
 
-        <!-- 合计行（仅全部成员时显示） -->
-        <view class="rank-item rank-total-row" wx:if="{{selectedMemberId === 'all'}}">
+        <!-- 合计行 -->
+        <view class="rank-item rank-total-row">
           <view class="rank-left">
             <text class="rank-name rank-total-label">合计</text>
           </view>
           <view class="rank-right">
             <view class="rank-data-item">
+              <text class="rank-data-label">排班</text>
               <text class="rank-data-value rank-total-value">{{totalSummary.totalSchedules}}</text>
             </view>
             <view class="rank-data-divider"></view>
             <view class="rank-data-item">
-              <text class="rank-data-value rank-total-value">{{totalSummary.totalRestSchedules}}</text>
+              <text class="rank-data-label">工时</text>
+              <text class="rank-data-value rank-total-value">{{totalSummary.totalHours}}h</text>
             </view>
             <view class="rank-data-divider"></view>
             <view class="rank-data-item">
-              <text class="rank-data-value rank-total-value">{{totalSummary.totalHours}}h</text>
+              <text class="rank-data-label">欠存</text>
+              <text class="rank-data-value rank-total-value">-</text>
             </view>
           </view>
         </view>
@@ -186,19 +179,31 @@
   <view class="picker-popup" catchtap="stopPropagation" catchtouchmove="stopPropagation">
     <view class="picker-header">
       <text class="picker-title">选择成员</text>
-      <text class="picker-close" bindtap="hidePicker">×</text>
+      <view class="picker-header-right">
+        <text class="picker-action-btn" bindtap="toggleSelectAll">
+          <text wx:if="{{selectedMemberIds.length === memberOptions.length && memberOptions.length > 0}}">取消全选</text>
+          <text wx:else>全选</text>
+        </text>
+        <text class="picker-action-count">已选{{selectedMemberIds.length}}人</text>
+        <text class="picker-close" bindtap="hidePicker">×</text>
+      </view>
     </view>
     <scroll-view scroll-y class="picker-list">
       <view
-        class="picker-item {{item.id === selectedMemberId ? 'active' : ''}}"
+        class="picker-item {{selectedMemberMap[item.id] ? 'active' : ''}}"
         wx:for="{{memberOptions}}"
         wx:key="id"
         bindtap="onMemberChange"
         data-id="{{item.id}}"
       >
+        <view class="picker-checkbox {{selectedMemberMap[item.id] ? 'checked' : ''}}">
+          <text class="picker-check-icon" wx:if="{{selectedMemberMap[item.id]}}">✓</text>
+        </view>
         <text class="picker-item-text">{{item.name}}</text>
-        <text class="picker-check" wx:if="{{item.id === selectedMemberId}}">✓</text>
       </view>
     </scroll-view>
+    <view class="picker-footer">
+      <view class="picker-confirm-btn" bindtap="confirmMemberSelection">确定</view>
+    </view>
   </view>
 </view>

@@ -14,7 +14,9 @@ Page({
       totalDays: 0,
       restDays: 0,
       totalHours: 0,
-      shiftDetails: []
+      shiftDetails: [],
+      savedDays: 0,   // 存班天数
+      owedDays: 0     // 欠班天数
     },
     
     // 科室统计
@@ -32,10 +34,10 @@ Page({
       totalHours: 0
     },
 
-    // 成员筛选
-    memberOptions: [{ id: 'all', name: '全部成员' }],
-    selectedMemberId: 'all',
-    selectedMemberName: '全部成员',
+    // 成员筛选（多选）
+    memberOptions: [],
+    selectedMemberIds: [],  // 空数组表示全部成员
+    selectedMemberMap: {},  // {id: true} 选中映射，用于WXML判断
     showMemberPicker: false,
     memberStats: {
       totalDays: 0,
@@ -87,12 +89,10 @@ Page({
     try {
       const res = await api.getMemberList();
       const members = (res.data || []).map(m => ({
-        id: m.id,
+        id: String(m.id),
         name: m.nickName
       }));
-      this.setData({
-        memberOptions: [{ id: 'all', name: '全部成员' }, ...members]
-      });
+      this.setData({ memberOptions: members });
     } catch (error) {
       // 加载成员列表失败
     }
@@ -157,6 +157,9 @@ Page({
           return detail;
         });
       }
+      // 存班/欠班由后端返回
+      data.savedDays = data.savedDays || 0;
+      data.owedDays = data.owedDays || 0;
       this.setData({ myStats: data });
     } catch (error) {
       // 加载统计失败
@@ -170,8 +173,13 @@ Page({
       const departmentId = app.globalData.currentTeamId || app.globalData.department?.id;
       const res = await api.getDepartmentStatistics(this.data.currentYear, this.data.currentMonth, departmentId);
       const deptStats = res.data || {};
-      // 给每个成员记录原始排行序号
-      const memberRank = (deptStats.memberRank || []).map((m, i) => ({ ...m, rankIndex: i }));
+      // 给每个成员记录原始排行序号（存班/欠班由后端返回）
+      const memberRank = (deptStats.memberRank || []).map((m, i) => ({
+        ...m,
+        rankIndex: i,
+        savedDays: m.savedDays || 0,
+        owedDays: m.owedDays || 0
+      }));
       this.setData({
         deptStats: { ...deptStats, memberRank },
         rankList: memberRank,
@@ -190,7 +198,11 @@ Page({
   async loadCurrentUserStats() {
     try {
       const res = await api.getMyStatistics(this.data.currentYear, this.data.currentMonth);
-      this.setData({ currentUserStats: res.data || {} });
+      const data = res.data || {};
+      // 存班/欠班由后端返回
+      data.savedDays = data.savedDays || 0;
+      data.owedDays = data.owedDays || 0;
+      this.setData({ currentUserStats: data });
     } catch (error) {
       // 加载当前用户统计失败
     }
@@ -209,44 +221,66 @@ Page({
   // 阻止事件冒泡和穿透
   stopPropagation() {},
 
-  // 切换成员
+  // 切换成员选中状态（多选）
   onMemberChange(e) {
-    const memberId = e.currentTarget.dataset.id;
-    const member = this.data.memberOptions.find(m => m.id === memberId);
-    
-    if (member) {
-      const updates = {
-        selectedMemberId: member.id,
-        selectedMemberName: member.name,
+    const memberId = String(e.currentTarget.dataset.id);
+    let ids = this.data.selectedMemberIds.slice();
+    const index = ids.indexOf(memberId);
+    if (index > -1) {
+      ids.splice(index, 1);
+    } else {
+      ids.push(memberId);
+    }
+    const map = {};
+    ids.forEach(id => { map[id] = true; });
+    this.setData({ selectedMemberIds: ids, selectedMemberMap: map });
+  },
+
+  // 全选/取消全选
+  toggleSelectAll() {
+    const allIds = this.data.memberOptions.map(m => String(m.id));
+    const currentIds = this.data.selectedMemberIds;
+    if (currentIds.length === allIds.length && allIds.every(id => currentIds.includes(id))) {
+      // 已全选，取消全选
+      this.setData({ selectedMemberIds: [], selectedMemberMap: {} });
+    } else {
+      // 全选
+      const map = {};
+      allIds.forEach(id => { map[id] = true; });
+      this.setData({ selectedMemberIds: allIds, selectedMemberMap: map });
+    }
+  },
+
+  // 确认选择，筛选列表
+  confirmMemberSelection() {
+    const selectedMemberIds = this.data.selectedMemberIds.map(String);
+    const memberRank = this.data.deptStats.memberRank || [];
+
+    if (selectedMemberIds.length === 0) {
+      // 未选任何成员 = 全部成员
+      this.setData({
+        rankList: memberRank,
+        totalSummary: {
+          totalSchedules: this.data.deptStats.totalSchedules,
+          totalRestSchedules: this.data.deptStats.totalRestSchedules,
+          totalHours: this.data.deptStats.totalHours
+        },
         showMemberPicker: false
-      };
-
-      if (member.id === 'all') {
-        // 全部成员：恢复完整排行
-        const deptStats = this.data.deptStats;
-        updates.rankList = deptStats.memberRank || [];
-        updates.totalSummary = {
-          totalSchedules: deptStats.totalSchedules,
-          totalRestSchedules: deptStats.totalRestSchedules,
-          totalHours: deptStats.totalHours
-        };
-        updates.memberStats = { totalDays: 0, restDays: 0, totalHours: 0 };
-      } else {
-        // 选中某人：只显示该人的排行（保留原始排行序号）
-        const memberRank = this.data.deptStats.memberRank || [];
-        const found = memberRank.find(m => m.id === member.id);
-        updates.rankList = found ? [found] : [];
-        // 用排行数据直接填充统计面板
-        if (found) {
-          updates.memberStats = {
-            totalDays: found.scheduleCount || 0,
-            restDays: found.restCount || 0,
-            totalHours: found.totalHours || 0
-          };
-        }
-      }
-
-      this.setData(updates);
+      });
+    } else {
+      // 选中部分成员
+      const filtered = memberRank.filter(m => selectedMemberIds.includes(String(m.id)));
+      const totalSchedules = filtered.reduce((sum, m) => sum + (m.scheduleCount || 0), 0);
+      const totalHours = filtered.reduce((sum, m) => sum + (m.totalHours || 0), 0);
+      this.setData({
+        rankList: filtered,
+        totalSummary: {
+          totalSchedules,
+          totalRestSchedules: 0,
+          totalHours: Math.round(totalHours * 10) / 10
+        },
+        showMemberPicker: false
+      });
     }
   },
 

@@ -619,6 +619,12 @@ const getMemberStatistics = (memberId, year, month) => {
   return request({ url: '/statistics/member', data: { memberId, year, month } });
 };
 
+// ========== 假日相关接口 ==========
+
+const getHolidayList = (year) => {
+  return request({ url: '/holiday/list', data: year ? { year } : {} });
+};
+
 // ========== 班种套餐相关接口 ==========
 
 const getShiftPackageList = (departmentId) => {
@@ -696,6 +702,8 @@ module.exports = {
   getMyStatistics,
   getMemberStatistics,
   getDepartmentStatistics,
+  // 假日相关
+  getHolidayList,
   // 班种套餐相关
   getShiftPackageList,
   createShiftPackage,
