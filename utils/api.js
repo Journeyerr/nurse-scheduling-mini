@@ -485,6 +485,14 @@ const getMonthlySchedule = (departmentId, year, month) => {
   return request({ url: '/schedule/monthly', data: { departmentId: deptId, year, month } });
 };
 
+const getDailySchedule = (date, departmentId) => {
+  const deptId = departmentId || getCurrentDepartmentId();
+  if (!deptId) {
+    return Promise.reject({ message: '科室ID不存在' });
+  }
+  return request({ url: '/schedule/daily', data: { date, departmentId: deptId } });
+};
+
 const getWeeklySchedule = (departmentId, startDate) => {
   if (USE_MOCK) return mockRequest('getWeeklySchedule', { startDate });
   const deptId = departmentId || getCurrentDepartmentId();
@@ -677,6 +685,7 @@ module.exports = {
   deleteShift,
   // 排班相关
   getMonthlySchedule,
+  getDailySchedule,
   getWeeklySchedule,
   addSchedule,
   batchSchedule,

@@ -918,7 +918,7 @@ Page({
   },
 
   // 点击日期
-  onDayTap(e) {
+  async onDayTap(e) {
     const { date, day } = e.currentTarget.dataset;
     if (!day || !date) return;
 
@@ -939,20 +939,15 @@ Page({
       return;
     }
 
-    // 显示当前月份的排班信息
-    const schedule = this.data.scheduleData[date];
-    if (schedule) {
-      this.setData({
-        showDayModal: true,
-        selectedDate: date,
-        daySchedule: [schedule]
-      });
-    } else {
-      this.setData({
-        showDayModal: true,
-        selectedDate: date,
-        daySchedule: []
-      });
+    // 显示当天所有排班
+    this.setData({ showDayModal: true, selectedDate: date, daySchedule: [] });
+    try {
+      const app = getApp();
+      const departmentId = app.globalData.currentTeamId || app.globalData.department?.id;
+      const res = await api.getDailySchedule(date, departmentId);
+      this.setData({ daySchedule: res.data || [] });
+    } catch (error) {
+      // 获取当天排班失败
     }
   },
 

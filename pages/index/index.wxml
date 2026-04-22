@@ -307,20 +307,11 @@
       <view wx:if="{{daySchedule.length === 0}}" class="empty-state">
         <text>暂无排班</text>
       </view>
-      <view wx:else class="schedule-list">
-        <view class="schedule-item" wx:for="{{daySchedule}}" wx:key="id">
-          <view class="schedule-color" style="background-color: {{item.color}}"></view>
-          <view class="schedule-detail">
-            <text class="schedule-name">{{item.name}}</text>
-            <view class="schedule-time-row">
-              <block wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
-                <text class="schedule-time-text" wx:if="{{index > 0}}"> / </text>
-                <text class="schedule-time-text">
-                  {{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}
-                </text>
-              </block>
-            </view>
-          </view>
+      <view wx:else class="day-schedule-list">
+        <view class="day-schedule-item" wx:for="{{daySchedule}}" wx:key="memberId">
+          <view class="day-schedule-color" style="background-color: {{item.shiftColor}}"></view>
+          <text class="day-schedule-name">{{item.memberName}}</text>
+          <text class="day-schedule-shift" style="color: {{item.shiftColor}}">{{item.shiftName}}</text>
         </view>
       </view>
     </view>
