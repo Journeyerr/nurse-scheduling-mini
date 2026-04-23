@@ -20,12 +20,13 @@ Page({
       duration: '',
       coefficient: '1.0',
       isRest: false,
-      color: '#7BA3C8'
+      color: '#4A90D9'
     },
     colorList: [
-      '#7BA3C8', '#9B8AA8', '#A8B5BD',
-      '#E89B7C', '#B8A07E', '#8A9EB5',
-      '#C49BA8', '#C4B89A'
+      '#4A90D9', '#E89B7C', '#5BBD72', '#E85D75',
+      '#9B59B6', '#F5A623', '#3ABFBF', '#8B6FC0',
+      '#D4637A', '#2EAADC',  '#E6783E',
+      '#5C7CAA', '#45A5A5', '#B8860B'
     ],
     canSubmit: false,
 
@@ -140,7 +141,7 @@ Page({
         duration: '',
         coefficient: '1.0',
         isRest: false,
-        color: '#7BA3C8'
+        color: '#4A90D9'
       },
       canSubmit: false
     });
@@ -178,6 +179,9 @@ Page({
   // 阻止冒泡
   stopPropagation() {},
 
+  // 阻止遮罩层触摸穿透
+  preventTouchMove() {},
+
   // 输入班种编号
   onCodeInput(e) {
     const code = e.detail.value.toUpperCase();
@@ -211,8 +215,10 @@ Page({
 
   // 切换是否休息
   toggleIsRest(e) {
+    const isRest = e.detail.value;
     this.setData({
-      'editingShift.isRest': e.detail.value
+      'editingShift.isRest': isRest,
+      'editingShift.duration': isRest ? '0' : ''
     });
   },
 
@@ -477,7 +483,7 @@ Page({
     }
   },
 
-  // 跳转到班种套餐
+  // 跳转到班种套班
   goShiftPackage() {
     wx.navigateTo({ url: '/pages/shift-package/shift-package' });
   }

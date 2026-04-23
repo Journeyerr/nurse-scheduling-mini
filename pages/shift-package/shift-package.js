@@ -214,7 +214,7 @@ Page({
     const { editingPackage } = this.data;
     
     if (!editingPackage.name.trim()) {
-      util.showError('请输入套餐名称');
+      util.showError('请输入套班名称');
       return;
     }
 
@@ -224,7 +224,7 @@ Page({
       return;
     }
 
-    // 构建套餐数据
+    // 构建套班数据
     const shifts = editingPackage.shifts.map(s => ({
       shiftId: s.shiftId || null,
       code: s.code || '',

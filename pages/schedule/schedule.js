@@ -703,7 +703,7 @@ Page({
     this.doApplyPackage(pkg, member);
   },
 
-  // 执行应用套餐（只应用到一个成员）
+  // 执行应用套班（只应用到一个成员）
   doApplyPackage(pkg, member) {
     const { members, weekDates, localChanges } = this.data;
     const newAdds = [...localChanges.adds];
@@ -946,7 +946,7 @@ Page({
     this.setData({ toolbarTab: tab });
   },
 
-  // 跳转创建套餐
+  // 跳转创建套班
   goCreatePackage() {
     wx.navigateTo({ url: '/pages/shift-package/shift-package' });
   },

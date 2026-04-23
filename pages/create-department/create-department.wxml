@@ -1,64 +1,114 @@
 <!--pages/create-department/create-department.wxml-->
 <view class="create-container">
-  <view class="form-section card">
-    <view class="form-item">
-      <text class="form-label">科室名称</text>
-      <input 
-        class="input" 
-        placeholder="请输入科室名称" 
-        value="{{name}}"
-        bindinput="onNameInput"
-        maxlength="20"
-      />
+
+  <!-- 顶部引导区 -->
+  <view class="header-section">
+    <view class="header-icon">
+      <text class="icon-emoji">🏥</text>
+    </view>
+    <text class="header-title">创建您的科室</text>
+    <text class="header-desc">创建科室后即可邀请成员、开始排班</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-card">
+    <!-- 科室名称 -->
+    <view class="form-group">
+      <view class="form-label-row">
+        <text class="label-dot"></text>
+        <text class="form-label">科室名称</text>
+      </view>
+      <view class="input-wrapper">
+        <input 
+          class="form-input" 
+          placeholder="例如：内科一病区" 
+          placeholder-class="input-placeholder"
+          value="{{name}}"
+          bindinput="onNameInput"
+          maxlength="20"
+        />
+        <text class="input-count" wx:if="{{name.length > 0}}">{{name.length}}/20</text>
+      </view>
     </view>
     
-    <view class="form-item">
-      <text class="form-label">您的姓名</text>
-      <input 
-        class="input" 
-        placeholder="请输入您的姓名" 
-        value="{{creatorName}}"
-        bindinput="onCreatorNameInput"
-        maxlength="10"
-      />
+    <!-- 您的姓名 -->
+    <view class="form-group">
+      <view class="form-label-row">
+        <text class="label-dot"></text>
+        <text class="form-label">您的姓名</text>
+      </view>
+      <view class="input-wrapper">
+        <input 
+          class="form-input" 
+          placeholder="成员列表中显示的名称" 
+          placeholder-class="input-placeholder"
+          value="{{creatorName}}"
+          bindinput="onCreatorNameInput"
+          maxlength="10"
+        />
+        <text class="input-count" wx:if="{{creatorName.length > 0}}">{{creatorName.length}}/10</text>
+      </view>
     </view>
 
-    <view class="form-item">
+    <!-- 分割线 -->
+    <view class="form-divider"></view>
+
+    <!-- 班种选择 -->
+    <view class="form-group">
       <view class="form-label-row">
-        <text class="form-label">班种选择</text>
-        <text class="form-tip-inline">可多选</text>
+        <text class="label-dot"></text>
+        <text class="form-label">选择班种</text>
+        <text class="form-tip">至少选一个，可多选</text>
       </view>
-      <view class="shift-list">
+      
+      <view class="shift-list" wx:if="{{shiftList.length > 0}}">
         <view 
-          class="shift-item {{item.selected ? 'selected' : ''}}" 
+          class="shift-card {{item.selected ? 'shift-selected' : ''}}" 
           wx:for="{{shiftList}}" 
           wx:key="id"
           bindtap="toggleShift"
           data-index="{{index}}"
         >
-          <view class="shift-header">
-            <view class="shift-badge" style="background-color: {{item.color}}20; border-color: {{item.color}}">
-              <text class="badge-code" style="color: {{item.color}}">{{item.code}}</text>
+          <view class="shift-card-left">
+            <view class="shift-color-dot" style="background-color: {{item.color}}"></view>
+            <view class="shift-info">
+              <view class="shift-name-row">
+                <text class="shift-name">{{item.name}}</text>
+                <text class="shift-code-badge" style="color: {{item.color}}; background-color: {{item.color}}15;">{{item.code}}</text>
+              </view>
+              <view class="shift-meta" wx:if="{{item.timeSlots.length > 0 || item.duration}}">
+                <text class="shift-time" wx:for="{{item.timeSlots}}" wx:for-item="slot" wx:key="index">
+                  {{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}
+                </text>
+                <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
+              </view>
             </view>
-            <text class="shift-name">{{item.name}}</text>
-            <text class="shift-duration" wx:if="{{item.duration}}">{{item.duration}}h</text>
           </view>
-          <view class="shift-times">
-            <view class="time-slot" wx:for="{{item.timeSlots || []}}" wx:for-item="slot" wx:key="index">
-              <text class="time-text">{{slot.startTime}}{{slot.startIsNextDay ? '次日' : ''}}-{{slot.endTime}}{{slot.endIsNextDay ? '次日' : ''}}</text>
-            </view>
+          <view class="shift-check-box {{item.selected ? 'checked' : ''}}">
+            <text class="check-icon" wx:if="{{item.selected}}">✓</text>
           </view>
-          <text class="shift-check" wx:if="{{item.selected}}">✓</text>
         </view>
       </view>
+
+      <!-- 空状态 -->
+      <view class="shift-empty" wx:if="{{shiftList.length === 0}}">
+        <text class="empty-text">还没有班种，点击下方添加</text>
+      </view>
+
+      <!-- 新增班种按钮 -->
       <view class="add-shift-btn" bindtap="addShift">
-        <text class="add-icon">+</text>
+        <view class="add-btn-circle">
+          <text class="add-icon">+</text>
+        </view>
         <text class="add-text">新增班种</text>
       </view>
     </view>
   </view>
 
-  <button class="submit-btn" bindtap="handleSubmit" disabled="{{!canSubmit}}">
-    创建科室
-  </button>
+  <!-- 底部提交按钮 -->
+  <view class="submit-area">
+    <button class="submit-btn" bindtap="handleSubmit" disabled="{{!canSubmit}}">
+      创建科室
+    </button>
+  </view>
 </view>

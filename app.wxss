@@ -20,7 +20,7 @@ page {
   background: #fff;
   border-radius: 12rpx;
   padding: 30rpx;
-  margin-bottom: 20rpx;
+  /* margin-bottom: 5rpx; */
 }
 
 /* 按钮样式 - 固定底部提交按钮 */

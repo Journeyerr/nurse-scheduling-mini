@@ -150,6 +150,12 @@ Page({
 
   // 下拉刷新
   async onPullDownRefresh() {
+    // 没有科室时不触发刷新
+    if (!this.data.hasDepartment) {
+      wx.stopPullDownRefresh();
+      return;
+    }
+
     try {
       // 等待数据加载完成
       await this.refreshData();
@@ -1396,9 +1402,14 @@ Page({
       await api.quitDepartment(this.data.department.id);
       util.hideLoading();
       
-      // 清除本地科室数据
+      // 清除本地科室相关数据（保留登录信息：token、userInfo、holidayMap、workdayMap）
       app.setDepartment(null);
+      app.setRole(null);
+      app.globalData.isCreator = false;
+      app.globalData.isAdmin = false;
+      app.globalData.currentTeamId = null;
       wx.removeStorageSync('department');
+      wx.removeStorageSync('role');
       
       util.showSuccess('已退出科室');
 
@@ -1409,6 +1420,23 @@ Page({
     } catch (error) {
       util.hideLoading();
       util.showError(error.message || error.msg || '退出失败');
+    }
+  },
+
+  // 点击邀请按钮
+  onInviteTap() {
+    if (!this.data.hasDepartment) {
+      wx.showModal({
+        title: '提示',
+        content: '请先创建科室',
+        showCancel: false,
+        confirmText: '去创建',
+        success: (res) => {
+          if (res.confirm) {
+            this.goCreateDepartment();
+          }
+        }
+      });
     }
   },
 

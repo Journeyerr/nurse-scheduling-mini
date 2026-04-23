@@ -144,7 +144,7 @@
         <view class="tab-indicator" wx:if="{{toolbarTab === 'shift'}}">●</view>
       </view>
       <view class="toolbar-tab {{toolbarTab === 'package' ? 'active' : ''}}" bindtap="switchToolbarTab" data-tab="package">
-        <text>套餐</text>
+        <text>套班</text>
         <view class="tab-indicator" wx:if="{{toolbarTab === 'package'}}">●</view>
       </view>
     </view>
@@ -167,7 +167,7 @@
       </view>
     </scroll-view>
 
-    <!-- 套餐面板 -->
+    <!-- 套班面板 -->
     <scroll-view scroll-x class="toolbar-panel" wx:if="{{toolbarTab === 'package'}}">
       <view class="toolbar-package-list">
         <view class="toolbar-package-item" wx:for="{{packageList}}" wx:key="id" bindtap="applyPackage" data-id="{{item.id}}">

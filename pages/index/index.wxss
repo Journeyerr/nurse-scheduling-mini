@@ -398,7 +398,7 @@
   width: 85rpx;
   height: 36rpx;
   /* margin-left: 8rpx; */
-  margin-top: 14rpx;
+  margin-top: 6rpx;
   opacity: 0.5;
 }
 

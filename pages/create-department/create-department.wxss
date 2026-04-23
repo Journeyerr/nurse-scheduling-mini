@@ -1,28 +1,64 @@
 /* pages/create-department/create-department.wxss */
 
 .create-container {
-  padding: 30rpx;
-  padding-bottom: 140rpx;
   min-height: 100vh;
-  background: #F5F7FA;
+  background: linear-gradient(180deg, #E8F0FE 0%, #F5F7FA 30%);
+  padding-bottom: 180rpx;
   box-sizing: border-box;
 }
 
-.form-section {
-  padding: 40rpx 30rpx;
-  margin-bottom: 30rpx;
+/* 顶部引导区 */
+.header-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx 40rpx;
 }
 
-.form-item {
-  margin-bottom: 40rpx;
+.header-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background: #fff;
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(74, 144, 217, 0.15);
 }
 
-.form-label {
-  display: block;
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 16rpx;
-  font-weight: 500;
+.icon-emoji {
+  font-size: 56rpx;
+}
+
+.header-title {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 12rpx;
+}
+
+.header-desc {
+  font-size: 26rpx;
+  color: #888;
+}
+
+/* 表单卡片 */
+.form-card {
+  margin: 0 30rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 表单组 */
+.form-group {
+  margin-bottom: 36rpx;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
 }
 
 .form-label-row {
@@ -31,108 +67,186 @@
   margin-bottom: 16rpx;
 }
 
-.form-tip-inline {
-  font-size: 24rpx;
-  color: #999;
-  margin-left: 16rpx;
-}
-
-.input {
-  width: 100%;
-  height: 88rpx;
-  background: #F5F7FA;
-  border-radius: 12rpx;
-  padding: 0 24rpx;
-  box-sizing: border-box;
-  font-size: 28rpx;
-}
-
-/* 班种选择 - 一行两个 */
-.shift-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: 20rpx;
-}
-
-.shift-item {
-  width: 48%;
-  display: flex;
-  flex-direction: column;
-  padding: 20rpx 24rpx;
-  background: #fff;
-  border-radius: 12rpx;
-  border: 2rpx solid transparent;
-  box-sizing: border-box;
-  position: relative;
-  margin-bottom: 16rpx;
-}
-
-.shift-item.selected {
-  background: #E8F4FD;
-  border-color: #4A90D9;
-}
-
-.shift-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8rpx;
-  padding-right: 40rpx;
-}
-
-.shift-badge {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 8rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2rpx solid;
+.label-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #4A90D9;
   margin-right: 12rpx;
   flex-shrink: 0;
 }
 
-.badge-code {
+.form-label {
   font-size: 28rpx;
-  font-weight: bold;
+  color: #333;
+  font-weight: 600;
+}
+
+.form-tip {
+  font-size: 24rpx;
+  color: #AAA;
+  margin-left: auto;
+}
+
+/* 输入框 */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  height: 92rpx;
+  background: #F7F8FA;
+  border-radius: 16rpx;
+  padding: 0 100rpx 0 28rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  color: #333;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  background: #F0F4FF;
+}
+
+.input-placeholder {
+  color: #C8C8C8;
+  font-size: 28rpx;
+}
+
+.input-count {
+  position: absolute;
+  right: 24rpx;
+  font-size: 22rpx;
+  color: #C8C8C8;
+}
+
+/* 分割线 */
+.form-divider {
+  height: 1rpx;
+  background: #F0F0F0;
+  margin: 36rpx 0;
+}
+
+/* 班种列表 */
+.shift-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.shift-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+  background: #FAFBFC;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.shift-card.shift-selected {
+  background: #F0F5FF;
+  border-color: #4A90D9;
+}
+
+.shift-card-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.shift-color-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 8rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.shift-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.shift-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 4rpx;
 }
 
 .shift-name {
   font-size: 28rpx;
   color: #333;
   font-weight: 600;
-  flex: 1;
+}
+
+.shift-code-badge {
+  font-size: 22rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 8rpx;
+  font-weight: 600;
+}
+
+.shift-meta {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.shift-time {
+  font-size: 22rpx;
+  color: #999;
 }
 
 .shift-duration {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #4A90D9;
-  font-weight: 600;
-  margin-left: 8rpx;
+  font-weight: 500;
 }
 
-.shift-times {
+/* 选择框 */
+.shift-check-box {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 12rpx;
+  border: 2rpx solid #D9D9D9;
   display: flex;
-  flex-direction: column;
-  gap: 4rpx;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+  transition: all 0.2s;
 }
 
-.time-slot {
-  display: inline-flex;
+.shift-check-box.checked {
+  background: #4A90D9;
+  border-color: #4A90D9;
 }
 
-.time-text {
-  font-size: 24rpx;
-  color: #666;
+.check-icon {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 700;
 }
 
-.shift-check {
-  position: absolute;
-  top: 12rpx;
-  right: 12rpx;
-  font-size: 28rpx;
-  color: #4A90D9;
-  font-weight: bold;
+/* 空状态 */
+.shift-empty {
+  text-align: center;
+  padding: 40rpx 0;
+  margin-bottom: 16rpx;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #C8C8C8;
 }
 
 /* 新增班种按钮 */
@@ -140,47 +254,73 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20rpx 24rpx;
-  background: #fff;
-  border-radius: 12rpx;
+  padding: 24rpx;
+  background: #FAFBFC;
+  border-radius: 16rpx;
   border: 2rpx dashed #D9D9D9;
-  width: 100%;
-  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.add-shift-btn:active {
+  background: #F0F5FF;
+  border-color: #4A90D9;
+}
+
+.add-btn-circle {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 20rpx;
+  background: #4A90D9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12rpx;
 }
 
 .add-icon {
-  font-size: 36rpx;
-  color: #4A90D9;
-  margin-right: 12rpx;
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .add-text {
   font-size: 28rpx;
   color: #4A90D9;
+  font-weight: 500;
 }
 
-/* 提交按钮 */
-.submit-btn {
+/* 底部提交按钮 */
+.submit-area {
   position: fixed;
   bottom: 0;
   left: 0;
+  width: 100%;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.submit-btn {
   width: 100% !important;
-  height: 110rpx;
-  line-height: 110rpx;
+  height: 96rpx;
+  line-height: 96rpx;
   background: linear-gradient(135deg, #4A90D9 0%, #357ABD 100%);
   color: #fff;
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 600;
-  letter-spacing: 2rpx;
+  letter-spacing: 4rpx;
   border: none;
-  border-radius: 0;
+  border-radius: 48rpx !important;
   padding: 0 !important;
   margin: 0;
-  box-shadow: 0 -4rpx 20rpx rgba(74, 144, 217, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(74, 144, 217, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
+  transition: all 0.2s;
 }
 
 .submit-btn::before {
@@ -193,12 +333,12 @@
 }
 
 .submit-btn[disabled] {
-  background: #B8B8B8;
-  color: #666;
+  background: #D9D9D9;
+  color: #fff;
   box-shadow: none;
-  width: 100% !important;
 }
 
 .submit-btn:not([disabled]):active {
   background: linear-gradient(135deg, #357ABD 0%, #2868A8 100%);
+  transform: scale(0.98);
 }

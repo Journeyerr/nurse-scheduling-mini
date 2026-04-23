@@ -78,6 +78,7 @@ App({
     wx.removeStorageSync('userInfo');
     wx.removeStorageSync('department');
     wx.removeStorageSync('role');
+    wx.removeStorageSync('token');
   },
 
   // 检查是否有科室

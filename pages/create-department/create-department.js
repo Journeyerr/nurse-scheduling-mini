@@ -28,22 +28,6 @@ Page({
     this.loadDefaultShifts();
   },
 
-  onLoad() {
-    // 检查用户是否已有科室，一个用户只能创建/加入一个科室
-    if (app.hasDepartment()) {
-      wx.showModal({
-        title: '提示',
-        content: '您已创建或加入了科室，一个用户只能创建或加入一个科室',
-        showCancel: false,
-        success: () => {
-          wx.reLaunch({ url: '/pages/index/index' });
-        }
-      });
-      return;
-    }
-    this.loadDefaultShifts();
-  },
-
   onShow() {
     // 检查是否有新添加的班种
     const newShift = app.globalData.tempNewShift;

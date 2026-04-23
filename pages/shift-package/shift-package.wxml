@@ -30,7 +30,7 @@
   <!-- 添加按钮 -->
   <view class="add-btn" bindtap="addPackage">
     <text class="add-icon">+</text>
-    <text class="add-text">添加班种套餐</text>
+    <text class="add-text">添加班种套班</text>
   </view>
 </view>
 
@@ -38,14 +38,14 @@
 <view class="bottom-modal-mask {{showEditModal ? 'show' : ''}}" bindtap="closeEditModal">
   <view class="bottom-modal" catchtap="stopPropagation">
     <view class="modal-header">
-      <text class="modal-title">{{editingPackage.id ? '编辑套餐' : '添加套餐'}}</text>
+      <text class="modal-title">{{editingPackage.id ? '编辑套班' : '添加套班'}}</text>
       <view class="modal-close" bindtap="closeEditModal">×</view>
     </view>
 
     <view class="modal-body">
-      <!-- 套餐名称 -->
+      <!-- 套班名称 -->
       <view class="form-item">
-        <input class="form-input" placeholder="请输入套餐名称" value="{{editingPackage.name}}" bindinput="onNameInput" />
+        <input class="form-input" placeholder="请输入套班名称" value="{{editingPackage.name}}" bindinput="onNameInput" />
       </view>
 
       <!-- 一周班种选择 -->

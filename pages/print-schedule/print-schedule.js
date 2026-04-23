@@ -391,11 +391,16 @@ Page({
       // 权限已获取，绘制图片
       wx.showLoading({ title: '生成中...' });
       const tempFilePath = await this._drawScheduleCanvas();
-      this.setData({ shareImagePath: tempFilePath });
+
+      // 将临时文件保存为持久路径，避免 saveImageToPhotosAlbum 找不到文件
+      const fs = wx.getFileSystemManager();
+      const persistentPath = `${wx.env.USER_DATA_PATH}/schedule_${this.data.currentYear}${this.data.currentMonth}.png`;
+      fs.saveFileSync(tempFilePath, persistentPath);
+      this.setData({ shareImagePath: persistentPath });
 
       // 保存到相册
       wx.saveImageToPhotosAlbum({
-        filePath: tempFilePath,
+        filePath: persistentPath,
         success: () => {
           wx.hideLoading();
           wx.showToast({ title: '已保存到相册', icon: 'success' });

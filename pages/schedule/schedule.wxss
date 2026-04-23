@@ -535,7 +535,7 @@
   white-space: nowrap;
 }
 
-/* 套餐横向列表 */
+/* 套班横向列表 */
 .toolbar-package-list {
   display: flex;
   gap: 16rpx;

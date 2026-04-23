@@ -120,16 +120,19 @@
   <!-- 科室信息与邀请（护士长/管理员可见） -->
   <view class="invite-section card" wx:if="{{isLoggedIn && isLeader}}">
     <view class="dept-info-row">
-      <view class="dept-info-left" bindtap="showDepartmentActions" hover-class="invite-text-hover">
+      <view class="dept-info-left" bindtap="{{hasDepartment ? 'showDepartmentActions' : ''}}" hover-class="invite-text-hover">
         <text class="dept-name-text dept-name-link">{{department.name}}</text>
-        <!-- <image class="dept-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image> -->
-        <text class="dept-separator">|</text>
-        <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit"></image>
+        <text class="dept-separator" wx:if="{{hasDepartment}}">|</text>
+        <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit" wx:if="{{hasDepartment}}"></image>
       </view>
-      <button class="invite-btn-new" size="mini" open-type="share">
+      <button class="invite-btn-new" size="mini" open-type="share" wx:if="{{hasDepartment}}">
         <text class="invite-link-text">邀请成员</text>
         <image class="invite-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
       </button>
+      <view class="invite-btn-new" wx:else bindtap="onInviteTap">
+        <text class="invite-link-text">邀请成员</text>
+        <image class="invite-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
+      </view>
     </view>
   </view>
 
@@ -138,7 +141,6 @@
     <view class="dept-info-row">
       <view class="dept-info-left" bindtap="showMemberActions" hover-class="invite-text-hover">
         <text class="dept-name-text dept-name-link">{{department.name}}</text>
-        <!-- <image class="dept-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image> -->
         <text class="dept-separator">|</text>
         <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit"></image>
       </view>

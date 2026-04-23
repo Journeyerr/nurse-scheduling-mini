@@ -1,101 +1,133 @@
 <!--pages/create-shift/create-shift.wxml-->
 <view class="create-shift-container">
-  <view class="form-section card">
-    <view class="form-item">
-      <text class="form-label">班种编号（代号）</text>
-      <input
-        class="input"
-        placeholder="如：A、B、N"
-        placeholder-class="input-placeholder"
-        value="{{code}}"
-        bindinput="onCodeInput"
-        maxlength="2"
-      />
+
+  <!-- 表单卡片 -->
+  <view class="form-card">
+    <!-- 基本信息 -->
+    <!-- <view class="section-title">
+      <text class="section-dot"></text>
+      <text class="section-text">基本信息</text>
+    </view> -->
+
+    <view class="form-group">
+      <view class="form-label-row">
+        <text class="label-dot"></text>
+        <text class="form-label">班种编号</text>
+        <text class="form-label-sub">日历上显示的代号</text>
+      </view>
+      <view class="input-wrapper input-code-wrapper">
+        <input
+          class="form-input"
+          placeholder="如 A、B、N"
+          placeholder-class="input-placeholder"
+          value="{{code}}"
+          bindinput="onCodeInput"
+          maxlength="2"
+        />
+        <view class="code-preview-badge" style="color: {{currentColor}}; background: {{currentColor}}15;">
+          {{code || 'A'}}
+        </view>
+      </view>
     </view>
 
-    <view class="form-item">
-      <text class="form-label">班种名称</text>
-      <input
-        class="input"
-        placeholder="如：白班、夜班"
-        placeholder-class="input-placeholder"
-        value="{{name}}"
-        bindinput="onNameInput"
-        maxlength="10"
-      />
+    <view class="form-group">
+      <view class="form-label-row">
+        <text class="label-dot"></text>
+        <text class="form-label">班种名称</text>
+      </view>
+      <view class="input-wrapper">
+        <input
+          class="form-input"
+          placeholder="如 白班、夜班"
+          placeholder-class="input-placeholder"
+          value="{{name}}"
+          bindinput="onNameInput"
+          maxlength="10"
+        />
+        <text class="input-count" wx:if="{{name.length > 0}}">{{name.length}}/10</text>
+      </view>
     </view>
-    
-    <view class="form-item">
-      <text class="form-label">工作时间段</text>
 
-      <view class="time-slots">
-        <view class="time-slot-item" wx:for="{{timeSlots}}" wx:key="index">
-          <view class="time-row">
-            <view class="time-col">
-              <text class="time-col-label">开始</text>
-              <view class="time-picker" bindtap="showStartTimePicker" data-index="{{index}}">
-                <text class="time-text">{{item.startTime || '00:00'}}</text>
-                <text class="next-day-tag" wx:if="{{item.startIsNextDay}}">次日</text>
-              </view>
+    <!-- 分割线 -->
+    <view class="form-divider"></view>
+
+    <!-- 时间设置 -->
+    <!-- <view class="section-title">
+      <text class="section-dot"></text>
+      <text class="section-text">时间设置</text>
+    </view> -->
+
+    <view class="time-slots">
+      <view class="time-slot-card" wx:for="{{timeSlots}}" wx:key="index">
+        <view class="time-slot-header">
+          <text class="time-slot-label">时间段 {{timeSlots.length > 1 ? index + 1 : ''}}</text>
+          <view class="time-slot-actions">
+            <view class="time-action-btn add-btn" wx:if="{{index === 0 && timeSlots.length < 2}}" bindtap="addTimeSlot">
+              <text class="action-icon add-icon">+</text>
+              <text class="action-text">添加</text>
             </view>
-            <view class="time-col">
-              <text class="time-col-label">结束</text>
-              <view class="time-picker" bindtap="showEndTimePicker" data-index="{{index}}">
-                <text class="time-text">{{item.endTime || '00:00'}}</text>
-                <text class="next-day-tag" wx:if="{{item.endIsNextDay}}">次日</text>
-              </view>
+            <view class="time-action-btn remove-btn" wx:if="{{index === 1}}" bindtap="removeTimeSlot" data-index="{{index}}">
+              <text class="action-icon remove-icon">−</text>
+              <text class="action-text">删除</text>
             </view>
-            <!-- 操作按钮区域（固定宽度，防止布局抖动） -->
-            <view class="time-action {{index === 0 && timeSlots.length < 2 ? 'add-action' : ''}}" 
-                  wx:if="{{(index === 0 && timeSlots.length < 2) || index === 1}}"
-                  bindtap="{{index === 0 ? 'addTimeSlot' : 'removeTimeSlot'}}"
-                  data-index="{{index}}">
-              <text class="{{index === 0 ? 'add-btn' : 'remove-btn'}}">{{index === 0 ? '+' : '−'}}</text>
-            </view>
-            <!-- 占位符，保持第一行有按钮时的宽度一致 -->
-            <view class="time-action-placeholder" wx:if="{{index === 0 && timeSlots.length >= 2}}"></view>
+          </view>
+        </view>
+        <view class="time-slot-row">
+          <view class="time-picker-card" bindtap="showStartTimePicker" data-index="{{index}}">
+            <text class="time-picker-label">开始</text>
+            <text class="time-picker-value">{{item.startTime || '选择时间'}}</text>
+            <text class="next-day-badge" wx:if="{{item.startIsNextDay}}">次日</text>
+          </view>
+          <view class="time-arrow">
+            <text class="arrow-line">→</text>
+          </view>
+          <view class="time-picker-card" bindtap="showEndTimePicker" data-index="{{index}}">
+            <text class="time-picker-label">结束</text>
+            <text class="time-picker-value">{{item.endTime || '选择时间'}}</text>
+            <text class="next-day-badge" wx:if="{{item.endIsNextDay}}">次日</text>
           </view>
         </view>
       </view>
     </view>
 
-    <view class="form-item">
-      <text class="form-label">时长（小时）</text>
-      <input
-        class="input"
-        type="digit"
-        placeholder="自动计算或手动输入"
-        placeholder-class="input-placeholder"
-        value="{{duration}}"
-        bindinput="onDurationInput"
-      />
-    </view>
-
-    <view class="form-item form-row-item">
-      <view class="form-row-left">
-        <text class="form-label">班种系数</text>
-        <text class="form-hint">用于酬劳计算</text>
+    <view class="inline-form-row">
+      <view class="inline-form-item">
+        <text class="inline-label">时长</text>
+        <view class="inline-input-wrapper">
+          <input class="inline-input" type="digit" placeholder="自动计算" placeholder-class="input-placeholder" value="{{duration}}" bindinput="onDurationInput" />
+          <text class="inline-unit">小时</text>
+        </view>
       </view>
-      <input
-        class="input input-small"
-        type="digit"
-        placeholder="默认1.0"
-        placeholder-class="input-placeholder"
-        value="{{coefficient}}"
-        bindinput="onCoefficientInput"
-      />
+      <view class="inline-form-item">
+        <text class="inline-label">系数</text>
+        <view class="inline-input-wrapper">
+          <input class="inline-input" type="digit" placeholder="1.0" placeholder-class="input-placeholder" value="{{coefficient}}" bindinput="onCoefficientInput" />
+        </view>
+      </view>
     </view>
 
-    <view class="form-item form-switch-item">
-      <view class="switch-left">
-        <text class="form-label">标记为休息班</text>
-        <text class="form-hint">休息班不计入工作排班数</text>
+    <!-- 分割线 -->
+    <view class="form-divider"></view>
+
+    <!-- 其他设置 -->
+    <!-- <view class="section-title">
+      <text class="section-dot"></text>
+      <text class="section-text">其他设置</text>
+    </view> -->
+
+    <view class="switch-row">
+      <view class="switch-info">
+        <text class="switch-label">休息班</text>
+        <text class="switch-desc">不计入工作排班数</text>
       </view>
       <switch checked="{{isRest}}" bindchange="onRestChange" color="#4A90D9" />
     </view>
-    
-    <view class="form-item">
-      <text class="form-label">编号字体颜色</text>
+
+    <view class="form-group">
+      <view class="form-label-row">
+        <text class="label-dot"></text>
+        <text class="form-label">编号颜色</text>
+      </view>
       <view class="color-picker">
         <view 
           class="color-item {{currentColor === item ? 'active' : ''}}" 
@@ -105,41 +137,48 @@
           bindtap="selectColor"
           data-color="{{item}}"
         >
-          <text class="check-icon" wx:if="{{currentColor === item}}">✓</text>
+          <text class="color-check" wx:if="{{currentColor === item}}">✓</text>
         </view>
       </view>
     </view>
-    
+
     <!-- 预览 -->
     <view class="preview-section">
-      <text class="form-label">预览效果</text>
-      <view class="preview-box">
-        <view class="preview-tag">
-          <text class="preview-code" style="color: {{currentColor}}">{{code || 'A'}}</text>
+      <text class="preview-title">预览效果</text>
+      <view class="preview-card">
+        <view class="preview-badge" style="color: {{currentColor}}; background: {{currentColor}}12;">
+          {{code || 'A'}}
         </view>
-        <view class="preview-info">
+        <view class="preview-detail">
           <text class="preview-name">{{name || '班种名称'}}</text>
-          <view class="preview-times">
+          <view class="preview-times" wx:if="{{timeSlots.length > 0}}">
             <text class="preview-time" wx:for="{{timeSlots}}" wx:key="index">
               {{item.startTime || '00:00'}}-{{item.endTime || '00:00'}}{{item.endIsNextDay ? '次日' : ''}}
             </text>
           </view>
         </view>
+        <view class="preview-duration" wx:if="{{duration}}">
+          <text class="duration-value">{{duration}}</text>
+          <text class="duration-unit">h</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <button class="submit-btn" bindtap="handleSubmit" disabled="{{!canSubmit}}">
-    {{isEdit ? '保存修改' : '创建班种'}}
-  </button>
+  <!-- 底部提交按钮 -->
+  <view class="submit-area">
+    <button class="submit-btn" bindtap="handleSubmit" disabled="{{!canSubmit}}">
+      {{isEdit ? '保存修改' : '创建班种'}}
+    </button>
+  </view>
 
   <!-- 时间选择弹窗 -->
   <view class="time-modal-mask" wx:if="{{showTimePickerModal}}" bindtap="hideTimePicker">
     <view class="time-modal" catchtap="stopPropagation">
       <view class="time-modal-header">
-        <view class="time-modal-btn cancel" bindtap="hideTimePicker">取消</view>
+        <text class="time-modal-cancel" bindtap="hideTimePicker">取消</text>
         <text class="time-modal-title">选择时间</text>
-        <view class="time-modal-btn" bindtap="confirmTime">确定</view>
+        <text class="time-modal-confirm" bindtap="confirmTime">确定</text>
       </view>
 
       <!-- 今日/次日切换 -->

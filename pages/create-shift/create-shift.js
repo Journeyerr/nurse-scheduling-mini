@@ -15,11 +15,12 @@ Page({
     duration: '', // 时长
     coefficient: '1.0', // 班种系数，默认1
     isRest: false, // 是否为休息班
-    currentColor: '#7BA3C8',
+    currentColor: '#4A90D9',
     colorList: [
-      '#7BA3C8', '#9B8AA8', '#A8B5BD',
-      '#E89B7C', '#B8A07E', '#8A9EB5',
-      '#C49BA8', '#C4B89A'
+      '#4A90D9', '#E89B7C', '#5BBD72', '#E85D75',
+      '#9B59B6', '#F5A623', '#3ABFBF', '#8B6FC0',
+      '#D4637A', '#2EAADC',  '#E6783E',
+      '#5C7CAA', '#45A5A5', '#B8860B'
     ],
     canSubmit: false,
 
@@ -315,7 +316,13 @@ Page({
 
   // 休息班开关
   onRestChange(e) {
-    this.setData({ isRest: e.detail.value });
+    const isRest = e.detail.value;
+    this.setData({ isRest });
+    if (isRest) {
+      this.setData({ duration: '0' });
+    } else {
+      this.calculateDuration();
+    }
   },
 
   // 阻止冒泡

@@ -633,7 +633,7 @@ const getHolidayList = (year) => {
   return request({ url: '/holiday/list', data: year ? { year } : {} });
 };
 
-// ========== 班种套餐相关接口 ==========
+// ========== 班种套班相关接口 ==========
 
 const getShiftPackageList = (departmentId) => {
   const deptId = departmentId || getCurrentDepartmentId();
@@ -713,7 +713,7 @@ module.exports = {
   getDepartmentStatistics,
   // 假日相关
   getHolidayList,
-  // 班种套餐相关
+  // 班种套班相关
   getShiftPackageList,
   createShiftPackage,
   updateShiftPackage,
