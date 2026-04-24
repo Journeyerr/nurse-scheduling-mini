@@ -202,6 +202,11 @@
   color: #FF9500;
 }
 
+.status-text-img {
+  width: 90rpx;
+  height: 65rpx;
+}
+
 .header-dates {
   display: flex;
   flex: 1;
@@ -236,7 +241,7 @@
 .table-row {
   display: flex;
   align-items: center;
-  padding: 12rpx 0;
+  padding: 6rpx 0;
   position: relative;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
@@ -282,7 +287,7 @@
 }
 
 .member-cell {
-  width: 120rpx;
+  width: 123rpx;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -322,7 +327,7 @@
 }
 
 .member-name {
-  font-size: 24rpx;
+  font-size: 25rpx;
   color: #333;
 }
 

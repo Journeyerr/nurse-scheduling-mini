@@ -1,0 +1,420 @@
+<!--pages/schedule-apply/schedule-apply.wxml-->
+<view class="apply-container">
+  <!-- 申请列表 -->
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="section-dot"></view>
+        <text class="section-title">我的申请</text>
+      </view>
+      <view class="btn-add" bindtap="addExpect">
+        <image class="btn-add-icon" src="/assets/icons/add-apply.png" mode="aspectFit"></image>
+      </view>
+    </view>
+
+    <view class="apply-list">
+      <view class="apply-item {{item.status !== 'pending' ? 'processed' : ''}}" wx:for="{{myExpects}}" wx:key="id" bindtap="showDetail" data-index="{{index}}">
+        <view class="apply-item-inner">
+          <!-- 内容区 -->
+          <view class="apply-content">
+            <!-- 第一行：类型标签 + 申请人 + 状态 -->
+            <view class="apply-row-top">
+              <view class="apply-row-left">
+                <view class="apply-type-tag {{item.type}}">
+                  <text>{{item.type === 'schedule' ? '排班' : '换班'}}</text>
+                </view>
+                <text class="apply-user-name">{{item.userName}}</text>
+              </view>
+              <view class="apply-status {{item.status}}">
+                <text>{{item.statusName}}</text>
+              </view>
+            </view>
+
+            <!-- 第二行：关键信息 -->
+            <block wx:if="{{item.type === 'schedule'}}">
+              <view class="apply-row-info">
+                <text class="info-text">{{item.startDate}}</text>
+                <text class="info-sep">·</text>
+                <text class="info-text info-highlight" style="color: {{item.shiftColor || '#4A90D9'}}">{{item.shiftCode ? item.shiftCode + '-' : ''}}{{item.shiftName || '无'}}</text>
+              </view>
+            </block>
+
+            <block wx:if="{{item.type === 'swap'}}">
+              <view class="swap-info-grid">
+                <text class="swap-info-left">{{item.myDate}}</text>
+                <text class="swap-info-arrow">⇄</text>
+                <text class="swap-info-right">{{item.targetDate}}</text>
+              </view>
+              <view class="swap-info-grid">
+                <text class="swap-info-left">{{item.userName}}</text>
+                <text class="swap-info-arrow">⇄</text>
+                <text class="swap-info-right">{{item.targetUserName}}</text>
+              </view>
+            </block>
+
+            <!-- 创建时间 -->
+            <view class="apply-row-time">
+              <text class="time-text">{{item.createTime}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{myExpects.length === 0}}">
+        <view class="empty-icon">
+          <text class="empty-emoji">📋</text>
+        </view>
+        <text class="empty-text">暂无申请记录</text>
+        <text class="empty-hint">点击右上角「+ 申请」发起申请</text>
+      </view>
+
+      <!-- 加载提示 -->
+      <view class="load-more" wx:if="{{myExpects.length > 0}}">
+        <view class="load-more-loading" wx:if="{{loadingMore}}">
+          <view class="load-spinner"></view>
+          <text class="load-more-text">加载中...</text>
+        </view>
+        <text class="load-more-text" wx:elif="{{!hasMore}}">— 没有更多了 —</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 申请类型选择弹窗 -->
+<view class="modal-mask {{showTypeModal ? 'show' : ''}}" catchtouchmove="stopPropagation" bindtap="closeTypeModal">
+  <view class="bottom-modal" catchtap="stopPropagation" catchtouchmove="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">选择申请类型</text>
+      <view class="modal-close" bindtap="closeTypeModal">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+    <view class="modal-body">
+      <view class="type-option" bindtap="selectScheduleType">
+        <view class="type-icon-wrap schedule-type-icon">
+          <text>排</text>
+        </view>
+        <view class="type-content">
+          <text class="type-name">期望排班</text>
+          <text class="type-desc">申请某天期望的班次</text>
+        </view>
+        <text class="type-arrow">›</text>
+      </view>
+      <view class="type-option" bindtap="selectSwapType">
+        <view class="type-icon-wrap swap-type-icon">
+          <text>换</text>
+        </view>
+        <view class="type-content">
+          <text class="type-name">申请换班</text>
+          <text class="type-desc">与其他护士交换班次</text>
+        </view>
+        <text class="type-arrow">›</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 详情弹窗 -->
+<view class="modal-mask {{showDetailModal ? 'show' : ''}}" catchtouchmove="stopPropagation" bindtap="closeDetailModal">
+  <view class="bottom-modal detail-modal" catchtap="stopPropagation" catchtouchmove="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{currentItem.typeName}}详情</text>
+      <view class="modal-close" bindtap="closeDetailModal">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+
+    <scroll-view class="modal-scroll" scroll-y wx:if="{{currentItem}}">
+      <view class="modal-body-inner">
+        <!-- 状态标签 -->
+        <view class="detail-status-banner {{currentItem.status}}">
+          <view class="detail-status-icon">
+            <text wx:if="{{currentItem.status === 'pending'}}">⏳</text>
+            <text wx:elif="{{currentItem.status === 'approved'}}"></text>
+            <text wx:elif="{{currentItem.status === 'rejected'}}"></text>
+            <text wx:elif="{{currentItem.status === 'cancelled'}}"></text>
+          </view>
+          <text class="detail-status-text">{{currentItem.statusName}}</text>
+        </view>
+
+        <!-- 期望排班详情 -->
+        <block wx:if="{{currentItem.type === 'schedule'}}">
+          <view class="detail-card">
+            <view class="detail-row">
+              <image class="detail-row-icon-img" src="/assets/icons/apply_date.png" mode="aspectFit"></image>
+              <view class="detail-row-content">
+                <text class="detail-row-label">日期</text>
+                <text class="detail-row-value">{{currentItem.startDate}}</text>
+              </view>
+            </view>
+            <view class="detail-divider"></view>
+            <view class="detail-row">
+              <image class="detail-row-icon-img" src="/assets/icons/apply_shift.png" mode="aspectFit"></image>
+              <view class="detail-row-content">
+                <text class="detail-row-label">班次</text>
+                <text class="detail-row-value" style="color: {{currentItem.shiftColor || '#4A90D9'}}">{{currentItem.shiftCode ? currentItem.shiftCode + '-' : ''}}{{currentItem.shiftName || '无'}}</text>
+              </view>
+            </view>
+            <view class="detail-divider" wx:if="{{currentItem.remark}}"></view>
+            <view class="detail-row" wx:if="{{currentItem.remark}}">
+              <view class="detail-row-icon">📝</view>
+              <view class="detail-row-content">
+                <text class="detail-row-label">备注</text>
+                <text class="detail-row-value">{{currentItem.remark}}</text>
+              </view>
+            </view>
+            <view class="detail-divider" wx:if="{{currentItem.approveRemark}}"></view>
+            <view class="detail-row" wx:if="{{currentItem.approveRemark}}">
+              <image class="detail-row-icon-img" src="/assets/icons/approval_remark.png" mode="aspectFit"></image>
+              <view class="detail-row-content">
+                <text class="detail-row-label">审批意见</text>
+                <text class="detail-row-value">{{currentItem.approveRemark}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <!-- 换班详情 -->
+        <block wx:if="{{currentItem.type === 'swap'}}">
+          <view class="detail-card">
+            <view class="swap-detail-block">
+              <view class="swap-detail-items">
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">我方 · </text>
+                  <text class="swap-detail-val">{{currentItem.userName}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">日期 · </text>
+                  <text class="swap-detail-val">{{currentItem.myDate}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">班次 · </text>
+                  <text class="swap-detail-val" style="color: {{currentItem.myShiftColor || '#999'}}">{{currentItem.myShiftName || '无'}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="swap-detail-center">
+              <view class="swap-detail-arrow">⇄</view>
+            </view>
+            <view class="swap-detail-block">
+              <view class="swap-detail-items">
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">对方 · </text>
+                  <text class="swap-detail-val">{{currentItem.targetUserName}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">日期 · </text>
+                  <text class="swap-detail-val">{{currentItem.targetDate}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">班次 · </text>
+                  <text class="swap-detail-val" style="color: {{currentItem.targetShiftColor || '#999'}}">{{currentItem.targetShiftName || '无'}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+          <view class="detail-card" wx:if="{{currentItem.remark || currentItem.approveRemark}}">
+            <view class="detail-row" wx:if="{{currentItem.remark}}">
+              <view class="detail-row-icon">📝</view>
+              <view class="detail-row-content">
+                <text class="detail-row-label">备注</text>
+                <text class="detail-row-value">{{currentItem.remark}}</text>
+              </view>
+            </view>
+            <view class="detail-divider" wx:if="{{currentItem.remark && currentItem.approveRemark}}"></view>
+            <view class="detail-row" wx:if="{{currentItem.approveRemark}}">
+              <view class="detail-row-icon">💬</view>
+              <view class="detail-row-content">
+                <text class="detail-row-label">审批意见</text>
+                <text class="detail-row-value">{{currentItem.approveRemark}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <!-- 取消申请按钮（仅待审批状态） -->
+        <view class="cancel-actions" wx:if="{{currentItem.status === 'pending'}}">
+          <button class="btn-cancel-apply" bindtap="handleCancel" data-id="{{currentItem.id}}">取消申请</button>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- 申请换班弹窗 -->
+<view class="modal-mask {{showSwapModal ? 'show' : ''}}" catchtouchmove="stopPropagation" bindtap="closeSwapModal">
+  <view class="bottom-modal swap-modal" catchtap="stopPropagation" catchtouchmove="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">申请换班</text>
+      <view class="modal-close" bindtap="closeSwapModal">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+
+    <scroll-view class="modal-scroll" scroll-y>
+      <view class="modal-body-inner">
+        <!-- 日期选择 -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <view class="label-dot"></view>
+            <text class="form-label">选择日期</text>
+          </view>
+          <view class="swap-picker-row">
+            <picker mode="date" value="{{swapRequest.myDate}}" start="{{todayDate}}" bindchange="onMyDateChange">
+              <view class="swap-picker-card {{swapRequest.myDate ? '' : 'placeholder'}}">
+                <text class="swap-picker-label">我方</text>
+                <text class="swap-picker-value">{{swapRequest.myDate || '选择日期'}}</text>
+              </view>
+            </picker>
+            <view class="swap-center-arrow">
+              <image class="swap-center-arrow-img" src="/assets/icons/exchange.png" mode="aspectFit"></image>
+            </view>
+            <picker mode="date" value="{{swapRequest.targetDate}}" start="{{todayDate}}" bindchange="onTargetDateChange">
+              <view class="swap-picker-card {{swapRequest.targetDate ? '' : 'placeholder'}}">
+                <text class="swap-picker-label">对方</text>
+                <text class="swap-picker-value">{{swapRequest.targetDate || '选择日期'}}</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+
+        <!-- 换班对象 -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <view class="label-dot"></view>
+            <text class="form-label">换班对象</text>
+          </view>
+          <view class="swap-picker-row">
+            <view class="swap-picker-card">
+              <text class="swap-picker-label">我方</text>
+              <text class="swap-picker-value">{{mySwapInfo.nickName || '无'}}</text>
+            </view>
+            <view class="swap-center-arrow">
+              <text>⇄</text>
+            </view>
+            <picker mode="selector" range="{{swapUsers}}" range-key="nickName" value="{{swapRequest.selectedUserIndex}}" bindchange="onSwapUserChange">
+              <view class="swap-picker-card {{swapRequest.targetUserId ? '' : 'placeholder'}} {{swapUsers.length > 0 ? '' : 'disabled'}}">
+                <text class="swap-picker-label">对方</text>
+                <text class="swap-picker-value">{{swapRequest.targetUserId ? swapUsers[swapRequest.selectedUserIndex].nickName : (swapUsers.length > 0 ? '请选择' : '无人员')}}</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+
+        <!-- 班次对比 -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <view class="label-dot"></view>
+            <text class="form-label">班次对比</text>
+          </view>
+          <view class="swap-picker-row">
+            <view class="swap-picker-card">
+              <text class="swap-picker-label">我方</text>
+              <text class="swap-picker-value" style="color: {{mySwapInfo.shiftColor || '#999'}}">{{mySwapInfo.shiftName || '无排班'}}</text>
+            </view>
+            <view class="swap-center-arrow">
+              <image class="swap-center-arrow-img" src="/assets/icons/exchange.png" mode="aspectFit"></image>
+            </view>
+            <view class="swap-picker-card">
+              <text class="swap-picker-label">对方</text>
+              <text class="swap-picker-value" style="color: {{targetSwapInfo.shiftColor || '#999'}}">{{targetSwapInfo.shiftName || '无排班'}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 备注 -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <view class="label-dot"></view>
+            <text class="form-label">备注（选填）</text>
+          </view>
+          <textarea
+            class="textarea"
+            placeholder="请输入换班原因说明"
+            placeholder-class="textarea-placeholder"
+            value="{{swapRequest.remark}}"
+            bindinput="onSwapRemarkInput"
+            maxlength="200"
+            auto-height
+          ></textarea>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer">
+      <button class="btn-submit-form" bindtap="submitSwap">提交申请</button>
+    </view>
+  </view>
+</view>
+
+<!-- 期望排班申请弹窗 -->
+<view class="modal-mask {{showEditModal ? 'show' : ''}}" catchtouchmove="stopPropagation" bindtap="closeEditModal">
+  <view class="bottom-modal edit-modal" catchtap="stopPropagation" catchtouchmove="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">期望排班申请</text>
+      <view class="modal-close" bindtap="closeEditModal">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+
+    <scroll-view class="modal-scroll" scroll-y>
+      <view class="modal-body-inner">
+        <!-- 选择日期 -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <view class="label-dot"></view>
+            <text class="form-label">选择日期</text>
+          </view>
+          <picker mode="date" value="{{editingExpect.date}}" start="{{todayDate}}" bindchange="onDateChange">
+            <view class="picker-card {{editingExpect.date ? '' : 'placeholder'}}">
+              <text class="picker-value">{{editingExpect.date || '请选择日期'}}</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 班种列表 -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <view class="label-dot"></view>
+            <text class="form-label">选择班种</text>
+          </view>
+          <view class="shift-grid">
+            <view
+              class="shift-tag {{editingExpect.shiftId === item.id ? 'active' : ''}}"
+              wx:for="{{shiftOptions}}"
+              wx:key="id"
+              bindtap="selectShift"
+              data-shift="{{item}}"
+            >
+              <view class="shift-tag-dot" style="background: {{item.color}}"></view>
+              <text class="shift-tag-text">{{item.code}} {{item.name}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 备注 -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <view class="label-dot"></view>
+            <text class="form-label">备注（选填）</text>
+          </view>
+          <textarea
+            class="textarea"
+            placeholder="请输入备注说明"
+            placeholder-class="textarea-placeholder"
+            value="{{editingExpect.remark}}"
+            bindinput="onRemarkInput"
+            maxlength="200"
+            auto-height
+          ></textarea>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer">
+      <button class="btn-submit-form" bindtap="submitExpect">提交申请</button>
+    </view>
+  </view>
+</view>

@@ -1,4 +1,4 @@
-<!--pages/print-schedule/print-schedule.wxml-->
+<!--pages/schedule-statistics/schedule-statistics.wxml-->
 <view class="print-container">
   <!-- 月份选择 -->
   <view class="month-selector card">

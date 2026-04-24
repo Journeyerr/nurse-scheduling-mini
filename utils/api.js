@@ -249,6 +249,11 @@ const getMockData = (apiName, data) => {
         e.id === data.id ? { ...e, status: data.status } : e
       );
       return { success: true };
+    case 'cancelExpectSchedule':
+      localExpectSchedules = localExpectSchedules.map(e => 
+        e.id === data ? { ...e, status: 'cancelled' } : e
+      );
+      return { success: true };
 
     // 统计相关
     case 'getMyStatistics':
@@ -571,19 +576,24 @@ const submitExpectSchedule = (data) => {
   return request({ url: '/expect/submit', method: 'POST', data });
 };
 
-const getExpectScheduleList = () => {
+const getExpectScheduleList = (page = 1, pageSize = 20) => {
   if (USE_MOCK) return mockRequest('getExpectScheduleList');
-  return request({ url: '/expect/list' });
+  return request({ url: '/expect/list', data: { page, pageSize } });
 };
 
-const getMyExpectSchedule = () => {
+const getMyExpectSchedule = (page = 1, pageSize = 20) => {
   if (USE_MOCK) return mockRequest('getMyExpectSchedule');
-  return request({ url: '/expect/my' });
+  return request({ url: '/expect/my', data: { page, pageSize } });
 };
 
 const approveExpectSchedule = (data) => {
   if (USE_MOCK) return mockRequest('approveExpectSchedule', data);
   return request({ url: '/expect/approve', method: 'POST', data });
+};
+
+const cancelExpectSchedule = (id) => {
+  if (USE_MOCK) return mockRequest('cancelExpectSchedule', id);
+  return request({ url: '/expect/cancel', method: 'POST', data: { id } });
 };
 
 const getPendingCount = () => {
@@ -702,6 +712,7 @@ module.exports = {
   getExpectScheduleList,
   getMyExpectSchedule,
   approveExpectSchedule,
+  cancelExpectSchedule,
   getPendingCount,
   getApprovedExpectByUsers,
   // 换班相关

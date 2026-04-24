@@ -1,4 +1,4 @@
-/* pages/approval/approval.wxss */
+/* pages/schedule-apply/schedule-apply.wxss */
 
 .apply-container {
   min-height: 100vh;
@@ -39,13 +39,21 @@
   color: #1A2B4A;
 }
 
-.pending-badge {
-  background: linear-gradient(135deg, #E74C3C, #C0392B);
-  color: #fff;
-  font-size: 24rpx;
-  padding: 8rpx 20rpx;
-  border-radius: 20rpx;
-  font-weight: 500;
+.btn-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx;
+}
+
+.btn-add:active {
+  opacity: 0.85;
+  transform: scale(0.97);
+}
+
+.btn-add-icon {
+  width: 80rpx;
+  height: 50rpx;
 }
 
 /* ==================== 申请列表 ==================== */
@@ -63,7 +71,7 @@
 }
 
 .apply-item.processed {
-  opacity: 0.50;
+  opacity: 0.55;
 }
 
 .apply-item-inner {
@@ -126,7 +134,7 @@
 }
 
 .apply-user-name {
-  font-size: 27rpx;
+  font-size: 28rpx;
   font-weight: 600;
   color: #1A2B4A;
 }
@@ -184,6 +192,12 @@
   margin: 0 2rpx;
 }
 
+.info-swap-icon {
+  font-size: 22rpx;
+  color: #4A90D9;
+  margin: 0 4rpx;
+}
+
 /* 换班卡片信息网格 */
 .swap-info-grid {
   display: flex;
@@ -192,7 +206,7 @@
 }
 
 .swap-info-left {
-  width: 140rpx;
+  width: 120rpx;
   font-size: 24rpx;
   color: #5A6A80;
   flex-shrink: 0;
@@ -207,9 +221,24 @@
   flex-shrink: 0;
 }
 
+.swap-info-arrow-img {
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
+}
+
 .swap-info-right {
   font-size: 24rpx;
   color: #5A6A80;
+}
+
+.apply-row-sub {
+  margin-top: 4rpx;
+}
+
+.sub-text {
+  font-size: 22rpx;
+  color: #8A9EB5;
 }
 
 /* 空状态 */
@@ -360,6 +389,82 @@
   padding: 28rpx 32rpx;
 }
 
+.modal-footer {
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* ==================== 申请类型选择 ==================== */
+.type-option {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 24rpx;
+  margin-bottom: 16rpx;
+  background: #F5F7FA;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.type-option:last-child {
+  margin-bottom: 0;
+}
+
+.type-option:active {
+  background: #EAF2FC;
+  border-color: #4A90D9;
+}
+
+.type-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.schedule-type-icon {
+  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  color: #1976D2;
+}
+
+.swap-type-icon {
+  background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+  color: #9848DA;
+}
+
+.type-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.type-name {
+  font-size: 30rpx;
+  color: #1A2B4A;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.type-desc {
+  font-size: 24rpx;
+  color: #8A9EB5;
+}
+
+.type-arrow {
+  font-size: 32rpx;
+  color: #B8C4D0;
+}
+
 /* ==================== 详情弹窗 ==================== */
 .detail-status-banner {
   display: flex;
@@ -383,6 +488,10 @@
   background: #FFEBEE;
 }
 
+.detail-status-banner.cancelled {
+  background: #F0F4F8;
+}
+
 .detail-status-icon {
   font-size: 32rpx;
 }
@@ -402,6 +511,10 @@
 
 .detail-status-banner.rejected .detail-status-text {
   color: #E74C3C;
+}
+
+.detail-status-banner.cancelled .detail-status-text {
+  color: #8A9EB5;
 }
 
 .detail-card {
@@ -506,85 +619,252 @@
   color: #4A90D9;
 }
 
-.swap-detail-arrow-img {
-  width: 40rpx;
-  height: 40rpx;
+/* ==================== 表单样式 ==================== */
+.form-group {
+  margin-bottom: 32rpx;
 }
 
-/* ==================== 审批操作 ==================== */
-.approval-textarea {
+.form-label-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 16rpx;
+}
+
+.label-dot {
+  width: 6rpx;
+  height: 24rpx;
+  border-radius: 3rpx;
+  background: linear-gradient(180deg, #4A90D9, #6AA8E8);
+}
+
+.form-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2C3E50;
+}
+
+/* 选择器卡片 */
+.picker-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F5F7FA;
+  border-radius: 12rpx;
+  padding: 24rpx 20rpx;
+}
+
+.picker-card.placeholder .picker-value {
+  color: #B8C4D0;
+}
+
+.picker-value {
+  font-size: 28rpx;
+  color: #2C3E50;
+  font-weight: 500;
+}
+
+.picker-arrow {
+  font-size: 32rpx;
+  color: #B8C4D0;
+}
+
+/* 换班选择行 */
+.swap-picker-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12rpx;
+}
+
+.swap-picker-row picker {
+  flex: 1;
+  min-width: 0;
+}
+
+.swap-picker-card {
+  flex: 1;
+  background: #F5F7FA;
+  border-radius: 12rpx;
+  padding: 20rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  min-width: 0;
+}
+
+.swap-picker-card.disabled {
+  opacity: 0.5;
+}
+
+.swap-picker-card.placeholder .swap-picker-value {
+  color: #B8C4D0;
+}
+
+.swap-picker-label {
+  font-size: 22rpx;
+  color: #8A9EB5;
+  font-weight: 600;
+}
+
+.swap-picker-value {
+  font-size: 26rpx;
+  color: #2C3E50;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.swap-center-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4rpx;
+  flex-shrink: 0;
+  color: #4A90D9;
+  font-size: 32rpx;
+}
+
+/* 文本域 */
+.textarea {
+  width: 100%;
   min-height: 80rpx;
-  padding: 16rpx 20rpx;
-  background: #ECEFF4;
+  padding: 22rpx 20rpx;
+  background: #F5F7FA;
   border-radius: 12rpx;
   font-size: 26rpx;
   color: #2C3E50;
   box-sizing: border-box;
   line-height: 1.5;
-  margin-top: 8rpx;
-  width: calc(100% + 56rpx);
-  margin-left: -56rpx;
 }
 
 .textarea-placeholder {
   color: #B8C4D0;
 }
 
-.approval-actions {
+/* ==================== 班种标签 ==================== */
+.shift-grid {
   display: flex;
-  gap: 20rpx;
-  margin-top: 16rpx;
+  flex-wrap: wrap;
+  gap: 16rpx;
 }
 
-.btn-reject {
-  flex: 1;
+.shift-tag {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 16rpx 28rpx;
+  background: #F5F7FA;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.shift-tag:active {
+  transform: scale(0.97);
+}
+
+.shift-tag.active {
   background: #fff;
-  color: #E74C3C;
-  border: 2rpx solid #E74C3C;
-  font-size: 28rpx;
-  font-weight: 600;
-  padding: 20rpx 0;
-  border-radius: 44rpx !important;
-  letter-spacing: 4rpx;
+  border-color: #4A90D9;
+  box-shadow: 0 4rpx 16rpx rgba(74, 144, 217, 0.2);
 }
 
-.btn-reject::before {
-  display: none;
+.shift-tag-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.btn-reject::after {
-  display: none;
-  border: none;
+.shift-tag-text {
+  font-size: 26rpx;
+  color: #2C3E50;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.btn-approve {
-  flex: 1;
-  background: linear-gradient(135deg, #4A90D9, #357ABD);
+/* ==================== 提交按钮 ==================== */
+.btn-submit-form {
+  width: 100% !important;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #357ABD 100%);
   color: #fff;
-  font-size: 28rpx;
+  font-size: 32rpx;
   font-weight: 600;
-  padding: 20rpx 0;
-  border-radius: 44rpx !important;
-  border: none;
-  box-shadow: 0 6rpx 20rpx rgba(74, 144, 217, 0.3);
   letter-spacing: 4rpx;
+  border: none;
+  border-radius: 48rpx !important;
+  padding: 0 !important;
+  margin: 0;
+  box-shadow: 0 8rpx 24rpx rgba(74, 144, 217, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
-.btn-approve::before {
+.btn-submit-form::before {
   display: none;
 }
 
-.btn-approve::after {
+.btn-submit-form::after {
   display: none;
   border: none;
 }
 
-.btn-approve:active {
-  background: linear-gradient(135deg, #357ABD, #2868A8);
+.btn-submit-form:active {
+  background: linear-gradient(135deg, #357ABD 0%, #2868A8 100%);
   transform: scale(0.98);
 }
 
 /* ==================== 弹窗高度 ==================== */
 .detail-modal {
+  max-height: 75vh;
+}
+
+/* ==================== 取消申请按钮 ==================== */
+.cancel-actions {
+  margin-top: 24rpx;
+}
+
+.btn-cancel-apply {
+  width: 100% !important;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: #fff;
+  color: #E74C3C;
+  font-size: 30rpx;
+  font-weight: 600;
+  letter-spacing: 4rpx;
+  border: 2rpx solid #E74C3C;
+  border-radius: 44rpx !important;
+  padding: 0 !important;
+  margin: 0;
+  transition: all 0.2s;
+}
+
+.btn-cancel-apply::before {
+  display: none;
+}
+
+.btn-cancel-apply::after {
+  display: none;
+  border: none;
+}
+
+.btn-cancel-apply:active {
+  background: #FFEBEE;
+  transform: scale(0.98);
+}
+
+.swap-modal {
+  max-height: 85vh;
+}
+
+.edit-modal {
   max-height: 85vh;
 }

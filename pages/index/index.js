@@ -1042,9 +1042,9 @@ Page({
     this.checkDepartmentAndGo('/pages/team-schedule/team-schedule');
   },
 
-  // 打印排班
+  // 排班统计
   goPrint() {
-    this.checkDepartmentAndGo('/pages/print-schedule/print-schedule');
+    this.checkDepartmentAndGo('/pages/schedule-statistics/schedule-statistics');
   },
 
   // 审批
@@ -1052,14 +1052,14 @@ Page({
     this.checkDepartmentAndGo('/pages/approval/approval');
   },
 
-  // 统计
+  // 工时统计
   goStatistics() {
-    this.checkDepartmentAndGo('/pages/statistics/statistics');
+    this.checkDepartmentAndGo('/pages/work-hours/work-hours');
   },
 
-  // 申请班次
+  // 排班申请
   goExpectSchedule() {
-    this.checkDepartmentAndGo('/pages/expect-schedule/expect-schedule');
+    this.checkDepartmentAndGo('/pages/schedule-apply/schedule-apply');
   },
 
   // 假勤申请

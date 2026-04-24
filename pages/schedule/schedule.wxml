@@ -61,7 +61,8 @@
     <!-- 表头 -->
     <view class="table-header">
       <view class="header-status">
-        <text class="status-text">排班日历</text>
+        <!-- <text class="status-text">排班日历</text> -->
+        <image class="status-text-img" src="/assets/icons/schedule_make.png" mode="aspectFit"></image>
       </view>
       <view class="header-dates">
         <view class="header-cell" wx:for="{{weekDates}}" wx:key="fullDate">

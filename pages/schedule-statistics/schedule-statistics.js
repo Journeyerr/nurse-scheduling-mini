@@ -1,4 +1,4 @@
-// pages/print-schedule/print-schedule.js
+// pages/schedule-statistics/schedule-statistics.js
 const app = getApp();
 const api = require('../../utils/api');
 const util = require('../../utils/util');

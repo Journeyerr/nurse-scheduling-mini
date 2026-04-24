@@ -1,111 +1,179 @@
 <!--pages/leave-apply/leave-apply.wxml-->
 <view class="leave-container">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <text class="header-title">假勤申请</text>
+      <text class="header-desc">提交请假、调班、换班申请</text>
+    </view>
+  </view>
+
   <!-- 我的申请记录 -->
-  <view class="section card">
+  <view class="section">
     <view class="section-header">
-      <text class="section-title">我的申请记录</text>
-      <button class="btn-add" bindtap="addApply">+ 申请</button>
+      <view class="section-title-wrap">
+        <view class="section-dot"></view>
+        <text class="section-title">我的申请</text>
+      </view>
+      <view class="btn-add" bindtap="addApply">
+        <text class="btn-add-icon">+</text>
+        <text class="btn-add-text">申请</text>
+      </view>
     </view>
     
     <view class="apply-list">
       <view class="apply-item" wx:for="{{myApplies}}" wx:key="id">
-        <view class="apply-header">
-          <text class="apply-type {{item.type}}">{{item.typeName}}</text>
-          <text class="apply-status {{item.status}}">{{item.statusName}}</text>
-        </view>
-        <view class="apply-content">
-          <view class="apply-row">
-            <text class="apply-label">时间：</text>
-            <text class="apply-value">{{item.startDate}} 至 {{item.endDate}}</text>
+        <view class="apply-item-inner">
+          <!-- 左侧类型图标 -->
+          <view class="apply-type-icon {{item.type}}">
+            <text wx:if="{{item.type === 'leave'}}">假</text>
+            <text wx:elif="{{item.type === 'transfer'}}">调</text>
+            <text wx:elif="{{item.type === 'exchange'}}">换</text>
           </view>
-          <view class="apply-row">
-            <text class="apply-label">天数：</text>
-            <text class="apply-value">{{item.days}}天</text>
-          </view>
-          <view class="apply-row" wx:if="{{item.reason}}">
-            <text class="apply-label">事由：</text>
-            <text class="apply-value">{{item.reason}}</text>
+          <!-- 中间内容 -->
+          <view class="apply-info">
+            <view class="apply-info-top">
+              <text class="apply-type-name">{{item.typeName}}</text>
+              <view class="apply-status-tag {{item.status}}">
+                <view class="status-dot"></view>
+                <text>{{item.statusName}}</text>
+              </view>
+            </view>
+            <view class="apply-info-detail">
+              <text class="detail-text">{{item.startDate}} 至 {{item.endDate}}</text>
+              <text class="detail-divider">·</text>
+              <text class="detail-text">{{item.days}}天</text>
+            </view>
+            <view class="apply-info-reason" wx:if="{{item.reason}}">
+              <text>{{item.reason}}</text>
+            </view>
           </view>
         </view>
       </view>
       
       <view class="empty-state" wx:if="{{myApplies.length === 0}}">
-        <text>暂无申请记录</text>
+        <view class="empty-icon">
+          <text class="empty-emoji">📋</text>
+        </view>
+        <text class="empty-text">暂无申请记录</text>
+        <text class="empty-hint">点击右上角「+ 申请」发起申请</text>
       </view>
     </view>
   </view>
 
   <!-- 申请弹窗 -->
-  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
-    <view class="modal-content" catchtap="stopPropagation">
+  <view class="modal-mask {{showModal ? 'show' : ''}}" bindtap="closeModal">
+    <view class="bottom-modal" catchtap="stopPropagation">
       <view class="modal-header">
         <text class="modal-title">假勤申请</text>
-        <view class="modal-close" bindtap="closeModal">×</view>
+        <view class="modal-close" bindtap="closeModal">
+          <text class="close-icon">×</text>
+        </view>
       </view>
-      
-      <view class="modal-body">
-        <view class="form-item">
-          <text class="form-label">申请类型</text>
-          <view class="type-options">
-            <view 
-              class="type-option {{applyType === 'leave' ? 'active' : ''}}" 
-              bindtap="selectType" 
-              data-type="leave"
-            >
-              请假
+
+      <scroll-view class="modal-body" scroll-y>
+        <view class="modal-body-inner">
+          <!-- 申请类型 -->
+          <view class="form-group">
+            <view class="form-label-row">
+              <view class="label-dot"></view>
+              <text class="form-label">申请类型</text>
             </view>
-            <view 
-              class="type-option {{applyType === 'transfer' ? 'active' : ''}}" 
-              bindtap="selectType" 
-              data-type="transfer"
-            >
-              调班
-            </view>
-            <view 
-              class="type-option {{applyType === 'exchange' ? 'active' : ''}}" 
-              bindtap="selectType" 
-              data-type="exchange"
-            >
-              换班
+            <view class="type-options">
+              <view 
+                class="type-option {{applyType === 'leave' ? 'active leave-active' : ''}}" 
+                bindtap="selectType" 
+                data-type="leave"
+              >
+                <view class="type-icon-wrap leave-icon">
+                  <text>假</text>
+                </view>
+                <text class="type-text">请假</text>
+              </view>
+              <view 
+                class="type-option {{applyType === 'transfer' ? 'active transfer-active' : ''}}" 
+                bindtap="selectType" 
+                data-type="transfer"
+              >
+                <view class="type-icon-wrap transfer-icon">
+                  <text>调</text>
+                </view>
+                <text class="type-text">调班</text>
+              </view>
+              <view 
+                class="type-option {{applyType === 'exchange' ? 'active exchange-active' : ''}}" 
+                bindtap="selectType" 
+                data-type="exchange"
+              >
+                <view class="type-icon-wrap exchange-icon">
+                  <text>换</text>
+                </view>
+                <text class="type-text">换班</text>
+              </view>
             </view>
           </view>
+
+          <!-- 时间选择 -->
+          <view class="form-group">
+            <view class="form-label-row">
+              <view class="label-dot"></view>
+              <text class="form-label">请假时间</text>
+            </view>
+            <view class="time-picker-row">
+              <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+                <view class="time-picker-card {{startDate ? '' : 'placeholder'}}">
+                  <text class="time-label">开始</text>
+                  <text class="time-value">{{startDate || '选择日期'}}</text>
+                </view>
+              </picker>
+              <view class="time-arrow">
+                <text class="arrow-line">→</text>
+              </view>
+              <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+                <view class="time-picker-card {{endDate ? '' : 'placeholder'}}">
+                  <text class="time-label">结束</text>
+                  <text class="time-value">{{endDate || '选择日期'}}</text>
+                </view>
+              </picker>
+            </view>
+          </view>
+
+          <!-- 换班对象 -->
+          <view class="form-group" wx:if="{{applyType === 'exchange'}}">
+            <view class="form-label-row">
+              <view class="label-dot"></view>
+              <text class="form-label">换班对象</text>
+            </view>
+            <picker mode="selector" range="{{members}}" range-key="nickName" bindchange="onMemberChange">
+              <view class="picker-card {{selectedMemberName ? '' : 'placeholder'}}">
+                <text class="picker-value">{{selectedMemberName || '请选择换班对象'}}</text>
+                <text class="picker-arrow">›</text>
+              </view>
+            </picker>
+          </view>
+
+          <!-- 事由说明 -->
+          <view class="form-group">
+            <view class="form-label-row">
+              <view class="label-dot"></view>
+              <text class="form-label">事由说明</text>
+            </view>
+            <textarea 
+              class="textarea" 
+              placeholder="请输入事由说明" 
+              placeholder-class="textarea-placeholder"
+              value="{{reason}}"
+              bindinput="onReasonInput"
+              maxlength="200"
+            ></textarea>
+            <text class="textarea-count" wx:if="{{reason.length > 0}}">{{reason.length}}/200</text>
+          </view>
         </view>
-        
-        <view class="form-item">
-          <text class="form-label">开始时间</text>
-          <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
-            <view class="picker-value">{{startDate || '请选择'}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item">
-          <text class="form-label">结束时间</text>
-          <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
-            <view class="picker-value">{{endDate || '请选择'}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item" wx:if="{{applyType === 'exchange'}}">
-          <text class="form-label">换班对象</text>
-          <picker mode="selector" range="{{members}}" range-key="nickName" bindchange="onMemberChange">
-            <view class="picker-value">{{selectedMemberName || '请选择'}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item">
-          <text class="form-label">事由说明</text>
-          <textarea 
-            class="textarea" 
-            placeholder="请输入事由说明" 
-            value="{{reason}}"
-            bindinput="onReasonInput"
-            maxlength="200"
-          ></textarea>
-        </view>
-      </view>
-      
+      </scroll-view>
+
       <view class="modal-footer">
-        <button class="btn-primary" bindtap="submitApply">提交申请</button>
+        <button class="btn-submit-form" bindtap="submitApply">提交申请</button>
       </view>
     </view>
   </view>

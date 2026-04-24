@@ -181,7 +181,7 @@
 
 .day-number {
   font-size: 30rpx;
-  color: #333;
+  color: #666;
   line-height: 1;
   font-weight: 500;
 }
@@ -299,19 +299,24 @@
 }
 
 .item-icon {
-  width: 90rpx;
-  height: 90rpx;
+  width: 76rpx;
+  height: 76rpx;
   border-radius: 20rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16rpx;
-  background: #F5F7FA;
+  margin-bottom: 12rpx;
+  background: transparent;
 }
 
 .icon-text {
   font-size: 36rpx;
   color: #4A90D9;
+}
+
+.menu-icon-img {
+  width: 44rpx;
+  height: 44rpx;
 }
 
 .item-name {
@@ -352,6 +357,14 @@
 .dept-info-left {
   display: flex;
   align-items: center;
+}
+
+.dept-name-icon {
+  padding-top: 5rpx;
+  width: 36rpx;
+  height: 36rpx;
+  flex-shrink: 0;
+  margin-right: 8rpx;
 }
 
 .dept-name-text {
@@ -417,7 +430,10 @@
   margin: 0;
   margin-right: -30rpx;
   line-height: 1.2;
-  height: auto;
+  height: 45rpx;
+  overflow: visible;
+  position: relative;
+  /* top: 4rpx; */
 }
 
 .invite-btn-new::after {
@@ -425,9 +441,9 @@
 }
 
 .invite-arrow-img {
-  width: 24rpx;
-  height: 24rpx;
-  margin-left: 4rpx;
+  width: 70rpx;
+  height: 45rpx;
+  flex-shrink: 0;
 }
 
 .invite-link-text {
@@ -821,17 +837,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 30rpx 40rpx;
+  padding: 20rpx 40rpx;
+  background: #F0F6FF;
+  border-radius: 80rpx;
+  border: 2rpx solid #4A90D9;
+  margin: 60rpx 40rpx 0;
+  width: calc(100% - 0rpx);
+  box-sizing: border-box;
 }
 
 .switch-role-text {
-  font-size: 30rpx;
+  font-size: 28rpx;
   color: #4A90D9;
   margin-right: 8rpx;
+  font-weight: 600;
 }
 
 .switch-arrow {
-  font-size: 30rpx;
+  font-size: 28rpx;
   color: #4A90D9;
 }
 

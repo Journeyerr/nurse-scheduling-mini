@@ -1,4 +1,4 @@
-<!--pages/statistics/statistics.wxml-->
+<!--pages/work-hours/work-hours.wxml-->
 <view class="stats-container">
   <!-- 月份选择 -->
   <view class="month-selector card">

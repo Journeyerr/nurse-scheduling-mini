@@ -4,7 +4,7 @@
   <!-- 顶部引导区 -->
   <view class="header-section">
     <view class="header-icon">
-      <text class="icon-emoji">🏥</text>
+      <image class="header-icon-img" src="/assets/icons/header-icon.png" mode="aspectFit"></image>
     </view>
     <text class="header-title">创建您的科室</text>
     <text class="header-desc">创建科室后即可邀请成员、开始排班</text>

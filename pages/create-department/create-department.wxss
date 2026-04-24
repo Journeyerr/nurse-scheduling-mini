@@ -27,8 +27,9 @@
   box-shadow: 0 8rpx 24rpx rgba(74, 144, 217, 0.15);
 }
 
-.icon-emoji {
-  font-size: 56rpx;
+.header-icon-img {
+  width: 120rpx;
+  height: 120rpx;
 }
 
 .header-title {

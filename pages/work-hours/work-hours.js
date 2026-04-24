@@ -1,4 +1,4 @@
-// pages/statistics/statistics.js
+// pages/work-hours/work-hours.js
 const app = getApp();
 const api = require('../../utils/api');
 const util = require('../../utils/util');

@@ -1,165 +1,233 @@
 <!--pages/approval/approval.wxml-->
-<view class="approval-container">
-  <!-- 标题 -->
-  <view class="page-header">
-    <text class="page-title">申请审批</text>
-    <view class="pending-badge" wx:if="{{expectPending > 0}}">{{expectPending}}条待审批</view>
-  </view>
-
+<view class="apply-container">
   <!-- 申请列表 -->
-  <view class="list-section">
-    <view class="approval-item card {{item.status !== 'pending' ? 'processed' : ''}}" wx:for="{{expectList}}" wx:key="id" bindtap="showDetail" data-index="{{index}}">
-      <!-- 盖章样式的审批状态 -->
-      <view class="stamp {{item.status}}">
-        <text class="stamp-text">{{item.statusName}}</text>
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="section-dot"></view>
+        <text class="section-title">申请审批</text>
       </view>
-
-      <!-- 卡片头部 -->
-      <view class="card-header">
-        <text class="user-name">{{item.userName}}</text>
-        <text class="type-badge {{item.type}}">{{item.typeName}}</text>
-      </view>
-
-      <!-- 期望排班类型 -->
-      <block wx:if="{{item.type === 'schedule'}}">
-        <view class="card-body">
-          <view class="info-row">
-            <text class="info-label">日期：</text>
-            <text class="info-value">{{item.startDate}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">班次：</text>
-            <text class="info-value">{{item.shiftCode ? item.shiftCode + '-' : ''}}{{item.shiftName || '无'}}</text>
-          </view>
-        </view>
-        <view class="card-footer">
-          <text class="submit-time">{{item.createTime}}</text>
-        </view>
-      </block>
-
-      <!-- 换班类型 -->
-      <block wx:if="{{item.type === 'swap'}}">
-        <view class="card-body">
-          <view class="info-row">
-            <text class="info-label">日期：</text>
-            <text class="info-value swap-left">{{item.startDate}}</text>
-            <text class="swap-icon">⇄</text>
-            <text class="info-value swap-right">{{item.targetDate}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">对象：</text>
-            <text class="info-value swap-left">{{item.userName}}</text>
-            <text class="swap-icon">⇄</text>
-            <text class="info-value swap-right">{{item.targetUserName}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">班次：</text>
-            <text class="info-value swap-left">{{item.myShiftName || '无'}}</text>
-            <text class="swap-icon">⇄</text>
-            <text class="info-value swap-right">{{item.targetShiftName || '无'}}</text>
-          </view>
-        </view>
-        <view class="card-footer">
-          <text class="submit-time">{{item.createTime}}</text>
-        </view>
-      </block>
+      <view class="pending-badge" wx:if="{{expectPending > 0}}">{{expectPending}}条待审批</view>
     </view>
 
-    <view class="empty-state" wx:if="{{expectList.length === 0}}">
-      <text>暂无申请</text>
+    <view class="apply-list">
+      <view class="apply-item {{item.status !== 'pending' ? 'processed' : ''}}" wx:for="{{expectList}}" wx:key="id" bindtap="showDetail" data-index="{{index}}">
+        <view class="apply-item-inner">
+          <!-- 内容区 -->
+          <view class="apply-content">
+            <!-- 第一行：类型标签 + 申请人 + 状态 -->
+            <view class="apply-row-top">
+              <view class="apply-row-left">
+                <view class="apply-type-tag {{item.type}}">
+                  <text>{{item.type === 'schedule' ? '排班' : '换班'}}</text>
+                </view>
+                <text class="apply-user-name">{{item.userName}}</text>
+              </view>
+              <view class="apply-status {{item.status}}">
+                <text>{{item.statusName}}</text>
+              </view>
+            </view>
+
+            <!-- 期望排班 -->
+            <block wx:if="{{item.type === 'schedule'}}">
+              <view class="apply-row-info">
+                <text class="info-text">{{item.startDate}}</text>
+                <text class="info-sep">·</text>
+                <text class="info-text info-highlight" style="color: {{item.shiftColor || '#4A90D9'}}">{{item.shiftCode ? item.shiftCode + '-' : ''}}{{item.shiftName || '无'}}</text>
+              </view>
+            </block>
+
+            <!-- 换班 -->
+            <block wx:if="{{item.type === 'swap'}}">
+              <view class="swap-info-grid">
+                <text class="swap-info-left">{{item.startDate}}</text>
+                <text class="swap-info-arrow">⇄</text>
+                <text class="swap-info-right">{{item.targetDate}}</text>
+              </view>
+              <view class="swap-info-grid">
+                <text class="swap-info-left">{{item.userName}}</text>
+                <text class="swap-info-arrow">⇄</text>
+                <text class="swap-info-right">{{item.targetUserName}}</text>
+              </view>
+            </block>
+
+            <!-- 创建时间 -->
+            <view class="apply-row-time">
+              <text class="time-text">{{item.createTime}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{expectList.length === 0}}">
+        <view class="empty-icon">
+          <text class="empty-emoji">📋</text>
+        </view>
+        <text class="empty-text">暂无申请</text>
+        <text class="empty-hint">待审批的申请将显示在这里</text>
+      </view>
+
+      <!-- 加载提示 -->
+      <view class="load-more" wx:if="{{expectList.length > 0}}">
+        <view class="load-more-loading" wx:if="{{loadingMore}}">
+          <view class="load-spinner"></view>
+          <text class="load-more-text">加载中...</text>
+        </view>
+        <text class="load-more-text" wx:elif="{{!hasMore}}">— 没有更多了 —</text>
+      </view>
     </view>
   </view>
 </view>
 
 <!-- 详情弹窗 -->
-<view class="bottom-modal-mask {{showDetailModal ? 'show' : ''}}" bindtap="closeDetailModal">
-  <view class="bottom-modal detail-modal" catchtap="stopPropagation">
+<view class="modal-mask {{showDetailModal ? 'show' : ''}}" catchtouchmove="stopPropagation" bindtap="closeDetailModal">
+  <view class="bottom-modal detail-modal" catchtap="stopPropagation" catchtouchmove="stopPropagation">
     <view class="modal-header">
-      <text class="modal-title">{{currentItem.typeName}}-详情</text>
-      <view class="modal-close" bindtap="closeDetailModal">×</view>
-    </view>
-
-    <view class="modal-body" wx:if="{{currentItem}}">
-      <!-- 基本信息 -->
-      <view class="detail-header">
-        <text class="detail-user-name">{{currentItem.userName}}</text>
-        <text class="type-badge {{currentItem.type}}">{{currentItem.typeName}}</text>
+      <text class="modal-title">{{currentItem.typeName}}详情</text>
+      <view class="modal-close" bindtap="closeDetailModal">
+        <text class="close-icon">×</text>
       </view>
-
-      <!-- 期望排班详情 -->
-      <block wx:if="{{currentItem.type === 'schedule'}}">
-        <view class="detail-section">
-          <view class="detail-row">
-            <text class="detail-label">日期：</text>
-            <text class="detail-value">{{currentItem.startDate}}</text>
-          </view>
-          <view class="detail-row">
-            <text class="detail-label">班次：</text>
-            <text class="detail-value" style="color: {{currentItem.shiftColor || '#333'}}">{{currentItem.shiftCode ? currentItem.shiftCode + '-' : ''}}{{currentItem.shiftName || '无'}}</text>
-          </view>
-          <view class="detail-row" wx:if="{{currentItem.remark}}">
-            <text class="detail-label">备注：</text>
-            <text class="detail-value">{{currentItem.remark}}</text>
-          </view>
-          <view class="detail-row" wx:if="{{currentItem.approveRemark}}">
-            <text class="detail-label">审批：</text>
-            <text class="detail-value">{{currentItem.approveRemark}}</text>
-          </view>
-        </view>
-      </block>
-
-      <!-- 换班详情 -->
-      <block wx:if="{{currentItem.type === 'swap'}}">
-        <view class="detail-section">
-          <view class="detail-row swap-detail-row">
-            <text class="detail-label">日期：</text>
-            <text class="detail-value swap-detail-left">{{currentItem.startDate}}</text>
-            <text class="swap-detail-icon">⇄</text>
-            <text class="detail-value swap-detail-right">{{currentItem.targetDate}}</text>
-          </view>
-          <view class="detail-row swap-detail-row">
-            <text class="detail-label">对象：</text>
-            <text class="detail-value swap-detail-left">{{currentItem.userName}}</text>
-            <text class="swap-detail-icon">⇄</text>
-            <text class="detail-value swap-detail-right">{{currentItem.targetUserName}}</text>
-          </view>
-          <view class="detail-row swap-detail-row">
-            <text class="detail-label">班次：</text>
-            <text class="detail-value swap-detail-left">{{currentItem.myShiftName || '无'}}</text>
-            <text class="swap-detail-icon">⇄</text>
-            <text class="detail-value swap-detail-right">{{currentItem.targetShiftName || '无'}}</text>
-          </view>
-          <view class="detail-row" wx:if="{{currentItem.remark}}">
-            <text class="detail-label">备注：</text>
-            <text class="detail-value">{{currentItem.remark}}</text>
-          </view>
-          <view class="detail-row" wx:if="{{currentItem.approveRemark}}">
-            <text class="detail-label">审批：</text>
-            <text class="detail-value">{{currentItem.approveRemark}}</text>
-          </view>
-        </view>
-      </block>
-
-      <!-- 审批操作 -->
-      <block wx:if="{{currentItem.status === 'pending'}}">
-        <view class="approval-section">
-          <view class="approval-label">审批意见</view>
-          <textarea
-            class="approval-textarea"
-            placeholder="请输入审批意见（选填）"
-            placeholder-class="textarea-placeholder"
-            value="{{approvalRemark}}"
-            bindinput="onApprovalRemarkInput"
-            maxlength="200"
-            auto-height
-          ></textarea>
-        </view>
-
-        <view class="approval-actions">
-          <button class="btn-reject" bindtap="handleReject" data-id="{{currentItem.id}}">拒绝</button>
-          <button class="btn-approve" bindtap="handleApprove" data-id="{{currentItem.id}}">通过</button>
-        </view>
-      </block>
     </view>
+
+    <scroll-view class="modal-scroll" scroll-y wx:if="{{currentItem}}">
+      <view class="modal-body-inner">
+        <!-- 状态标签 -->
+        <view class="detail-status-banner {{currentItem.status}}">
+          <view class="detail-status-icon">
+            <text wx:if="{{currentItem.status === 'pending'}}">⏳</text>
+            <text wx:elif="{{currentItem.status === 'approved'}}"></text>
+            <text wx:elif="{{currentItem.status === 'rejected'}}"></text>
+          </view>
+          <text class="detail-status-text">{{currentItem.statusName}}</text>
+        </view>
+
+        <!-- 期望排班详情 -->
+        <block wx:if="{{currentItem.type === 'schedule'}}">
+          <view class="detail-card">
+            <view class="detail-row">
+              <image class="detail-row-icon-img" src="/assets/icons/apply_user.png" mode="aspectFit"></image>
+              <view class="detail-row-content">
+                <text class="detail-row-label">申请人</text>
+                <text class="detail-row-value">{{currentItem.userName}}</text>
+              </view>
+            </view>
+            <view class="detail-divider"></view>
+            <view class="detail-row">
+              <image class="detail-row-icon-img" src="/assets/icons/apply_date.png" mode="aspectFit"></image>
+              <view class="detail-row-content">
+                <text class="detail-row-label">日期</text>
+                <text class="detail-row-value">{{currentItem.startDate}}</text>
+              </view>
+            </view>
+            <view class="detail-divider"></view>
+            <view class="detail-row">
+              <image class="detail-row-icon-img" src="/assets/icons/apply_shift.png" mode="aspectFit"></image>
+              <view class="detail-row-content">
+                <text class="detail-row-label">班次</text>
+                <text class="detail-row-value" style="color: {{currentItem.shiftColor || '#4A90D9'}}">{{currentItem.shiftCode ? currentItem.shiftCode + '-' : ''}}{{currentItem.shiftName || '无'}}</text>
+              </view>
+            </view>
+            <view class="detail-divider" wx:if="{{currentItem.remark}}"></view>
+            <view class="detail-row" wx:if="{{currentItem.remark}}">
+              <view class="detail-row-icon">📝</view>
+              <view class="detail-row-content">
+                <text class="detail-row-label">备注</text>
+                <text class="detail-row-value">{{currentItem.remark}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <!-- 换班详情 -->
+        <block wx:if="{{currentItem.type === 'swap'}}">
+          <view class="detail-card">
+            <view class="swap-detail-block">
+              <view class="swap-detail-items">
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">申请 · </text>
+                  <text class="swap-detail-val">{{currentItem.userName}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">日期 · </text>
+                  <text class="swap-detail-val">{{currentItem.startDate}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">班次 · </text>
+                  <text class="swap-detail-val" style="color: {{currentItem.myShiftColor || '#999'}}">{{currentItem.myShiftName || '无'}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="swap-detail-center">
+              <image class="swap-detail-arrow-img" src="/assets/icons/exchange.png" mode="aspectFit"></image>
+            </view>
+            <view class="swap-detail-block">
+              <view class="swap-detail-items">
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">对方 · </text>
+                  <text class="swap-detail-val">{{currentItem.targetUserName}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">日期 · </text>
+                  <text class="swap-detail-val">{{currentItem.targetDate}}</text>
+                </view>
+                <view class="swap-detail-item">
+                  <text class="swap-detail-key">班次 · </text>
+                  <text class="swap-detail-val" style="color: {{currentItem.targetShiftColor || '#999'}}">{{currentItem.targetShiftName || '无'}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+          <view class="detail-card" wx:if="{{currentItem.remark}}">
+            <view class="detail-row">
+              <view class="detail-row-icon">📝</view>
+              <view class="detail-row-content">
+                <text class="detail-row-label">备注</text>
+                <text class="detail-row-value">{{currentItem.remark}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <!-- 审批操作 -->
+        <block wx:if="{{currentItem.status === 'pending'}}">
+          <view class="detail-card">
+            <view class="detail-row">
+              <view class="detail-row-icon">💬</view>
+              <view class="detail-row-content">
+                <text class="detail-row-label">审批意见</text>
+                <textarea
+                  class="approval-textarea"
+                  placeholder="请输入审批意见（选填）"
+                  placeholder-class="textarea-placeholder"
+                  value="{{approvalRemark}}"
+                  bindinput="onApprovalRemarkInput"
+                  maxlength="200"
+                  auto-height
+                ></textarea>
+              </view>
+            </view>
+          </view>
+
+          <view class="approval-actions">
+            <button class="btn-reject" bindtap="handleReject" data-id="{{currentItem.id}}">拒绝</button>
+            <button class="btn-approve" bindtap="handleApprove" data-id="{{currentItem.id}}">通过</button>
+          </view>
+        </block>
+
+        <!-- 已审批的审批意见 -->
+        <block wx:if="{{currentItem.status !== 'pending' && currentItem.approveRemark}}">
+          <view class="detail-card">
+            <view class="detail-row">
+              <view class="detail-row-icon">💬</view>
+              <view class="detail-row-content">
+                <text class="detail-row-label">审批意见</text>
+                <text class="detail-row-value">{{currentItem.approveRemark}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </scroll-view>
   </view>
 </view>

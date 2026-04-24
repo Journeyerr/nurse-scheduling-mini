@@ -13,10 +13,10 @@
     "pages/schedule/schedule",
     "pages/team-schedule/team-schedule",
     "pages/approval/approval",
-    "pages/statistics/statistics",
-    "pages/expect-schedule/expect-schedule",
+    "pages/work-hours/work-hours",
+    "pages/schedule-apply/schedule-apply",
     "pages/leave-apply/leave-apply",
-    "pages/print-schedule/print-schedule"
+    "pages/schedule-statistics/schedule-statistics"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -1,4 +1,4 @@
-// pages/expect-schedule/expect-schedule.js
+// pages/schedule-apply/schedule-apply.js
 const api = require('../../utils/api');
 const util = require('../../utils/util');
 
@@ -10,6 +10,11 @@ Page({
     todayDate: '',
     showEditModal: false,
     initialized: false,  // 是否已初始化
+    // 分页相关
+    page: 1,
+    pageSize: 20,
+    hasMore: true,
+    loadingMore: false,
     editingExpect: {
       date: '',
       shiftId: '',
@@ -132,59 +137,89 @@ Page({
     }
   },
 
-  // 加载我的期望排班
+  // 加载我的期望排班（首页/刷新）
   async loadMyExpects() {
+    this.setData({ page: 1, hasMore: true });
     try {
-      const res = await api.getMyExpectSchedule();
+      const res = await api.getMyExpectSchedule(1, this.data.pageSize);
       const { shiftList } = this.data;
-      console.log('期望排班列表数据:', res.data);
-      console.log('班次列表:', shiftList);
       
-      const list = (res.data || []).map(item => {
-        // 统一转为字符串比较
-        const shift = shiftList.find(s => String(s.id) === String(item.shiftId));
-        const myShift = shiftList.find(s => String(s.id) === String(item.myShiftId));
-        const targetShift = shiftList.find(s => String(s.id) === String(item.targetShiftId));
-        
-        console.log('item.shiftId:', item.shiftId, '找到的班次:', shift);
-        
-        // 根据类型处理不同的显示
-        let displayInfo = {};
-        if (item.type === 'swap') {
-          displayInfo = {
-            type: 'swap',
-            typeName: '换班',
-            myDate: item.startDate,
-            targetDate: item.targetDate,
-            myShiftCode: myShift ? myShift.code : '',
-            myShiftName: myShift ? myShift.name : '',
-            myShiftColor: myShift ? myShift.color : '#999',
-            targetShiftCode: targetShift ? targetShift.code : '',
-            targetShiftName: targetShift ? targetShift.name : '',
-            targetShiftColor: targetShift ? targetShift.color : '#999',
-            targetUserName: item.targetUserName || ''
-          };
-        } else {
-          displayInfo = {
-            type: 'schedule',
-            typeName: '期望排班',
-            shiftCode: shift ? shift.code : '',
-            shiftName: shift ? shift.name : '',
-            shiftColor: shift ? shift.color : '#4A90D9'
-          };
-        }
-        
-        return {
-          ...item,
-          ...displayInfo,
-          statusName: item.status === 'pending' ? '待审批' :
-                      item.status === 'approved' ? '已通过' : '已拒绝'
-        };
-      });
-      this.setData({ myExpects: list });
+      const list = this.processList(res.data?.list || res.data || [], shiftList);
+      const hasMore = res.data?.hasMore !== undefined ? res.data.hasMore : false;
+      this.setData({ myExpects: list, hasMore });
     } catch (error) {
       // 加载期望排班失败
     }
+  },
+
+  // 加载更多
+  async loadMoreExpects() {
+    if (this.data.loadingMore || !this.data.hasMore) return;
+    this.setData({ loadingMore: true });
+    
+    try {
+      const nextPage = this.data.page + 1;
+      const res = await api.getMyExpectSchedule(nextPage, this.data.pageSize);
+      const { shiftList } = this.data;
+      
+      const newList = this.processList(res.data?.list || res.data || [], shiftList);
+      const hasMore = res.data?.hasMore !== undefined ? res.data.hasMore : false;
+      this.setData({
+        myExpects: [...this.data.myExpects, ...newList],
+        page: nextPage,
+        hasMore,
+        loadingMore: false
+      });
+    } catch (error) {
+      this.setData({ loadingMore: false });
+    }
+  },
+
+  // 处理列表数据
+  processList(rawList, shiftList) {
+    return rawList.map(item => {
+      const shift = shiftList.find(s => String(s.id) === String(item.shiftId));
+      const myShift = shiftList.find(s => String(s.id) === String(item.myShiftId));
+      const targetShift = shiftList.find(s => String(s.id) === String(item.targetShiftId));
+      
+      let displayInfo = {};
+      if (item.type === 'swap') {
+        displayInfo = {
+          type: 'swap',
+          typeName: '换班',
+          myDate: item.startDate,
+          targetDate: item.targetDate,
+          myShiftCode: myShift ? myShift.code : '',
+          myShiftName: myShift ? myShift.name : '',
+          myShiftColor: myShift ? myShift.color : '#999',
+          targetShiftCode: targetShift ? targetShift.code : '',
+          targetShiftName: targetShift ? targetShift.name : '',
+          targetShiftColor: targetShift ? targetShift.color : '#999',
+          targetUserName: item.targetUserName || ''
+        };
+      } else {
+        displayInfo = {
+          type: 'schedule',
+          typeName: '期望排班',
+          shiftCode: shift ? shift.code : '',
+          shiftName: shift ? shift.name : '',
+          shiftColor: shift ? shift.color : '#4A90D9'
+        };
+      }
+      
+      return {
+        ...item,
+        ...displayInfo,
+        statusName: item.status === 'pending' ? '待审批' :
+                    item.status === 'approved' ? '已通过' : 
+                    item.status === 'cancelled' ? '已取消' : '已拒绝'
+      };
+    });
+  },
+
+  // 触底加载更多
+  onReachBottom() {
+    this.loadMoreExpects();
   },
 
   // 新增申请
@@ -256,6 +291,25 @@ Page({
       showDetailModal: false,
       currentItem: null
     });
+  },
+
+  // 取消申请
+  async handleCancel(e) {
+    const { id } = e.currentTarget.dataset;
+    const confirm = await util.showConfirm('确认取消', '确定要取消该申请吗？取消后将不再进入审批流程。');
+    if (!confirm) return;
+
+    try {
+      util.showLoading('处理中...');
+      await api.cancelExpectSchedule(id);
+      util.hideLoading();
+      util.showSuccess('已取消');
+      this.closeDetailModal();
+      this.loadMyExpects();
+    } catch (error) {
+      util.hideLoading();
+      util.showError(error.message || '取消失败');
+    }
   },
 
   // 选择日期

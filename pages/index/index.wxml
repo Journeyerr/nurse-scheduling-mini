@@ -66,25 +66,25 @@
       <!-- 护士长可见 -->
       <view class="action-item" wx:if="{{isLeader}}" bindtap="goSchedule">
         <view class="item-icon schedule-icon">
-          <text class="icon-text">排</text>
+          <image class="menu-icon-img" src="/assets/icons/schedule-icon.png" mode="aspectFit"></image>
         </view>
         <text class="item-name">排班</text>
       </view>
       <view class="action-item" wx:if="{{isLeader}}" bindtap="goShiftManage">
         <view class="item-icon shift-icon">
-          <text class="icon-text">班</text>
+          <image class="menu-icon-img" src="/assets/icons/shift-manage-icon.png" mode="aspectFit"></image>
         </view>
         <text class="item-name">班种</text>
       </view>
       <view class="action-item" wx:if="{{isLeader}}" bindtap="goPrint">
         <view class="item-icon print-icon">
-          <text class="icon-text">统</text>
+          <image class="menu-icon-img" src="/assets/icons/statistics-icon.png" mode="aspectFit"></image>
         </view>
         <text class="item-name">统计</text>
       </view>
       <view class="action-item" wx:if="{{isLeader}}" bindtap="goApproval">
         <view class="item-icon approval-icon">
-          <text class="icon-text">审</text>
+          <image class="menu-icon-img" src="/assets/icons/approval-icon.png" mode="aspectFit"></image>
         </view>
         <text class="item-name">审批</text>
         <view class="badge" wx:if="{{pendingCount > 0}}">{{pendingCount}}</view>
@@ -92,19 +92,19 @@
       <!-- 全员可见 -->
       <view class="action-item" bindtap="goStatistics">
         <view class="item-icon stats-icon">
-          <text class="icon-text">时</text>
+          <image class="menu-icon-img" src="/assets/icons/workHours-icon.png" mode="aspectFit"></image>
         </view>
         <text class="item-name">工时</text>
       </view>
       <view class="action-item" bindtap="goExpectSchedule">
         <view class="item-icon expect-icon">
-          <text class="icon-text">申</text>
+          <image class="menu-icon-img" src="/assets/icons/apply-icon.png" mode="aspectFit"></image>
         </view>
         <text class="item-name">申请</text>
       </view>
       <view class="action-item" bindtap="goTeamSchedule">
         <view class="item-icon team-icon">
-          <text class="icon-text">全</text>
+          <image class="menu-icon-img" src="/assets/icons/teamSchedule-icon.png" mode="aspectFit"></image>
         </view>
         <text class="item-name">全科</text>
       </view>
@@ -118,21 +118,17 @@
   </view>
 
   <!-- 科室信息与邀请（护士长/管理员可见） -->
-  <view class="invite-section card" wx:if="{{isLoggedIn && isLeader}}">
+  <view class="invite-section card" wx:if="{{isLoggedIn && isLeader && hasDepartment}}">
     <view class="dept-info-row">
       <view class="dept-info-left" bindtap="{{hasDepartment ? 'showDepartmentActions' : ''}}" hover-class="invite-text-hover">
+        <image class="dept-name-icon" src="/assets/icons/deptName.png" mode="aspectFit"></image>
         <text class="dept-name-text dept-name-link">{{department.name}}</text>
         <text class="dept-separator" wx:if="{{hasDepartment}}">|</text>
         <image class="search-icon-inline" src="/assets/icons/search.png" catchtap="toggleSearch" mode="aspectFit" wx:if="{{hasDepartment}}"></image>
       </view>
       <button class="invite-btn-new" size="mini" open-type="share" wx:if="{{hasDepartment}}">
-        <text class="invite-link-text">邀请成员</text>
-        <image class="invite-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
+        <image class="invite-arrow-img" src="/assets/icons/invite.png" mode="aspectFit"></image>
       </button>
-      <view class="invite-btn-new" wx:else bindtap="onInviteTap">
-        <text class="invite-link-text">邀请成员</text>
-        <image class="invite-arrow-img" src="/assets/images/arrow-right.png" mode="aspectFit"></image>
-      </view>
     </view>
   </view>
 
