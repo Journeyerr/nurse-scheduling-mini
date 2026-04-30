@@ -837,12 +837,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20rpx 40rpx;
-  background: #F0F6FF;
+  padding: 80rpx 40rpx;
+  /* background: #F0F6FF; */
   border-radius: 80rpx;
-  border: 2rpx solid #4A90D9;
-  margin: 60rpx 40rpx 0;
-  width: calc(100% - 0rpx);
+  /* border: 2rpx solid #4A90D9; */
+  /* margin: 60rpx 40rpx 0; */
+  width: calc(100% - 350rpx);
   box-sizing: border-box;
 }
 
