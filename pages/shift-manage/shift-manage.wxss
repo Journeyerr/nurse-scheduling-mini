@@ -159,36 +159,23 @@
   bottom: 40rpx;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #4A90D9 0%, #357ABD 100%);
-  color: #fff;
-  padding: 20rpx 48rpx;
-  border-radius: 48rpx;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 8rpx 30rpx rgba(74, 144, 217, 0.35);
-}
-
-.add-btn-circle {
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12rpx;
+  background: #4A90D9;
+  color: #fff;
+  padding: 20rpx 60rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 4rpx 12rpx rgba(74, 144, 217, 0.3);
 }
 
 .add-icon {
-  font-size: 32rpx;
-  color: #fff;
-  font-weight: 700;
-  line-height: 1;
+  font-size: 40rpx;
+  margin-right: 12rpx;
 }
 
 .add-text {
-  font-size: 28rpx;
-  font-weight: 500;
+  font-size: 30rpx;
 }
 
 /* ============ 底部滑入弹窗 ============ */
@@ -428,7 +415,7 @@
   line-height: 1;
 }
 
-.add-icon {
+.action-icon.add-icon {
   color: #4A90D9;
 }
 

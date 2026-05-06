@@ -30,7 +30,7 @@
   <!-- 添加按钮 -->
   <view class="add-btn" bindtap="addPackage">
     <text class="add-icon">+</text>
-    <text class="add-text">添加班种套班</text>
+    <text class="add-text">添加套班</text>
   </view>
 </view>
 

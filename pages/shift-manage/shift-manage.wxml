@@ -46,9 +46,7 @@
 
   <!-- 添加按钮 -->
   <view class="add-btn" bindtap="addShift">
-    <view class="add-btn-circle">
-      <text class="add-icon">+</text>
-    </view>
+    <text class="add-icon">+</text>
     <text class="add-text">添加班种</text>
   </view>
 </view>

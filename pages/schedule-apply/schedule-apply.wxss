@@ -39,21 +39,35 @@
   color: #1A2B4A;
 }
 
-.btn-add {
+/* 底部固定申请按钮 */
+.add-btn {
+  position: fixed;
+  bottom: 40rpx;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8rpx;
+  background: #4A90D9;
+  color: #fff;
+  padding: 20rpx 60rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 4rpx 12rpx rgba(74, 144, 217, 0.3);
+  z-index: 100;
 }
 
-.btn-add:active {
+.add-btn:active {
   opacity: 0.85;
-  transform: scale(0.97);
+  transform: translateX(-50%) scale(0.97);
 }
 
-.btn-add-icon {
-  width: 80rpx;
-  height: 50rpx;
+.add-icon {
+  font-size: 40rpx;
+  margin-right: 12rpx;
+}
+
+.add-text {
+  font-size: 30rpx;
 }
 
 /* ==================== 申请列表 ==================== */
@@ -399,6 +413,11 @@
 }
 
 /* ==================== 申请类型选择 ==================== */
+.modal-body {
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}
+
 .type-option {
   display: flex;
   align-items: center;
@@ -725,6 +744,11 @@
   flex-shrink: 0;
   color: #4A90D9;
   font-size: 32rpx;
+}
+
+.swap-center-arrow-img {
+  width: 40rpx;
+  height: 40rpx;
 }
 
 /* 文本域 */

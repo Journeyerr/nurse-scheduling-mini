@@ -7,9 +7,6 @@
         <view class="section-dot"></view>
         <text class="section-title">我的申请</text>
       </view>
-      <view class="btn-add" bindtap="addExpect">
-        <image class="btn-add-icon" src="/assets/icons/add-apply.png" mode="aspectFit"></image>
-      </view>
     </view>
 
     <view class="apply-list">
@@ -417,4 +414,10 @@
       <button class="btn-submit-form" bindtap="submitExpect">提交申请</button>
     </view>
   </view>
+</view>
+
+<!-- 底部固定申请按钮 -->
+<view class="add-btn" bindtap="addExpect">
+  <text class="add-icon">+</text>
+  <text class="add-text">新增申请</text>
 </view>
